@@ -1,5 +1,5 @@
-import type { Post } from "../assets/mockPosts";
 import { Link } from "react-router-dom";
+import type { Post } from "../types";
 
 type PostCardProps = {
   post: Post;
