@@ -26,8 +26,7 @@ src/
 │   ├── PostCard.tsx     # 文章卡片
 │   └── ThemeProvider.tsx # 主题提供器
 ├── hooks/               # 自定义 Hooks
-│   ├── usePost.ts       # 文章存储 hook
-│   └── useThemeInit.ts  # 主题初始化 hook
+│   └── usePost.ts       # 文章存储 hook
 ├── layouts/             # 布局组件
 │   ├── AdminLayout.tsx  # 管理后台布局（带侧边栏）
 │   └── AppLayout.tsx    # 应用主布局（头部+页脚）

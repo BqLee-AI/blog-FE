@@ -1,5 +1,5 @@
-import { type ReactNode, useEffect } from "react";
-import { useThemeStore } from "../store/themeStore";
+import { type ReactNode, useEffect, useState } from "react";
+import { useThemeStore } from "../store/themeStore.ts";
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -7,16 +7,19 @@ interface ThemeProviderProps {
 
 /**
  * 主题提供者组件
- * 订阅 store 中的主题状态，在 useEffect 中同步到 DOM
- * 这样做能避免 SSR Hydration 问题，遵循 React 生命周期最佳实践
+ * 1. 订阅 store 中的主题状态
+ * 2. 同步主题到 DOM (添加/移除 dark 类)
+ * 3. 监听系统主题变化（当用户未手动设置时）
  */
 export default function ThemeProvider({ children }: ThemeProviderProps) {
-  // 精确订阅 theme 状态，当它改变时组件会重新渲染
   const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
+  const [mounted, setMounted] = useState(false);
 
-  // 在 useEffect 中处理所有 DOM 操作
-  // 确保 DOM 操作只在客户端、组件挂载后执行
+  // 同步主题到 DOM
   useEffect(() => {
+    setMounted(true); // 标记组件已挂载（避免 hydration 问题）
+    
     const html = document.documentElement;
     
     if (theme === "dark") {
@@ -25,8 +28,35 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
       html.classList.remove("dark");
     }
     
-    console.log("DOM updated with theme:", theme);
-  }, [theme]); // 当 theme 改变时执行
+    console.log("Theme synced to DOM:", theme);
+  }, [theme]);
+
+  // 监听系统主题变化
+  useEffect(() => {
+    if (!mounted) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleThemeChange = (e: MediaQueryListEvent) => {
+      // 只有当用户没有手动设置过主题时，才跟随系统主题
+      const savedTheme = localStorage.getItem("blog-theme");
+      if (!savedTheme) {
+        const newTheme = e.matches ? "dark" : "light";
+        console.log("📱 System theme changed to:", newTheme);
+        setTheme(newTheme);
+      }
+    };
+
+    // 添加监听器
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleThemeChange);
+      return () => mediaQuery.removeEventListener("change", handleThemeChange);
+    } else {
+      // 兼容旧版浏览器
+      mediaQuery.addListener(handleThemeChange);
+      return () => mediaQuery.removeListener(handleThemeChange);
+    }
+  }, [mounted, setTheme]);
 
   return <>{children}</>;
 }

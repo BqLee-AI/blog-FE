@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { useThemeStore } from "../store/themeStore";
+import { useThemeStore } from "../store/themeStore.ts";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 
 export default function Header() {
-  const { theme, toggleTheme } = useThemeStore();
+  const theme = useThemeStore((state) => state.theme);
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors">
@@ -45,8 +46,7 @@ export default function Header() {
                 管理后台
               </Link>
             </li>
-
-            {/* 主题切换按钮 */}
+            {/* 主题切换按钮 */}           
             <li>
               <button
                 onClick={toggleTheme}

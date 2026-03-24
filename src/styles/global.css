@@ -5,6 +5,10 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
+:is(.dark) {
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -13,6 +17,11 @@ body {
   margin: 0;
   background: radial-gradient(circle at top right, #f2f6ff, #e6ecf7 45%, #dae3f3);
   color: #111827;
+}
+
+:is(.dark) body {
+  background: radial-gradient(circle at top right, #1a1a2e, #16213e 45%, #0f0f23);
+  color: #e5e7eb;
 }
 
 .container {
@@ -50,6 +59,12 @@ h1 {
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.dark .post-card {
+  background: #1f2937cc;
+  border: 1px solid #374151;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .post-card h3 {
