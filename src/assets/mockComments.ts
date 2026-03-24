@@ -1,0 +1,115 @@
+import type { Comment } from '../types';
+
+/**
+ * 模拟评论数据
+ * 包括普通评论和嵌套回复评论
+ */
+export const mockComments: Comment[] = [
+  // 文章 1 的评论
+  {
+    id: 1,
+    postId: 1,
+    author: '网友1',
+    content: '写得很好，学到了很多东西！',
+    createdAt: '2026-03-20T10:30:00Z',
+    isApproved: true,
+    likes: 37,
+    dislikes: 2,
+    replyCount: 2,
+  },
+  {
+    id: 2,
+    postId: 1,
+    author: '网友2',
+    content: '同意，非常详细的讲解',
+    createdAt: '2026-03-20T12:45:00Z',
+    isApproved: true,
+    replyTo: 1,
+    likes: 8,
+    dislikes: 0,
+    replyCount: 0,
+  },
+  {
+    id: 3,
+    postId: 1,
+    author: '网友3',
+    content: '有没有代码示例？想看看具体实现',
+    createdAt: '2026-03-20T14:20:00Z',
+    isApproved: true,
+    likes: 15,
+    dislikes: 1,
+    replyCount: 1,
+  },
+  {
+    id: 4,
+    postId: 1,
+    author: '网友1',
+    content: '已在文末补充代码，感谢建议！',
+    createdAt: '2026-03-20T15:10:00Z',
+    isApproved: true,
+    replyTo: 3,
+    likes: 12,
+    dislikes: 0,
+    replyCount: 0,
+  },
+
+  // 文章 2 的评论
+  {
+    id: 5,
+    postId: 2,
+    author: '网友4',
+    content: '这个话题很有意思，期待更多内容',
+    createdAt: '2026-03-21T09:00:00Z',
+    isApproved: true,
+    likes: 40,
+    dislikes: 3,
+    replyCount: 3,
+  },
+  {
+    id: 6,
+    postId: 2,
+    author: '网友5',
+    content: '👍 强烈推荐',
+    createdAt: '2026-03-21T10:15:00Z',
+    isApproved: true,
+    likes: 25,
+    dislikes: 1,
+    replyCount: 0,
+  },
+  {
+    id: 7,
+    postId: 2,
+    author: '网友6',
+    content: '你怎么看这个问题？',
+    createdAt: '2026-03-21T11:30:00Z',
+    isApproved: true,
+    likes: 18,
+    dislikes: 2,
+    replyCount: 1,
+  },
+  {
+    id: 8,
+    postId: 2,
+    author: '网友4',
+    content: '这是一个很好的问题，我的看法是...',
+    createdAt: '2026-03-21T13:00:00Z',
+    isApproved: true,
+    replyTo: 7,
+    likes: 6,
+    dislikes: 0,
+    replyCount: 0,
+  },
+
+  // 文章 3 的评论
+  {
+    id: 9,
+    postId: 3,
+    author: '网友7',
+    content: '实用性很强，感谢分享',
+    createdAt: '2026-03-22T08:30:00Z',
+    isApproved: true,
+    likes: 22,
+    dislikes: 0,
+    replyCount: 0,
+  },
+];
