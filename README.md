@@ -38,8 +38,7 @@ src/
 │   ├── CommentList.tsx  # 评论列表
 │   └── CommentManagement.tsx # 评论管理（后台）
 ├── hooks/               # 自定义 Hooks
-│   ├── usePost.ts       # 文章存储 hook
-│   └── useThemeInit.ts  # 主题初始化 hook
+│   └── usePost.ts       # 文章存储 hook
 ├── layouts/             # 布局组件
 │   ├── AdminLayout.tsx  # 管理后台布局（带侧边栏）
 │   └── AppLayout.tsx    # 应用主布局（头部+页脚）

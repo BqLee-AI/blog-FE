@@ -40,28 +40,32 @@ export type ListResponse<T> = {
 };
 
 /**
- * 评论类型定义
+ * 用户类型定义
  */
-export interface Comment {
+export type User = {
   id: number;
-  postId: number; // 关联的文章 ID
-  content: string; // 评论内容
-  createdAt: string; // 创建时间
-  updatedAt?: string; // 更新时间
-  isApproved: boolean; // 是否通过审核（默认 true，前端不审核）
-  replyTo?: number; // 回复的评论 ID（用于嵌套评论）
-  author?: string; // 评论者名称（后端数据，前端暂时不用）
-  email?: string; // 评论者邮箱（后端数据，前端暂时不用）
-  likes: number; // 点赞数
-  dislikes: number; // 踩数
-  replyCount: number; // 回复数
-}
+  username: string;
+  email: string;
+  avatar?: string;
+  bio?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 /**
- * 评论列表响应类型
+ * 用户个人信息编辑表单类型
  */
-export type CommentListResponse = {
-  items: Comment[];
-  total: number;
-  postId: number;
+export type UserProfileForm = {
+  username: string;
+  email: string;
+  bio: string;
+};
+
+/**
+ * 密码修改表单类型
+ */
+export type PasswordChangeForm = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 };
