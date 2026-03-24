@@ -5,6 +5,7 @@ import AppLayout from "./layouts/AppLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import HomePage from "./pages/HomePage";
 import ArticleDetailPage from "./pages/ArticleDetailPage";
+import ReplyDetailPage from "./pages/ReplyDetailPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CreateArticlePage from "./pages/CreateArticlePage";
 import EditArticlePage from "./pages/EditArticlePage";
@@ -20,6 +21,7 @@ function AppContent() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/article/:id" element={<ArticleDetailPage />} />
+          <Route path="/article/:postId/comment/:commentId/replies" element={<ReplyDetailPage />} />
         </Route>
 
         {/* 后台管理路由 */}
