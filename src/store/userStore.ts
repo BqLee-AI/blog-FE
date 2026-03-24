@@ -12,6 +12,9 @@ interface UserStore {
   // 更新个人信息
   updateProfile: (profile: UserProfileForm) => Promise<void>;
   
+  // 更新头像
+  updateAvatar: (avatarUrl: string) => Promise<void>;
+  
   // 修改密码
   changePassword: (passwordForm: PasswordChangeForm) => Promise<void>;
   
@@ -81,6 +84,32 @@ export const useUserStore = create<UserStore>((set) => ({
         error: error instanceof Error ? error.message : "更新个人信息失败",
         isLoading: false,
       });
+    }
+  },
+
+  // 更新头像
+  updateAvatar: async (avatarUrl: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      // 模拟 API 延迟
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      set((state) => ({
+        user: state.user
+          ? {
+              ...state.user,
+              avatar: avatarUrl,
+              updatedAt: new Date().toISOString().split("T")[0],
+            }
+          : null,
+        isLoading: false,
+      }));
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : "更新头像失败",
+        isLoading: false,
+      });
+      throw error;
     }
   },
 

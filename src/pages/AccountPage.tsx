@@ -1,11 +1,23 @@
 import { useEffect, useState } from "react";
 import { useUserStore } from "../store/userStore";
+import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
+import AvatarUpload from "../components/AvatarUpload";
 import type { UserProfileForm, PasswordChangeForm } from "../types/index";
 
 export default function AccountPage() {
   const navigate = useNavigate();
-  const { user, isLoading, error, fetchUser, updateProfile, changePassword, logout, clearError } = useUserStore();
+  const { isLoggedIn } = useAuthStore();
+  const { user, isLoading, error, fetchUser, updateProfile, updateAvatar, changePassword, logout, clearError } = useUserStore();
+
+  // 检查是否已登录
+  useEffect(() => {
+    if (!isLoggedIn) {
+      // 未登录则返回首页
+      navigate("/");
+      return;
+    }
+  }, [isLoggedIn, navigate]);
 
   // 个人信息编辑状态
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -61,6 +73,19 @@ export default function AccountPage() {
     }
   };
 
+  // 处理头像变更
+  const handleAvatarChange = async (avatarUrl: string) => {
+    try {
+      await updateAvatar(avatarUrl);
+      // 同时更新 authStore 中的头像
+      const { updateAvatar: authUpdateAvatar } = useAuthStore.getState();
+      authUpdateAvatar(avatarUrl);
+    } catch (err) {
+      console.error("更新头像失败:", err);
+      throw err;
+    }
+  };
+
   // 处理密码修改表单变化
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -97,7 +122,9 @@ export default function AccountPage() {
   // 处理登出
   const handleLogout = () => {
     if (window.confirm("确定要退出登录吗？")) {
+      const { logout: authLogout } = useAuthStore.getState();
       logout();
+      authLogout();
       navigate("/");
     }
   };
@@ -138,12 +165,24 @@ export default function AccountPage() {
 
       {/* 用户信息卡片 */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-        <div className="flex items-center gap-6 mb-6">
-          {/* 头像 */}
+        {/* 头像编辑区 */}
+        <div className="mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">头像设置</h3>
+          <AvatarUpload
+            currentAvatar={user.avatar || "https://ui-avatars.com/api/?background=random&size=200"}
+            username={user.username}
+            onAvatarChange={handleAvatarChange}
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* 基本信息 */}
+        <div className="flex items-start gap-6">
+          {/* 头像简览 */}
           <img
             src={user.avatar}
             alt={user.username}
-            className="w-24 h-24 rounded-full border-4 border-blue-200 dark:border-blue-700 object-cover"
+            className="w-20 h-20 rounded-full border-4 border-blue-200 dark:border-blue-700 object-cover flex-shrink-0"
           />
 
           {/* 基本信息 */}
