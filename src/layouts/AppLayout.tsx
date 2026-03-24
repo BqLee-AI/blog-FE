@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 
 export default function AppLayout() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
       {/* 顶部导航栏 */}
       <Header />
 

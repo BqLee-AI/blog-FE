@@ -12,12 +12,12 @@ export default function AdminLayout() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-white dark:bg-gray-950 transition-colors">
       {/* 侧边栏 - 固定位置 */}
-      <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white shadow-lg overflow-y-auto">
+      <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 dark:bg-black text-white shadow-lg overflow-y-auto transition-colors">
         <div className="p-6">
           <Link to="/admin" className="flex items-center gap-2 font-bold text-xl">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-600 dark:bg-blue-700 rounded-lg flex items-center justify-center">
               <span>A</span>
             </div>
             Admin
@@ -35,8 +35,8 @@ export default function AdminLayout() {
                 to={item.path}
                 className={`flex items-center gap-3 px-6 py-3 transition-colors ${
                   active
-                    ? "bg-blue-600 border-r-4 border-blue-400"
-                    : "hover:bg-gray-800"
+                    ? "bg-blue-600 dark:bg-blue-700 border-r-4 border-blue-400"
+                    : "hover:bg-gray-800 dark:hover:bg-gray-900"
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -50,7 +50,7 @@ export default function AdminLayout() {
         <div className="absolute bottom-6 left-6 right-6">
           <Link
             to="/"
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 dark:bg-gray-900 hover:bg-gray-700 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <ExitIcon className="w-5 h-5" />
             <span>返回博客</span>

@@ -7,21 +7,21 @@ type PostCardProps = {
 
 export default function PostCard({ post }: PostCardProps) {
   return (
-    <article className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-200">
+    <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-lg dark:hover:shadow-xl transition-shadow overflow-hidden border border-gray-200 dark:border-gray-700">
       <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
           <Link to={`/article/${post.id}`}>
             {post.title}
           </Link>
         </h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
           {post.summary}
         </p>
         <div className="flex flex-wrap gap-2">
           {post.tags.map((tag) => (
             <span
               key={tag}
-              className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full hover:bg-blue-200 transition-colors"
+              className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
             >
               #{tag}
             </span>

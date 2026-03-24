@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ThemeProvider from "./components/ThemeProvider";
+import { useThemeInit } from "./hooks/useThemeInit";
 import AppLayout from "./layouts/AppLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import HomePage from "./pages/HomePage";
@@ -7,7 +9,10 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CreateArticlePage from "./pages/CreateArticlePage";
 import EditArticlePage from "./pages/EditArticlePage";
 
-export default function App() {
+function AppContent() {
+  // 初始化主题
+  useThemeInit();
+
   return (
     <Router>
       <Routes>
@@ -27,3 +32,12 @@ export default function App() {
     </Router>
   );
 }
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
+
