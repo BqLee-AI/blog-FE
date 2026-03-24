@@ -86,7 +86,7 @@ export default function ReplyDetailPage() {
       }
 
       if (targetComment) {
-        setReplyTarget((currentTarget) => currentTarget || targetComment);
+        setReplyTarget((currentTarget: Comment | null) => currentTarget || targetComment);
       }
     }
   }, [commentIdNum, postIdNum, getCommentById, getCommentReplies]);
@@ -124,9 +124,9 @@ export default function ReplyDetailPage() {
   };
 
   // 处理点赞
-  const handleLike = async (replyId: number) => {
+  const handleLike = async (commentPostId: number, replyId: number) => {
     try {
-      await likeComment(postIdNum, replyId);
+      await likeComment(commentPostId, replyId);
       reloadThread();
     } catch (err) {
       console.error('Failed to like reply:', err);
@@ -134,9 +134,9 @@ export default function ReplyDetailPage() {
   };
 
   // 处理踩
-  const handleDislike = async (replyId: number) => {
+  const handleDislike = async (commentPostId: number, replyId: number) => {
     try {
-      await dislikeComment(postIdNum, replyId);
+      await dislikeComment(commentPostId, replyId);
       reloadThread();
     } catch (err) {
       console.error('Failed to dislike reply:', err);
