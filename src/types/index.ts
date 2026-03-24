@@ -38,3 +38,34 @@ export type ListResponse<T> = {
   items: T[];
   pagination: PaginationInfo;
 };
+
+/**
+ * 用户类型定义
+ */
+export type User = {
+  id: number;
+  username: string;
+  email: string;
+  avatar?: string;
+  bio?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+/**
+ * 用户个人信息编辑表单类型
+ */
+export type UserProfileForm = {
+  username: string;
+  email: string;
+  bio: string;
+};
+
+/**
+ * 密码修改表单类型
+ */
+export type PasswordChangeForm = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};

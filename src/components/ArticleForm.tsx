@@ -103,7 +103,7 @@ export default function ArticleForm({
             value={formData.title}
             onChange={handleInputChange}
             placeholder="输入文章标题"
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors ${
+            className={`hover-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
               errors.title ? "border-red-500" : "border-gray-300 dark:border-gray-600"
             }`}
           />
@@ -124,7 +124,7 @@ export default function ArticleForm({
             value={formData.author}
             onChange={handleInputChange}
             placeholder="输入作者名称"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+            className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
@@ -140,7 +140,7 @@ export default function ArticleForm({
             onChange={handleInputChange}
             placeholder="输入文章摘要（简短描述）"
             rows={3}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors ${
+            className={`hover-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
               errors.summary ? "border-red-500" : "border-gray-300 dark:border-gray-600"
             }`}
           />
@@ -161,7 +161,7 @@ export default function ArticleForm({
             onChange={handleInputChange}
             placeholder="输入文章内容（支持 HTML）"
             rows={12}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors ${
+            className={`hover-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
               errors.content ? "border-red-500" : "border-gray-300 dark:border-gray-600"
             }`}
           />
@@ -188,12 +188,12 @@ export default function ArticleForm({
                 }
               }}
               placeholder="输入标签后按 Enter 或点击添加"
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+              className="hover-input flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
             <button
               type="button"
               onClick={handleAddTag}
-              className="px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center gap-2"
+              className="hover-button px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg flex items-center gap-2"
             >
               <PlusIcon className="w-4 h-4" />
               添加
@@ -234,7 +234,7 @@ export default function ArticleForm({
             name="createdAt"
             value={formData.createdAt || ""}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+            className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
@@ -243,14 +243,14 @@ export default function ArticleForm({
           <button
             type="submit"
             disabled={isLoading}
-            className="px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="hover-button px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? "保存中..." : initialData ? "更新文章" : "发布文章"}
           </button>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
+            className="hover-button px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium"
           >
             取消
           </button>

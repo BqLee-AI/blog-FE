@@ -91,3 +91,99 @@ h1 {
   padding: 4px 8px;
   border-radius: 999px;
 }
+
+/* ========== 悬停效果 ========== */
+
+/* 卡片悬停 - 缩放和发光 */
+.hover-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.25);
+}
+
+.dark .hover-card:hover {
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+}
+
+/* 按钮悬停 - 缩放和发光 */
+.hover-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.hover-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.dark .hover-button:hover {
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+}
+
+/* 链接悬停 - 下划线发光效果 */
+.hover-link {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.hover-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-link:hover::after {
+  width: 100%;
+}
+
+/* 头像悬停 - 温和发光 */
+.hover-avatar {
+  transition: all 0.3s ease;
+}
+
+.hover-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+}
+
+.dark .hover-avatar:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+}
+
+/* 输入框悬停 - 淡蓝色边框发光 */
+.hover-input {
+  transition: all 0.3s ease;
+}
+
+.hover-input:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.dark .hover-input:hover {
+  border-color: #60a5fa;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.3);
+}
+
+/* 表格行悬停 - 柔和背景变化 */
+.hover-row {
+  transition: all 0.2s ease;
+}
+
+.hover-row:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+.dark .hover-row:hover {
+  background-color: rgba(59, 130, 246, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+}

@@ -7,7 +7,7 @@ type PostCardProps = {
 
 export default function PostCard({ post }: PostCardProps) {
   return (
-    <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg dark:shadow-lg dark:hover:shadow-xl transition-shadow overflow-hidden border border-gray-200 dark:border-gray-700">
+    <article className="hover-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
       <div className="p-6">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
           <Link to={`/article/${post.id}`}>
