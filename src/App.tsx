@@ -6,6 +6,7 @@ import AppLayout from "./layouts/AppLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import HomePage from "./pages/HomePage";
 import ArticleDetailPage from "./pages/ArticleDetailPage";
+import ReplyDetailPage from "./pages/ReplyDetailPage";
 import AccountPage from "./pages/AccountPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CreateArticlePage from "./pages/CreateArticlePage";
@@ -25,6 +26,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/article/:id" element={<ArticleDetailPage />} />
+            <Route path="/article/:postId/comment/:commentId/replies" element={<ReplyDetailPage />} />
             <Route path="/account" element={<AccountPage />} />
           </Route>
 
