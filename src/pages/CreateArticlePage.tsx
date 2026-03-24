@@ -22,7 +22,7 @@ export default function CreateArticlePage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">创建新文章</h1>
+        <h1 className="text-3xl font-bold text-gray-600">创建新文章</h1>
         <p className="text-gray-600 mt-2">填写下面的表单发布一篇新文章</p>
       </div>
 

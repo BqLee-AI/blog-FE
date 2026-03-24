@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
       {/* 页面标题和操作 */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">文章管理</h1>
+          <h1 className="text-3xl font-bold text-gray-600">文章管理</h1>
           <p className="text-gray-600 mt-2">管理和编辑你的所有文章</p>
         </div>
         <Link

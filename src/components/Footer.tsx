@@ -40,12 +40,12 @@ export default function Footer() {
             <h3 className="text-white dark:text-white font-bold mb-4">社交媒体</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300 transition">
+                <a href="https://github.com" className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300 transition">
                   GitHub
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300 transition">
+                <a href="https://x.com/home" className="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300 transition">
                   Twitter
                 </a>
               </li>

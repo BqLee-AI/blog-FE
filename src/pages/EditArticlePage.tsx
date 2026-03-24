@@ -32,7 +32,7 @@ export default function EditArticlePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">加载中...</p>
@@ -62,7 +62,7 @@ export default function EditArticlePage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">编辑文章</h1>
+        <h1 className="text-3xl font-bold text-gray-600">编辑文章</h1>
         <p className="text-gray-600 mt-2">修改文章内容并保存更改</p>
       </div>
 
