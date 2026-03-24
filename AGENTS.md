@@ -134,6 +134,67 @@ export const usePostDetail = (id: number): UsePostReturn => {
 - **store 方法命名**：动词开头（如 `fetchPosts`、`addPost`、`toggleTheme`）
 - **异步操作**：在 store 中 handle，返回 Promise，让组件端防止深层耦合
 
+### 4.3 代码复用与避免重复（DRY 原则）
+
+#### 优先使用已有实现
+在编写新代码前，**必须先搜索现有代码库**，确认是否已有相同或相似的实现。遵循优先级：
+
+1. **检查现有 hooks**（`src/hooks/*.ts`）
+   - 如需获取文章数据，先检查是否有 `usePost`、`usePostDetail`
+   - 如需主题操作，先查看 `useThemeInit`
+
+2. **检查 store 方法**（`src/store/*.ts`）
+   - 如需文章操作，先使用 `postStore.fetchPosts()`、`postStore.addPost()` 等已有方法
+   - 不得重新定义相同功能的 API 调用逻辑
+
+3. **检查工具函数**（`src/lib/utils.ts`）
+   - 数值转换、字符串处理等常用功能，优先复用已有工具函数
+   - 新工具函数添加到此文件，而非在各组件中重复定义
+
+4. **检查公共组件**（`src/components/`）
+   - UI 模式、表单元素等，优先使用或扩展已有组件
+   - 避免创建功能重复的组件
+
+#### 代码复用检查清单
+```tsx
+// ❌ 错误：重复创建全局变量和帮助函数
+// src/pages/HomePage.tsx
+const formatDate = (date: string) => new Date(date).toLocaleDateString();
+const API_DELAY = 300; // 已在 store 中定义过
+const fetchArticles = async () => { /* 实现 */ }; // 使用 postStore.fetchPosts()
+
+// ✅ 正确：优先使用已有实现
+// src/pages/HomePage.tsx
+import { usePost } from '@/hooks/usePost';
+import { formatDate } from '@/lib/utils'; // 如果已定义
+import { postStore } from '@/store/postStore';
+
+export const HomePage = () => {
+  const { posts, fetchPosts } = usePost();
+  
+  useEffect(() => {
+    fetchPosts(); // 直接使用 store 方法
+  }, []);
+
+  return (
+    <div>
+      {posts.map(post => (
+        <div key={post.id}>
+          {post.title}
+          <span>{formatDate(post.createdAt!)}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+```
+
+#### 发现重复代码时的处理
+- **小范围重复** → 提取为工具函数放到 `src/lib/utils.ts`
+- **组件逻辑重复** → 提取为自定义 hook 放到 `src/hooks/`
+- **状态操作重复** → 检查是否应加入 store 方法
+- **UI 模式重复** → 创建可复用组件，放到 `src/components/`
+
 ---
 
 ## 5. Directory Structure & Core Files（目录结构与核心文件）
@@ -184,6 +245,9 @@ src/
 - 提交 `node_modules/`、IDE 配置（`.vscode/`）、编译产物（`dist/`）
 - 修改 `package.json` 中的依赖版本
 - 使用全局变量或 window 对象存储业务状态（必须用 store）
+- **重复创建已有的函数、hook、store 方法或组件**（违反 DRY 原则）
+  - 新增功能前必须搜索现有代码，优先复用而非重新实现
+  - 如发现重复，立即重构提取为可复用的函数/hook/组件
 
 ---
 
