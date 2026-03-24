@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useThemeStore } from "../store/themeStore.ts";
 import { useAuthStore } from "../store/authStore.ts";
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { MoonIcon, SunIcon, MagnifyingGlassIcon, PersonIcon, HomeIcon, FileTextIcon, GearIcon } from "@radix-ui/react-icons";
 import LoginPopover from "./LoginPopover";
 
 export default function Header() {
@@ -10,58 +10,74 @@ export default function Header() {
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { user, isLoggedIn } = useAuthStore();
   const [isLoginPopoverOpen, setIsLoginPopoverOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors">
       <div className="container mx-auto px-4 max-w-6xl">
-        <nav className="flex items-center justify-between h-0.5">
+        <nav className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">B</span>
+            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-xl">B</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
+            <span className="text-2xl font-bold bg-linear-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
               MyBlog
             </span>
           </Link>
 
+          {/* 搜索栏 */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="搜索文章..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 w-64 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          </div>
+
           {/* 导航链接 */}
-          <ul className="flex items-center gap-8">
+          <ul className="flex items-center gap-6">
             <li>
               <Link
                 to="/"
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium flex items-center gap-2 hover-button"
               >
-                首页
+                <HomeIcon className="w-5 h-5" />
+                <span>首页</span>
               </Link>
             </li>
             <li>
               <a
                 href="#articles"
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium flex items-center gap-2 hover-button"
               >
-                文章
+                <FileTextIcon className="w-5 h-5" />
+                <span>文章</span>
               </a>
             </li>
             <li>
               <Link
                 to="/admin"
-                className="hover-button px-4 py-2 bg-blue-600 text-white rounded-lg dark:bg-blue-700 font-medium"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg hover-button flex items-center gap-2"
               >
-                管理后台
+                <GearIcon className="w-5 h-5" />
+                <span>管理后台</span>
               </Link>
             </li>
             {isLoggedIn && user ? (
               <li>
                 <Link
                   to="/account"
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-full"
+                  className="flex items-center justify-center w-10 h-10 rounded-full hover:ring-2 hover:ring-blue-500 transition-all"
                   title="账号设置"
                 >
                   <img
                     src={user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.email}
                     alt="用户头像"
-                    className="hover-avatar w-10 h-10 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
                   />
                 </Link>
               </li>
@@ -69,9 +85,10 @@ export default function Header() {
               <li>
                 <button
                   onClick={() => setIsLoginPopoverOpen(true)}
-                  className="hover-button px-4 py-2 bg-blue-600 text-white rounded-lg dark:bg-blue-700 font-medium"
+                  className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
                 >
-                  登录
+                  <PersonIcon className="w-4 h-4" />
+                  <span>登录</span>
                 </button>
               </li>
             )}
@@ -79,7 +96,7 @@ export default function Header() {
             <li>
               <button
                 onClick={toggleTheme}
-                className="hover-button p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-yellow-400"
+                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
                 title={theme === "light" ? "切换到暗夜模式" : "切换到日间模式"}
               >
                 {theme === "light" ? (
