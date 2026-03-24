@@ -131,7 +131,7 @@ export default function AccountPage() {
 
   if (!user && isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">加载中...</p>
@@ -182,7 +182,7 @@ export default function AccountPage() {
           <img
             src={user.avatar}
             alt={user.username}
-            className="w-20 h-20 rounded-full border-4 border-blue-200 dark:border-blue-700 object-cover flex-shrink-0"
+            className="w-20 h-20 rounded-full border-4 border-blue-200 dark:border-blue-700 object-cover shrink-0"
           />
 
           {/* 基本信息 */}

@@ -83,13 +83,13 @@ export default function AvatarUpload({
 
       {/* 头像预览和上传 */}
       <div className="flex flex-col sm:flex-row gap-6 items-start">
-        <div className="flex-shrink-0">
-          <div className="relative">
+        <div className="shrink-0">
+          <div className="relative group cursor-pointer hover-button">
             {/* 当前头像 */}
             <img
               src={preview || currentAvatar}
               alt={username}
-              className="w-32 h-32 rounded-full border-4 border-gray-200 dark:border-gray-700 object-cover"
+              className="w-32 h-32 rounded-full border-4 border-gray-200 dark:border-gray-700 object-cover transition-all duration-300 group-hover:border-blue-500"
             />
 
             {/* 上传状态指示 */}
@@ -98,6 +98,13 @@ export default function AvatarUpload({
                 <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 px-2 py-1 rounded">
                   预览
                 </span>
+              </div>
+            )}
+
+            {/* 悬停提示遮罩 */}
+            {!preview && (
+              <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <span className="text-white text-sm font-medium">点击上传</span>
               </div>
             )}
           </div>
