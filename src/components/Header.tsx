@@ -24,12 +24,12 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link
-                to="/articles"
+              <a
+                href="#articles"
                 className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
               >
                 文章
-              </Link>
+              </a>
             </li>
             <li>
               <Link
