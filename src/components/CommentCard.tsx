@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import type { Comment } from '../types';
 import { ChatBubbleIcon, TrashIcon } from '@radix-ui/react-icons';
+import { commentStore } from '../store/commentStore';
+import { cn } from '../lib/utils';
 
 interface CommentCardProps {
   comment: Comment;
@@ -33,6 +35,9 @@ export const CommentCard: React.FC<CommentCardProps> = ({
   const [isDisliking, setIsDisliking] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const currentReaction = commentStore(
+    state => state.reactions[`${postId}:${comment.id}`] ?? null
+  );
 
   const createdAt = new Date(comment.createdAt).toLocaleDateString('zh-CN', {
     year: 'numeric',
@@ -138,10 +143,16 @@ export const CommentCard: React.FC<CommentCardProps> = ({
         <button
           onClick={handleLike}
           disabled={isLiking}
-          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:opacity-50"
+          aria-pressed={currentReaction === 'like'}
+          className={cn(
+            'flex items-center gap-1 text-sm transition-colors disabled:opacity-50',
+            currentReaction === 'like'
+              ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full'
+              : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
+          )}
           title="点赞"
         >
-          <span className="text-base">👍</span>
+          <span className={cn('text-base transition-transform', currentReaction === 'like' && 'scale-110')}>👍</span>
           <span>{comment.likes}</span>
         </button>
 
@@ -149,10 +160,16 @@ export const CommentCard: React.FC<CommentCardProps> = ({
         <button
           onClick={handleDislike}
           disabled={isDisliking}
-          className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+          aria-pressed={currentReaction === 'dislike'}
+          className={cn(
+            'flex items-center gap-1 text-sm transition-colors disabled:opacity-50',
+            currentReaction === 'dislike'
+              ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-full'
+              : 'text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400'
+          )}
           title="踩"
         >
-          <span className="text-base">👎</span>
+          <span className={cn('text-base transition-transform', currentReaction === 'dislike' && 'scale-110')}>👎</span>
           <span>{comment.dislikes}</span>
         </button>
 
