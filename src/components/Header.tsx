@@ -50,13 +50,13 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <a
-                href="#articles"
+              <Link
+                to="/articles"
                 className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium flex items-center gap-2 hover-button"
               >
                 <FileTextIcon className="w-5 h-5" />
                 <span>文章</span>
-              </a>
+              </Link>
             </li>
             <li>
               <Link
