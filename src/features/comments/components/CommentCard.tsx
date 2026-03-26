@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import type { Comment } from '../types';
+import type { Comment } from '@/types';
 import { ChatBubbleIcon, TrashIcon } from '@radix-ui/react-icons';
-import { commentStore } from '../store/commentStore';
-import { cn } from '../lib/utils';
+import { commentStore } from '@/store/commentStore';
+import { cn } from '@/lib/utils';
 
 interface CommentCardProps {
   comment: Comment;

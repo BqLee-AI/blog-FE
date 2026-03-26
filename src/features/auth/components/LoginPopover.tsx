@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuthStore } from "../store/authStore";
-import type { LoginForm, RegisterForm } from "../store/authStore";
+import { useAuthStore } from "@/store/authStore";
+import type { LoginForm, RegisterForm } from "@/store/authStore";
 
 interface LoginPopoverProps {
   isOpen: boolean;
@@ -261,12 +261,15 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                 disabled={isLoading}
                 className="hover-button w-full px-4 py-2 bg-green-600 text-white rounded-lg dark:bg-green-700 font-medium disabled:opacity-50"
               >
-                {isLoading ? "注册中..." : "创建账号"}
+                {isLoading ? "注册中..." : "立即注册"}
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-600 dark:text-gray-400">
-              获得美妙的创作体验 ✨
+            {/* 测试账号提示 */}
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+              <p className="font-semibold mb-2">💡 注册说明：</p>
+              <p>用户名至少 2 个字符</p>
+              <p>密码至少 6 个字符</p>
             </div>
           </div>
         )}

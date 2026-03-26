@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import type { AuthUser } from "../store/authStore";
 
 interface AvatarUploadProps {
   currentAvatar: string;

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { usePostStore } from "../store/postStore";
-import { commentStore } from "../store/commentStore";
-import { CommentForm } from "../components/CommentForm";
-import { CommentCard } from "../components/CommentCard";
-import type { Comment } from "../types";
+import { usePostStore } from "@/store/postStore";
+import { commentStore } from "@/store/commentStore";
+import { CommentForm } from "@/features/comments/components/CommentForm";
+import { CommentCard } from "@/features/comments/components/CommentCard";
+import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 
 /**

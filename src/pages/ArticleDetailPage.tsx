@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { usePostStore } from "../store/postStore";
-import { commentStore } from "../store/commentStore";
-import { CommentForm } from "../components/CommentForm";
-import { CommentList } from "../components/CommentList";
-import type { Comment } from "../types";
+import { usePostStore } from "@/store/postStore";
+import { commentStore } from "@/store/commentStore";
+import { CommentForm } from "@/features/comments/components/CommentForm";
+import { CommentList } from "@/features/comments/components/CommentList";
+import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 
 export default function ArticleDetailPage() {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import type { Comment } from '../types';
+import React from 'react';
+import type { Comment } from '@/types';
 import { CommentCard } from './CommentCard';
 
 interface CommentListProps {

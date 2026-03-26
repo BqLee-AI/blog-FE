@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useThemeStore } from "../store/themeStore.ts";
-import { useAuthStore } from "../store/authStore.ts";
+import { useThemeStore } from "@/store/themeStore";
+import { useAuthStore } from "@/store/authStore";
 import { MoonIcon, SunIcon, MagnifyingGlassIcon, PersonIcon, HomeIcon, FileTextIcon, GearIcon } from "@radix-ui/react-icons";
-import LoginPopover from "./LoginPopover";
+import LoginPopover from "@/features/auth/components/LoginPopover";
 
 export default function Header() {
   const theme = useThemeStore((state) => state.theme);

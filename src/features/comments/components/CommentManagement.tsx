@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { commentStore } from '../store/commentStore';
-import type { Comment } from '../types';
+import { commentStore } from '@/store/commentStore';
+import type { Comment } from '@/types';
 import { TrashIcon, ChatBubbleIcon } from '@radix-ui/react-icons';
 
 /**

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Comment } from '../types';
+import type { Comment } from '@/types';
 
 interface CommentFormProps {
   postId: number;

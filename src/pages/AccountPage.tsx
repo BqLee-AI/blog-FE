@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useUserStore } from "../store/userStore";
-import { useAuthStore } from "../store/authStore";
+import { useUserStore } from "@/store/userStore";
+import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
-import AvatarUpload from "../components/AvatarUpload";
-import type { UserProfileForm, PasswordChangeForm } from "../types/index";
+import AvatarUpload from "@/features/account/components/AvatarUpload";
+import type { UserProfileForm, PasswordChangeForm } from "@/types";
 
 export default function AccountPage() {
   const navigate = useNavigate();

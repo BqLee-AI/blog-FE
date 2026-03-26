@@ -28,16 +28,27 @@
 
 ```
 src/
-├── components/          # 可复用组件
-│   ├── ArticleForm.tsx  # 文章表单（新建/编辑）
+├── components/          # 少量全局通用组件
 │   ├── Footer.tsx       # 页脚组件
 │   ├── Header.tsx       # 头部导航栏
-│   ├── PostCard.tsx     # 文章卡片
-│   ├── ThemeProvider.tsx # 主题提供器
-│   ├── CommentForm.tsx  # 评论表单
-│   ├── CommentCard.tsx  # 评论卡片（含点赞/踩/回复按钮）
-│   ├── CommentList.tsx  # 评论列表
-│   └── CommentManagement.tsx # 评论管理（后台）
+│   └── ThemeProvider.tsx # 主题提供器
+├── features/            # 按业务域组织的可复用组件
+│   ├── articles/
+│   │   └── components/
+│   │       ├── ArticleForm.tsx  # 文章表单（新建/编辑）
+│   │       └── PostCard.tsx     # 文章卡片
+│   ├── comments/
+│   │   └── components/
+│   │       ├── CommentForm.tsx  # 评论表单
+│   │       ├── CommentCard.tsx  # 评论卡片（含点赞/踩/回复按钮）
+│   │       ├── CommentList.tsx  # 评论列表
+│   │       └── CommentManagement.tsx # 评论管理（后台）
+│   ├── auth/
+│   │   └── components/
+│   │       └── LoginPopover.tsx # 登录/注册弹窗
+│   └── account/
+│       └── components/
+│           └── AvatarUpload.tsx # 头像上传
 ├── hooks/               # 自定义 Hooks
 │   └── usePost.ts       # 文章存储 hook
 ├── layouts/             # 布局组件
@@ -168,6 +179,7 @@ toggleTheme()              // 切换主题（自动保存到 localStorage）
 
 ## 🎨 主要组件
 
+### `src/components/` 全局通用组件
 ### Header 组件
 - 顶部导航栏，包含 Logo 和主题切换按钮
 - 支持深色模式样式
@@ -175,6 +187,11 @@ toggleTheme()              // 切换主题（自动保存到 localStorage）
 ### Footer 组件
 - 页脚区域，展示关于、快速链接、社交媒体和版权信息
 
+### ThemeProvider 组件
+- 监听主题状态变化
+- 自动更新 HTML 元素的 `dark` class
+
+### `src/features/articles/components/` 文章域组件
 ### PostCard 组件
 - 文章卡片展示，包含标题、摘要和标签
 - 可点击跳转到文章详情页
@@ -184,6 +201,7 @@ toggleTheme()              // 切换主题（自动保存到 localStorage）
 - 标签动态管理（添加/删除）
 - 支持深色模式样式
 
+### `src/features/comments/components/` 评论域组件
 ### CommentForm 组件
 - 简化的评论输入表单（仅需评论内容）
 - 动态提示词（发表/回复）
@@ -201,9 +219,15 @@ toggleTheme()              // 切换主题（自动保存到 localStorage）
 - 评论统计和筛选
 - 批量删除功能
 
-### ThemeProvider 组件
-- 监听主题状态变化
-- 自动更新 HTML 元素的 `dark` class
+### `src/features/auth/components/` 认证组件
+### LoginPopover 组件
+- 登录 / 注册弹窗
+- 支持切换标签页与密码可见性
+
+### `src/features/account/components/` 账号组件
+### AvatarUpload 组件
+- 头像预览与本地选择上传
+- 支持校验文件类型和大小
 
 ## 📱 响应式设计
 

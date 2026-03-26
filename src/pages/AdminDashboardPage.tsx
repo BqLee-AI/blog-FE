@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { usePostStore } from "../store/postStore";
-import { CommentManagement } from "../components/CommentManagement";
+import { usePostStore } from "@/store/postStore";
+import { CommentManagement } from "@/features/comments/components/CommentManagement";
 import { PlusIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 
 export default function AdminDashboardPage() {
