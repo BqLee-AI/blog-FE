@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { Comment, CommentListResponse } from '../types';
-import { mockComments } from '../assets/mockComments';
+import type { Comment, CommentListResponse } from "@/types";
+import { mockComments } from "@/assets/mockComments";
 
 type CommentReaction = 'like' | 'dislike';
 type CommentReactionMap = Record<string, CommentReaction>;

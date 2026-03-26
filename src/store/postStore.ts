@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Post } from "../types";
-import { mockPosts } from "../assets/mockPosts";
+import type { Post } from "@/types";
+import { mockPosts } from "@/assets/mockPosts";
 
 /**
  * 文章 Store 状态接口

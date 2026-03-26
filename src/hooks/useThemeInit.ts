@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useThemeStore } from "../store/themeStore.ts";
+import { useThemeStore } from "@/store/themeStore";
 
 /**
  * 初始化主题的 Hook

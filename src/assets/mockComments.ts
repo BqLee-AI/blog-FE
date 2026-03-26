@@ -1,4 +1,4 @@
-import type { Comment } from '../types';
+import type { Comment } from "@/types";
 
 /**
  * 模拟评论数据

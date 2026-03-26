@@ -1,4 +1,4 @@
-import { usePostStore } from "../store/postStore";
+import { usePostStore } from "@/store/postStore";
 
 /**
  * 自定义 Hook：获取文章相关的状态和方法

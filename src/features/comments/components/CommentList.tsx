@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Comment } from '@/types';
-import { CommentCard } from './CommentCard';
+import { CommentCard } from "@/features/comments/components/CommentCard";
 
 interface CommentListProps {
   postId: number;
