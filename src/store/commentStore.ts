@@ -1,14 +1,10 @@
 import { create } from 'zustand';
-import type { Comment, CommentListResponse } from "@/types/comment";
+import type { Comment, CommentListResponse, CommentReaction } from "@/types/comment";
 import { mockComments } from "@/assets/mockComments";
-
-type CommentReaction = 'like' | 'dislike';
-type CommentReactionMap = Record<string, CommentReaction>;
 
 interface CommentState {
   // 状态
   comments: Map<number, Comment[]>; // key: postId, value: comments[]
-  reactions: CommentReactionMap;
   isLoading: boolean;
   error: string | null;
 
@@ -26,9 +22,6 @@ interface CommentState {
 }
 
 const STORAGE_KEY = 'blog_comments';
-const REACTION_STORAGE_KEY = 'blog_comment_reactions';
-
-const getReactionKey = (postId: number, commentId: number): string => `${postId}:${commentId}`;
 
 const normalizeComment = (comment: Comment): Comment => ({
   ...comment,
@@ -36,49 +29,75 @@ const normalizeComment = (comment: Comment): Comment => ({
   likes: comment.likes ?? 0,
   dislikes: comment.dislikes ?? 0,
   replyCount: comment.replyCount ?? 0,
+  currentReaction: comment.currentReaction,
 });
 
-/**
- * 从 localStorage 加载评论数据
- */
-const loadCommentsFromStorage = (): Map<number, Comment[]> => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return new Map(
-        Object.entries(parsed).map(([key, value]) => [
-          Number(key),
-          (value as Comment[]).map(normalizeComment),
-        ])
-      );
-    }
-  } catch (err) {
-    console.error('Failed to load comments from localStorage:', err);
-  }
-
-  // 如果 localStorage 中没有数据，使用模拟数据
+const buildMockCommentMap = (): Map<number, Comment[]> => {
   const initialMap = new Map<number, Comment[]>();
+
   mockComments.forEach((comment: Comment) => {
     if (!initialMap.has(comment.postId)) {
       initialMap.set(comment.postId, []);
     }
     initialMap.get(comment.postId)!.push(normalizeComment(comment));
   });
+
   return initialMap;
 };
 
-const loadReactionsFromStorage = (): CommentReactionMap => {
+const mergeCommentMaps = (
+  baseMap: Map<number, Comment[]>,
+  fallbackMap: Map<number, Comment[]>
+): Map<number, Comment[]> => {
+  const merged = new Map<number, Comment[]>();
+  const postIds = new Set<number>([
+    ...Array.from(baseMap.keys()),
+    ...Array.from(fallbackMap.keys()),
+  ]);
+
+  postIds.forEach((postId) => {
+    const baseComments = baseMap.get(postId) || [];
+    const fallbackComments = fallbackMap.get(postId) || [];
+    const commentById = new Map<number, Comment>();
+
+    fallbackComments.forEach((comment) => {
+      commentById.set(comment.id, comment);
+    });
+
+    baseComments.forEach((comment) => {
+      commentById.set(comment.id, normalizeComment(comment));
+    });
+
+    merged.set(postId, Array.from(commentById.values()));
+  });
+
+  return merged;
+};
+
+/**
+ * 从 localStorage 加载评论数据
+ */
+const loadCommentsFromStorage = (): Map<number, Comment[]> => {
+  const mockCommentMap = buildMockCommentMap();
+
   try {
-    const stored = localStorage.getItem(REACTION_STORAGE_KEY);
+    const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored) as CommentReactionMap;
+      const parsed = JSON.parse(stored);
+      const storedMap = new Map(
+        Object.entries(parsed).map(([key, value]) => [
+          Number(key),
+          (value as Comment[]).map(normalizeComment),
+        ])
+      );
+      return mergeCommentMaps(storedMap, mockCommentMap);
     }
   } catch (err) {
-    console.error('Failed to load comment reactions from localStorage:', err);
+    console.error('Failed to load comments from localStorage:', err);
   }
 
-  return {};
+  // 如果 localStorage 中没有数据，使用模拟数据
+  return mockCommentMap;
 };
 
 /**
@@ -96,18 +115,46 @@ const saveCommentsToStorage = (comments: Map<number, Comment[]>) => {
   }
 };
 
-const saveReactionsToStorage = (reactions: CommentReactionMap) => {
+const loadLegacyReactionsFromStorage = (): Record<string, CommentReaction> => {
   try {
-    localStorage.setItem(REACTION_STORAGE_KEY, JSON.stringify(reactions));
+    const stored = localStorage.getItem('blog_comment_reactions');
+    if (stored) {
+      return JSON.parse(stored) as Record<string, CommentReaction>;
+    }
   } catch (err) {
-    console.error('Failed to save comment reactions to localStorage:', err);
+    console.error('Failed to load legacy comment reactions from localStorage:', err);
   }
+
+  return {};
+};
+
+const applyLegacyReactions = (
+  comments: Map<number, Comment[]>,
+  reactions: Record<string, CommentReaction>
+): Map<number, Comment[]> => {
+  if (Object.keys(reactions).length === 0) {
+    return comments;
+  }
+
+  const nextComments = new Map<number, Comment[]>();
+
+  comments.forEach((postComments, postId) => {
+    nextComments.set(
+      postId,
+      postComments.map((comment) => {
+        const reactionKey = `${postId}:${comment.id}`;
+        const reaction = reactions[reactionKey];
+        return reaction ? { ...comment, currentReaction: reaction } : comment;
+      })
+    );
+  });
+
+  return nextComments;
 };
 
 export const commentStore = create<CommentState>((set, get) => ({
   // 初始状态
-  comments: loadCommentsFromStorage(),
-  reactions: loadReactionsFromStorage(),
+  comments: applyLegacyReactions(loadCommentsFromStorage(), loadLegacyReactionsFromStorage()),
   isLoading: false,
   error: null,
 
@@ -146,6 +193,7 @@ export const commentStore = create<CommentState>((set, get) => ({
         likes: 0,
         dislikes: 0,
         replyCount: 0,
+        currentReaction: undefined,
       };
 
       set(state => {
@@ -265,41 +313,37 @@ export const commentStore = create<CommentState>((set, get) => ({
 
       set(state => {
         const comments = new Map(state.comments);
-        const reactions = { ...state.reactions };
         const postComments = comments.get(postId) || [];
-        const reactionKey = getReactionKey(postId, commentId);
-        const previousReaction = reactions[reactionKey];
 
         const updated = postComments.map(c => {
           if (c.id !== commentId) {
             return c;
           }
 
-          if (previousReaction === 'like') {
-            delete reactions[reactionKey];
-            return { ...c, likes: Math.max(c.likes - 1, 0) };
+          if (c.currentReaction === 'like') {
+            return { ...c, currentReaction: undefined, likes: Math.max(c.likes - 1, 0) };
           }
 
-          if (previousReaction === 'dislike') {
-            reactions[reactionKey] = 'like';
+          if (c.currentReaction === 'dislike') {
+            const nextReaction: CommentReaction = 'like';
             return {
               ...c,
+              currentReaction: nextReaction,
               likes: c.likes + 1,
               dislikes: Math.max(c.dislikes - 1, 0),
             };
           }
 
-          reactions[reactionKey] = 'like';
-          return { ...c, likes: c.likes + 1 };
+          const nextReaction: CommentReaction = 'like';
+          return { ...c, currentReaction: nextReaction, likes: c.likes + 1 };
         });
 
         comments.set(postId, updated);
         
         // 保存到 localStorage
         saveCommentsToStorage(comments);
-        saveReactionsToStorage(reactions);
         
-        return { comments, reactions };
+        return { comments };
       });
     } catch (err) {
       console.error('Failed to like comment:', err);
@@ -315,41 +359,37 @@ export const commentStore = create<CommentState>((set, get) => ({
 
       set(state => {
         const comments = new Map(state.comments);
-        const reactions = { ...state.reactions };
         const postComments = comments.get(postId) || [];
-        const reactionKey = getReactionKey(postId, commentId);
-        const previousReaction = reactions[reactionKey];
 
         const updated = postComments.map(c => {
           if (c.id !== commentId) {
             return c;
           }
 
-          if (previousReaction === 'dislike') {
-            delete reactions[reactionKey];
-            return { ...c, dislikes: Math.max(c.dislikes - 1, 0) };
+          if (c.currentReaction === 'dislike') {
+            return { ...c, currentReaction: undefined, dislikes: Math.max(c.dislikes - 1, 0) };
           }
 
-          if (previousReaction === 'like') {
-            reactions[reactionKey] = 'dislike';
+          if (c.currentReaction === 'like') {
+            const nextReaction: CommentReaction = 'dislike';
             return {
               ...c,
+              currentReaction: nextReaction,
               dislikes: c.dislikes + 1,
               likes: Math.max(c.likes - 1, 0),
             };
           }
 
-          reactions[reactionKey] = 'dislike';
-          return { ...c, dislikes: c.dislikes + 1 };
+          const nextReaction: CommentReaction = 'dislike';
+          return { ...c, currentReaction: nextReaction, dislikes: c.dislikes + 1 };
         });
 
         comments.set(postId, updated);
         
         // 保存到 localStorage
         saveCommentsToStorage(comments);
-        saveReactionsToStorage(reactions);
-        
-        return { comments, reactions };
+
+        return { comments };
       });
     } catch (err) {
       console.error('Failed to dislike comment:', err);

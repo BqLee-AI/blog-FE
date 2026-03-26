@@ -15,27 +15,20 @@ export default function ReplyDetailPage() {
   const { commentId, postId } = useParams<{ commentId: string; postId: string }>();
   const navigate = useNavigate();
   const rootCommentRef = useRef<HTMLDivElement | null>(null);
+  const replyFormRef = useRef<HTMLDivElement | null>(null);
   
   const { currentPost, fetchPostById, isLoading: postLoading } = usePostStore();
-  const { getCommentById, getCommentReplies, addComment, deleteComment, likeComment, dislikeComment } = commentStore();
-  
-  const [comment, setComment] = useState<Comment | null>(null);
-  const [threadComments, setThreadComments] = useState<Comment[]>([]);
+  const threadComments = commentStore((state) => state.comments.get(postId ? Number(postId) : 0) || []);
+  const { addComment, deleteComment, likeComment, dislikeComment } = commentStore();
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   
   const postIdNum = postId ? Number(postId) : 0;
   const commentIdNum = commentId ? Number(commentId) : 0;
 
-  const reloadThread = () => {
-    if (!postIdNum || !commentIdNum) {
-      return [] as Comment[];
-    }
-
-    const comments = commentStore.getState().getCommentsByPostId(postIdNum);
-    setThreadComments(comments);
-    return comments;
-  };
+  const comment = useMemo(() => {
+    return threadComments.find((item) => item.id === commentIdNum) || null;
+  }, [threadComments, commentIdNum]);
 
   const sortedReplies = useMemo(() => {
     return [...threadComments]
@@ -78,31 +71,17 @@ export default function ReplyDetailPage() {
   // 加载评论和回复
   useEffect(() => {
     if (commentIdNum) {
-      const targetComment = getCommentById(commentIdNum);
-      setComment(targetComment || null);
-
-      if (postIdNum) {
-        reloadThread();
-      }
-
-      if (targetComment) {
-        setReplyTarget((currentTarget: Comment | null) => currentTarget || targetComment);
+      if (comment) {
+        setReplyTarget((currentTarget: Comment | null) => currentTarget || comment);
       }
     }
-  }, [commentIdNum, postIdNum, getCommentById, getCommentReplies]);
-
-  useEffect(() => {
-    if (postIdNum) {
-      reloadThread();
-    }
-  }, [postIdNum]);
+  }, [commentIdNum, comment]);
 
   // 处理添加回复
   const handleAddReply = async (commentData: Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'author' | 'email' | 'likes' | 'dislikes' | 'replyCount'>) => {
     setIsSubmittingComment(true);
     try {
       await addComment(postIdNum, commentData);
-      reloadThread();
       if (comment) {
         setReplyTarget(comment);
       }
@@ -117,7 +96,6 @@ export default function ReplyDetailPage() {
   const handleDeleteReply = async (replyId: number) => {
     try {
       await deleteComment(postIdNum, replyId);
-      reloadThread();
     } catch (err) {
       console.error('Failed to delete reply:', err);
     }
@@ -127,7 +105,6 @@ export default function ReplyDetailPage() {
   const handleLike = async (commentPostId: number, replyId: number) => {
     try {
       await likeComment(commentPostId, replyId);
-      reloadThread();
     } catch (err) {
       console.error('Failed to like reply:', err);
     }
@@ -137,7 +114,6 @@ export default function ReplyDetailPage() {
   const handleDislike = async (commentPostId: number, replyId: number) => {
     try {
       await dislikeComment(commentPostId, replyId);
-      reloadThread();
     } catch (err) {
       console.error('Failed to dislike reply:', err);
     }
@@ -146,7 +122,7 @@ export default function ReplyDetailPage() {
   const handleBackToOriginalComment = () => {
     if (comment) {
       setReplyTarget(comment);
-      rootCommentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      replyFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -234,7 +210,7 @@ export default function ReplyDetailPage() {
       </div>
 
       {/* 新增回复表单 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div ref={replyFormRef} className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between gap-3 mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">添加回复</h2>
           {replyTarget && replyTarget.id !== comment.id && (

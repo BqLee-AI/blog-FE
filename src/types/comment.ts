@@ -1,3 +1,5 @@
+export type CommentReaction = "like" | "dislike";
+
 export interface Comment {
   id: number;
   postId: number;
@@ -11,6 +13,7 @@ export interface Comment {
   likes: number;
   dislikes: number;
   replyCount: number;
+  currentReaction?: CommentReaction;
 }
 
 export type CommentListResponse = {

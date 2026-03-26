@@ -14,9 +14,9 @@ export default function ArticleDetailPage() {
     usePostStore();
   
   // 评论相关状态
-  const { isLoading: commentsLoading, addComment, deleteComment, getCommentsByPostId, likeComment, dislikeComment } = commentStore();
+  const comments = commentStore((state) => state.comments.get(id ? Number(id) : 0) || []);
+  const { isLoading: commentsLoading, addComment, deleteComment, likeComment, dislikeComment } = commentStore();
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const postId = id ? Number(id) : 0;
 
@@ -26,21 +26,11 @@ export default function ArticleDetailPage() {
     }
   }, [id, fetchPostById]);
 
-  // 加载评论
-  useEffect(() => {
-    if (postId) {
-      const postComments = getCommentsByPostId(postId);
-      setComments(postComments);
-    }
-  }, [postId, getCommentsByPostId]);
-
   // 处理添加评论
   const handleAddComment = async (commentData: Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'author' | 'email' | 'likes' | 'dislikes' | 'replyCount'>) => {
     setIsSubmittingComment(true);
     try {
       await addComment(postId, commentData);
-      const updatedComments = getCommentsByPostId(postId);
-      setComments(updatedComments);
       setReplyingTo(null);
     } catch (err) {
       console.error('Failed to add comment:', err);
@@ -53,30 +43,24 @@ export default function ArticleDetailPage() {
   const handleDeleteComment = async (commentId: number) => {
     try {
       await deleteComment(postId, commentId);
-      const updatedComments = getCommentsByPostId(postId);
-      setComments(updatedComments);
     } catch (err) {
       console.error('Failed to delete comment:', err);
     }
   };
 
   // 处理点赞
-  const handleLike = async (commentId: number) => {
+  const handleLike = async (commentPostId: number, commentId: number) => {
     try {
-      await likeComment(postId, commentId);
-      const updatedComments = getCommentsByPostId(postId);
-      setComments(updatedComments);
+      await likeComment(commentPostId, commentId);
     } catch (err) {
       console.error('Failed to like comment:', err);
     }
   };
 
   // 处理踩
-  const handleDislike = async (commentId: number) => {
+  const handleDislike = async (commentPostId: number, commentId: number) => {
     try {
-      await dislikeComment(postId, commentId);
-      const updatedComments = getCommentsByPostId(postId);
-      setComments(updatedComments);
+      await dislikeComment(commentPostId, commentId);
     } catch (err) {
       console.error('Failed to dislike comment:', err);
     }
