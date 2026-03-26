@@ -135,7 +135,7 @@ export const CommentManagement: React.FC = () => {
                     </p>
 
                     {/* 评论内容 */}
-                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap wrap-break-word">
                       {comment.content}
                     </p>
                   </div>
@@ -144,7 +144,7 @@ export const CommentManagement: React.FC = () => {
                   <button
                     onClick={() => handleDeleteComment(comment.postId, comment.id)}
                     disabled={deletingCommentId === comment.id}
-                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50 flex-shrink-0"
+                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50 shrink-0"
                     title="删除评论"
                   >
                     <TrashIcon className="w-5 h-5" />

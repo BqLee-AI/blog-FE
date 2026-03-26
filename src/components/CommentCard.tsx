@@ -133,7 +133,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({
       </div>
 
       {/* 评论内容 */}
-      <p className="text-gray-800 dark:text-gray-200 text-sm mb-4 whitespace-pre-wrap break-words leading-relaxed">
+      <p className="text-gray-800 dark:text-gray-200 text-sm mb-4 whitespace-pre-wrap wrap-break-word leading-relaxed">
         {comment.content}
       </p>
 
