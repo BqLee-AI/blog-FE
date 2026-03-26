@@ -3,13 +3,17 @@ import { Link } from "react-router-dom";
 import { useThemeStore } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { MoonIcon, SunIcon, MagnifyingGlassIcon, PersonIcon, HomeIcon, FileTextIcon, GearIcon } from "@radix-ui/react-icons";
-import LoginPopover from "@/features/auth/components/LoginPopover";
+
+// 全局登录弹窗控制函数
+export function setLoginPopoverOpen(open: boolean) {
+  const event = new CustomEvent("toggleLoginPopover", { detail: { open } });
+  window.dispatchEvent(event);
+}
 
 export default function Header() {
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { user, isLoggedIn } = useAuthStore();
-  const [isLoginPopoverOpen, setIsLoginPopoverOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollPos, setLastScrollPos] = useState(0);
@@ -36,7 +40,7 @@ export default function Header() {
   }, [lastScrollPos, isVisible, scrollThreshold]);
 
   return (
-    <header className={`bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-all duration-300 overflow-hidden ${
+    <header className={`bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-all duration-300 overflow-visible ${
       isVisible ? "translate-y-0" : "-translate-y-full"
     }`}>
       <div className="container mx-auto px-4 max-w-6xl">
@@ -109,7 +113,7 @@ export default function Header() {
             ) : (
               <li>
                 <button
-                  onClick={() => setIsLoginPopoverOpen(true)}
+                  onClick={() => setLoginPopoverOpen(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg hover-button"
                 >
                   <PersonIcon className="w-4 h-4" />
@@ -134,12 +138,6 @@ export default function Header() {
           </ul>
         </nav>
       </div>
-
-      {/* 登录弹窗 */}
-      <LoginPopover
-        isOpen={isLoginPopoverOpen}
-        onClose={() => setIsLoginPopoverOpen(false)}
-      />
     </header>
   );
 }
