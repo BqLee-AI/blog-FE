@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useThemeStore } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
@@ -11,11 +11,36 @@ export default function Header() {
   const { user, isLoggedIn } = useAuthStore();
   const [isLoginPopoverOpen, setIsLoginPopoverOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollPos, setLastScrollPos] = useState(0);
+  const [scrollThreshold] = useState(80);
+
+  // 监听滚动事件
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.scrollY;
+      const isScrollingDown = currentScrollPos > lastScrollPos;
+      const hasScrolledEnough = Math.abs(currentScrollPos - lastScrollPos) > scrollThreshold;
+
+      if (isScrollingDown && hasScrolledEnough && isVisible) {
+        setIsVisible(false);
+      } else if (!isScrollingDown && !isVisible) {
+        setIsVisible(true);
+      }
+
+      setLastScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollPos, isVisible, scrollThreshold]);
 
   return (
-    <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors">
+    <header className={`bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-all duration-300 overflow-hidden ${
+      isVisible ? "translate-y-0" : "-translate-y-full"
+    }`}>
       <div className="container mx-auto px-4 max-w-6xl">
-        <nav className="flex items-center justify-between h-16">
+        <nav className="flex items-center justify-between h-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
@@ -85,7 +110,7 @@ export default function Header() {
               <li>
                 <button
                   onClick={() => setIsLoginPopoverOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg hover-button"
                 >
                   <PersonIcon className="w-4 h-4" />
                   <span>登录</span>
