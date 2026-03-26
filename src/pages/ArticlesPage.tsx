@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import PostCard from "../components/PostCard";
-import { usePostStore } from "../store/postStore";
+import PostCard from "@/features/articles/components/PostCard";
+import { usePostStore } from "@/store/postStore";
 
 export default function ArticlesPage() {
   const { posts, isLoading, fetchPosts } = usePostStore();

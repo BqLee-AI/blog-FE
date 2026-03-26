@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { Post } from "../types";
+import type { Post } from "@/types";
 
 type PostCardProps = {
   post: Post;
@@ -31,4 +31,3 @@ export default function PostCard({ post }: PostCardProps) {
     </article>
   );
 }
-

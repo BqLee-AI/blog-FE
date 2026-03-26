@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Post } from "../types";
+import type { Post } from "@/types";
 import { TrashIcon, PlusIcon } from "@radix-ui/react-icons";
 
 interface ArticleFormProps {

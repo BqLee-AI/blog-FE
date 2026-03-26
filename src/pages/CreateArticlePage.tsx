@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import ArticleForm from "../components/ArticleForm";
-import { usePostStore } from "../store/postStore";
-import type { Post } from "../types";
+import ArticleForm from "@/features/articles/components/ArticleForm";
+import { usePostStore } from "@/store/postStore";
+import type { Post } from "@/types";
 
 export default function CreateArticlePage() {
   const navigate = useNavigate();
