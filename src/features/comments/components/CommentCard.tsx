@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { Comment } from '@/types';
 import { ChatBubbleIcon, TrashIcon } from '@radix-ui/react-icons';
-import { commentStore } from '@/store/commentStore';
 import { cn } from '@/lib/utils';
 
 interface CommentCardProps {
@@ -35,9 +34,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({
   const [isDisliking, setIsDisliking] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const currentReaction = commentStore(
-    state => state.reactions[`${postId}:${comment.id}`] ?? null
-  );
+  const currentReaction = comment.currentReaction ?? null;
 
   const createdAt = new Date(comment.createdAt).toLocaleDateString('zh-CN', {
     year: 'numeric',
