@@ -5,6 +5,7 @@ import { initializeAuth } from "./store/authStore";
 import AppLayout from "./layouts/AppLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import HomePage from "./pages/HomePage";
+import ArticlesPage from "./pages/ArticlesPage";
 import ArticleDetailPage from "./pages/ArticleDetailPage";
 import ReplyDetailPage from "./pages/ReplyDetailPage";
 import AccountPage from "./pages/AccountPage";
@@ -25,6 +26,7 @@ export default function App() {
           {/* 公开路由 */}
           <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/articles" element={<ArticlesPage />} />
             <Route path="/article/:id" element={<ArticleDetailPage />} />
             <Route path="/article/:postId/comment/:commentId/replies" element={<ReplyDetailPage />} />
             <Route path="/account" element={<AccountPage />} />
