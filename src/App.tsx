@@ -1,17 +1,17 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ThemeProvider from "./components/ThemeProvider";
-import { initializeAuth } from "./store/authStore";
-import AppLayout from "./layouts/AppLayout";
-import AdminLayout from "./layouts/AdminLayout";
-import HomePage from "./pages/HomePage";
-import ArticlesPage from "./pages/ArticlesPage";
-import ArticleDetailPage from "./pages/ArticleDetailPage";
-import ReplyDetailPage from "./pages/ReplyDetailPage";
-import AccountPage from "./pages/AccountPage";
-import AdminDashboardPage from "./pages/AdminDashboardPage";
-import CreateArticlePage from "./pages/CreateArticlePage";
-import EditArticlePage from "./pages/EditArticlePage";
+import ThemeProvider from "@/components/ThemeProvider";
+import { initializeAuth } from "@/store/authStore";
+import AppLayout from "@/layouts/AppLayout";
+import AdminLayout from "@/layouts/AdminLayout";
+import HomePage from "@/pages/HomePage";
+import ArticlesPage from "@/pages/ArticlesPage";
+import ArticleDetailPage from "@/pages/ArticleDetailPage";
+import ReplyDetailPage from "@/pages/ReplyDetailPage";
+import AccountPage from "@/pages/AccountPage";
+import AdminDashboardPage from "@/pages/AdminDashboardPage";
+import CreateArticlePage from "@/pages/CreateArticlePage";
+import EditArticlePage from "@/pages/EditArticlePage";
 
 export default function App() {
   // 初始化认证状态
