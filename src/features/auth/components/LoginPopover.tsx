@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
-import type { LoginForm, RegisterForm } from "@/store/authStore";
+import type { LoginForm, RegisterForm } from "@/types/auth";
 
 interface LoginPopoverProps {
   isOpen: boolean;

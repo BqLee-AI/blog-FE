@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Post } from "@/types";
+import type { Post } from "@/types/post";
 import { mockPosts } from "@/assets/mockPosts";
 
 /**

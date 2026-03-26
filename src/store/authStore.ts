@@ -1,23 +1,5 @@
 import { create } from "zustand";
-
-export type AuthUser = {
-  id: number;
-  username: string;
-  email: string;
-  avatar?: string;
-};
-
-export type LoginForm = {
-  email: string;
-  password: string;
-};
-
-export type RegisterForm = {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-};
+import type { AuthUser, LoginForm, RegisterForm } from "@/types/auth";
 
 interface AuthStore {
   user: AuthUser | null;

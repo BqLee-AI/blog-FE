@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Comment, CommentListResponse } from "@/types";
+import type { Comment, CommentListResponse } from "@/types/comment";
 import { mockComments } from "@/assets/mockComments";
 
 type CommentReaction = 'like' | 'dislike';

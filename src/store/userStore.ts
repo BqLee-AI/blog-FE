@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { User, UserProfileForm, PasswordChangeForm } from "@/types";
+import type { User, UserProfileForm, PasswordChangeForm } from "@/types/user";
 
 interface UserStore {
   user: User | null;

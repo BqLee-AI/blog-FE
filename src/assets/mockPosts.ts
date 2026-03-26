@@ -1,12 +1,4 @@
-export type Post = {
-  id: number;
-  title: string;
-  summary: string;
-  content?: string;
-  tags: string[];
-  createdAt?: string;
-  author?: string;
-};
+import type { Post } from "@/types/post";
 
 export const mockPosts: Post[] = [
   {
