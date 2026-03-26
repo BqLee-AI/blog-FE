@@ -78,6 +78,31 @@ src/
 └── main.tsx             # 应用入口
 ```
 
+## 📁 目录约定
+
+### 公共层
+- `src/components/` 只放跨业务复用的通用组件。
+- `src/lib/` 只放纯工具函数，不放业务逻辑。
+- `src/styles/` 只放全局样式和基础样式入口。
+
+### 业务层
+- `src/features/` 按业务域组织复用组件。
+- `src/pages/` 只放路由级页面。
+- `src/store/` 按业务域拆分状态管理。
+- `src/types/` 按业务域拆分类型定义，`src/types/index.ts` 仅做过渡聚合。
+- `src/assets/` 只放静态资源和 mock 数据。
+
+### 编排层
+- `src/App.tsx` 只负责路由和全局布局编排。
+- `src/main.tsx` 只负责应用挂载。
+- `src/layouts/` 只负责页面壳子和区域布局。
+- `src/hooks/` 只放跨页面复用的组合逻辑。
+
+### 新增文件规则
+- 新增文章、评论、认证、账号相关内容，优先放进对应 `features/`、`store/`、`types/` 子目录。
+- 除非确实是跨业务复用，否则不要继续往 `src/components/` 堆文件。
+- `src/types/index.ts` 以后不再扩充新类型，只保留兼容导出。
+
 ## 🎯 页面功能详解
 
 | 页面 | 路由 | 描述 |
