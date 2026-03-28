@@ -47,7 +47,7 @@ export default function HomePage() {
             我的个人博客
           </h1>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl leading-8">
-            分享技术经验，记录学习笔记，用更清晰的结构阅读每一篇文章。
+            分享技术经验，记录学习笔记，用更清晰的结构浏览每一篇文章。
           </p>
         </div>
 

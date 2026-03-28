@@ -35,6 +35,8 @@ export const CommentCard: React.FC<CommentCardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const currentReaction = comment.currentReaction ?? null;
+  const displayName = comment.author || '匿名用户';
+  const avatarLabel = displayName.trim().charAt(0).toUpperCase() || 'U';
 
   const createdAt = new Date(comment.createdAt).toLocaleDateString('zh-CN', {
     year: 'numeric',
@@ -77,41 +79,49 @@ export const CommentCard: React.FC<CommentCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
+    <div className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-800/90 dark:hover:border-blue-800/60">
       {/* 评论头部 */}
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <p className="font-semibold text-gray-900 dark:text-white text-sm">
-              {comment.author || '匿名用户'}
+      <div className="mb-4 flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500 text-sm font-bold text-white shadow-sm">
+          {avatarLabel}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate font-semibold text-gray-900 dark:text-white text-sm">
+              {displayName}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {createdAt}
-            </p>
+            {comment.replyTo ? (
+              <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                回复 #{comment.replyTo}
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                主评论
+              </span>
+            )}
           </div>
-          {comment.replyTo && (
-            <p className="text-xs text-blue-600 dark:text-blue-400 mb-2">
-              回复评论 #{comment.replyTo}
-            </p>
-          )}
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {createdAt}
+          </p>
         </div>
 
         {/* 删除按钮 */}
         {isAdmin && (
-          <div>
+          <div className="shrink-0">
             {showDeleteConfirm ? (
-              <div className="flex gap-2">
+              <div className="flex gap-2 rounded-full bg-gray-50 p-1 dark:bg-gray-700/70">
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400 transition-colors"
+                  className="rounded-full bg-red-500 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
                   确定
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
                   disabled={isDeleting}
-                  className="text-xs px-2 py-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-500 disabled:opacity-50 transition-colors"
+                  className="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-gray-900 transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                 >
                   取消
                 </button>
@@ -119,7 +129,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({
             ) : (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                className="rounded-full p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
                 title="删除评论"
               >
                 <TrashIcon className="w-4 h-4" />
@@ -130,22 +140,22 @@ export const CommentCard: React.FC<CommentCardProps> = ({
       </div>
 
       {/* 评论内容 */}
-      <p className="text-gray-800 dark:text-gray-200 text-sm mb-4 whitespace-pre-wrap wrap-break-word leading-relaxed">
-        {comment.content}
-      </p>
+      <div className="mb-4 rounded-2xl bg-gray-50 px-4 py-3 text-sm leading-7 text-gray-800 shadow-inner dark:bg-gray-900/70 dark:text-gray-200">
+        <p className="whitespace-pre-wrap break-words">{comment.content}</p>
+      </div>
 
       {/* 操作按钮 - 参考B站设计 */}
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4 dark:border-gray-700/80">
         {/* 点赞 */}
         <button
           onClick={handleLike}
           disabled={isLiking}
           aria-pressed={currentReaction === 'like'}
           className={cn(
-            'flex items-center gap-1 text-sm transition-colors disabled:opacity-50',
+            'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50',
             currentReaction === 'like'
-              ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full'
-              : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
+              ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800'
+              : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-300'
           )}
           title="点赞"
         >
@@ -159,10 +169,10 @@ export const CommentCard: React.FC<CommentCardProps> = ({
           disabled={isDisliking}
           aria-pressed={currentReaction === 'dislike'}
           className={cn(
-            'flex items-center gap-1 text-sm transition-colors disabled:opacity-50',
+            'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50',
             currentReaction === 'dislike'
-              ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-full'
-              : 'text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400'
+              ? 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-900/30 dark:text-red-300 dark:ring-red-800'
+              : 'text-gray-600 hover:bg-red-50 hover:text-red-700 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-300'
           )}
           title="踩"
         >
@@ -174,7 +184,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({
         {onReply && (
           <button
             onClick={() => onReply(comment)}
-            className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-blue-300"
             title="回复"
           >
             <ChatBubbleIcon className="w-4 h-4" />
@@ -186,7 +196,7 @@ export const CommentCard: React.FC<CommentCardProps> = ({
         {!comment.replyTo && replyCount > 0 && onViewReplies && (
           <button
             onClick={() => onViewReplies(comment)}
-            className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/35"
             title="查看回复"
           >
             <ChatBubbleIcon className="w-4 h-4" />

@@ -60,7 +60,7 @@ export default function ArticlesPage() {
               查看所有文章
             </h1>
             <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 mt-3 max-w-3xl leading-8">
-              浏览博客中的全部文章，按分类筛选你感兴趣的内容，并快速了解每个分类下的内容密度。
+              浏览博客中的全部文章，按分类筛选你感兴趣的内容，并快速了解当前分类的内容密度。
             </p>
           </div>
 
@@ -71,7 +71,9 @@ export default function ArticlesPage() {
             </div>
             <div className="rounded-2xl bg-gray-50 dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">当前分类</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeCategory === "全部" ? categories.length - 1 : 1}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {activeCategory === "全部" ? categories.length - 1 : 1}
+              </p>
             </div>
             <div className="rounded-2xl bg-gray-50 dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">阅读总时长</p>
@@ -137,7 +139,7 @@ export default function ArticlesPage() {
         ) : visiblePosts.length === 0 ? (
           <div className="text-center py-16 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
             <p className="text-gray-500 dark:text-gray-400 text-lg">暂无文章</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">当前分类还没有内容，试试切换到其他标签。</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">当前分类没有内容，试试切换到其他标签。</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
