@@ -167,9 +167,15 @@ export default function ArticleDetailPage() {
         </section>
 
         {/* 摘要 */}
-        <div className="bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50 dark:from-blue-900/20 dark:via-sky-900/10 dark:to-cyan-900/10 border border-blue-100 dark:border-blue-900/30 p-5 mb-8 rounded-2xl shadow-sm">
-          <p className="text-gray-700 dark:text-gray-300 text-lg leading-8">{currentPost.summary}</p>
-        </div>
+        <section className="mb-8 rounded-2xl border border-blue-100 dark:border-blue-900/30 bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50 dark:from-blue-900/20 dark:via-sky-900/10 dark:to-cyan-900/10 p-5 shadow-sm">
+          <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-[0.3em] uppercase text-blue-700 dark:text-blue-300">
+            <span className="h-2 w-2 rounded-full bg-blue-500" />
+            文章摘要
+          </div>
+          <p className="text-lg leading-8 text-gray-700 dark:text-gray-300">
+            {currentPost.summary}
+          </p>
+        </section>
 
         {/* 标签 */}
         {currentPost.tags.length > 0 && (
@@ -186,18 +192,30 @@ export default function ArticleDetailPage() {
         )}
 
         {/* 文章内容 */}
-        <div className="prose prose-lg max-w-none mb-12">
+        <section className="mb-12 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm md:p-8">
+          <div className="mb-6 flex items-end justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
+            <div>
+              <p className="text-xs font-bold tracking-[0.35em] uppercase text-gray-500 dark:text-gray-400 mb-2">
+                正文
+              </p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">文章内容</h2>
+            </div>
+            <p className="hidden text-sm text-gray-500 dark:text-gray-400 md:block">
+              建议先看摘要，再顺着正文往下读
+            </p>
+          </div>
+
           {currentPost.content ? (
-            <div
-              className="text-gray-700 dark:text-gray-300 leading-relaxed prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:leading-8 prose-strong:text-gray-900 dark:prose-strong:text-white prose-a:text-blue-600 dark:prose-a:text-blue-400"
+            <article
+              className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300 prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:leading-8 prose-p:mb-5 prose-strong:text-gray-900 dark:prose-strong:text-white prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-img:rounded-2xl prose-img:shadow-sm prose-img:my-6 prose-blockquote:border-blue-400 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-300"
               dangerouslySetInnerHTML={{ __html: currentPost.content }}
             />
           ) : (
-            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-lg text-center text-gray-500 dark:text-gray-400">
+            <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center text-gray-500 dark:text-gray-400">
               <p>暂无详细内容</p>
             </div>
           )}
-        </div>
+        </section>
 
         {/* 底部导航 */}
         <div className="border-t dark:border-gray-700 pt-8">
