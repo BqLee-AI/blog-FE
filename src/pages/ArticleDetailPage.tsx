@@ -181,26 +181,16 @@ export default function ArticleDetailPage() {
             <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">
               {readingTime} 分钟阅读
             </span>
-            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">
-              {currentPost.tags.length} 个标签
-            </span>
           </div>
         </header>
 
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
             <p className="text-xs font-bold tracking-[0.25em] uppercase text-gray-500 dark:text-gray-400 mb-2">
               阅读
             </p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{readingTime} 分钟</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">预计完整阅读时长</p>
-          </div>
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
-            <p className="text-xs font-bold tracking-[0.25em] uppercase text-gray-500 dark:text-gray-400 mb-2">
-              标签
-            </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{currentPost.tags.length}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">文章分类标签数</p>
           </div>
           <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
             <p className="text-xs font-bold tracking-[0.25em] uppercase text-gray-500 dark:text-gray-400 mb-2">
