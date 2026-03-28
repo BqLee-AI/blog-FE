@@ -6,44 +6,7 @@ import { CommentForm } from "@/features/comments/components/CommentForm";
 import { CommentList } from "@/features/comments/components/CommentList";
 import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
-
-const formatArticleDate = (dateStr: string | undefined): string => {
-  if (!dateStr) {
-    return "";
-  }
-
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-
-  return date.toLocaleDateString("zh-CN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
-
-const estimateReadingTime = (content?: string): number => {
-  if (!content) {
-    return 1;
-  }
-
-  const plainText = content
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!plainText) {
-    return 1;
-  }
-
-  const cjkCharacters = plainText.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
-  const latinWords = plainText.match(/[a-zA-Z0-9]+/g)?.length ?? 0;
-
-  return Math.max(1, Math.ceil((cjkCharacters + latinWords * 2) / 300));
-};
+import { estimateReadingTime, formatArticleDate } from "@/lib/utils";
 
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
