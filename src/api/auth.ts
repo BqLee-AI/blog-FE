@@ -15,7 +15,7 @@ interface LoginResponse {
  */
 export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
   try {
-    const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
+    const response = await apiClient.post<LoginResponse>('/api/v1/auth/login', credentials);
     // 登录成功后保存token到localStorage
     if (response.data && response.data.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);
@@ -34,7 +34,7 @@ export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
  */
 export const register = async (userData: RegisterForm): Promise<AuthUser> => {
   try {
-    const response = await apiClient.post<AuthUser>('/auth/register', userData);
+    const response = await apiClient.post<AuthUser>('/api/v1/auth/register', userData);
     return response.data;
   } catch (error) {
     console.error('注册失败:', error);

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { AuthUser, LoginForm, RegisterForm } from "@/types/auth";
+import { login as apiLogin, register as apiRegister, logout as apiLogout } from "@/api/auth";
 
 interface AuthStore {
   user: AuthUser | null;
@@ -47,30 +48,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error("请输入正确的邮箱地址");
       }
 
-      if (form.password.length < 6) {
-        throw new Error("密码至少需要 6 个字符");
-      }
-
-      // 模拟 API 延迟
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // 模拟登录数据
-      const mockUser: AuthUser = {
-        id: 1,
-        username: form.email.split("@")[0] ?? "",
-        email: form.email,
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + form.email,
-      };
+      // 调用后端API
+      const response = await apiLogin(form);
 
       set({
-        user: mockUser,
+        user: response.user,
         isLoggedIn: true,
         isLoading: false,
       });
 
       // 保存到 localStorage
       try {
-        localStorage.setItem("blog-auth-user", JSON.stringify(mockUser));
+        localStorage.setItem("blog-auth-user", JSON.stringify(response.user));
       } catch (e) {
         console.error("Failed to save user to localStorage:", e);
       }
@@ -107,26 +96,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error("两次输入的密码不一致");
       }
 
-      // 模拟 API 延迟
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // 模拟注册数据
-      const mockUser: AuthUser = {
-        id: Math.random(),
-        username: form.username,
-        email: form.email,
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + form.email,
-      };
+      // 调用后端API
+      const user = await apiRegister(form);
 
       set({
-        user: mockUser,
+        user: user,
         isLoggedIn: true,
         isLoading: false,
       });
 
       // 保存到 localStorage
       try {
-        localStorage.setItem("blog-auth-user", JSON.stringify(mockUser));
+        localStorage.setItem("blog-auth-user", JSON.stringify(user));
       } catch (e) {
         console.error("Failed to save user to localStorage:", e);
       }
@@ -139,13 +120,20 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 
-  logout: () => {
-    set({ user: null, isLoggedIn: false, error: null });
-    // 清除 localStorage
+  logout: async () => {
     try {
-      localStorage.removeItem("blog-auth-user");
-    } catch (e) {
-      console.error("Failed to clear localStorage:", e);
+      // 调用后端API
+      await apiLogout();
+    } catch (error) {
+      console.error("登出API调用失败:", error);
+    } finally {
+      set({ user: null, isLoggedIn: false, error: null });
+      // 清除 localStorage
+      try {
+        localStorage.removeItem("blog-auth-user");
+      } catch (e) {
+        console.error("Failed to clear localStorage:", e);
+      }
     }
   },
 
