@@ -73,17 +73,52 @@ export const CommentForm: React.FC<CommentFormProps> = ({
     ? `回复 ${replyTo.author || '用户'} 的评论`
     : '请在评论区留下见解或问题...';
 
+  const characterCount = content.trim().length;
+
   return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <form onSubmit={handleSubmit} className="w-full rounded-2xl bg-white dark:bg-gray-800/90">
+      <div className="mb-4 flex items-start justify-between gap-4 border-b border-gray-100 pb-4 dark:border-gray-700">
+        <div>
+          <p className="text-xs font-bold tracking-[0.3em] uppercase text-blue-700 dark:text-blue-300 mb-2">
+            评论输入
+          </p>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            {replyTo ? '回复这条评论' : '写下你的看法'}
+          </h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            评论会直接显示在文章下方，保持简洁更容易被阅读。
+          </p>
+        </div>
+
+        {replyTo && (
+          <div className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+            回复 {replyTo.author || '用户'}
+          </div>
+        )}
+      </div>
+
       {/* 错误提示 */}
       {submitError && (
-        <div className="mb-3 p-3 bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 rounded text-sm">
+        <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300">
           {submitError}
         </div>
       )}
 
       {/* 评论内容字段 */}
-      <div className="mb-3">
+      <div className="mb-4">
+        <label className="mb-2 flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span>评论内容</span>
+          <span className={characterCount < 2 ? 'text-gray-400 dark:text-gray-500' : 'text-blue-600 dark:text-blue-400'}>
+            {characterCount} 字
+          </span>
+        </label>
+        <div
+          className={`rounded-2xl border bg-white p-2 shadow-sm transition-colors dark:bg-gray-900/60 ${
+            errors.content
+              ? 'border-red-300 ring-1 ring-red-200 dark:border-red-700 dark:ring-red-900/40'
+              : 'border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 dark:border-gray-700 dark:focus-within:border-blue-500 dark:focus-within:ring-blue-900/30'
+          }`}
+        >
         <textarea
           value={content}
           onChange={e => {
@@ -93,24 +128,23 @@ export const CommentForm: React.FC<CommentFormProps> = ({
           placeholder={placeholder}
           disabled={isLoading}
           rows={3}
-          className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-blue-500 dark:border-gray-600 resize-none text-sm ${
-            errors.content ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-          }`}
+          className="min-h-[120px] w-full resize-none rounded-xl border-0 bg-transparent px-3 py-2 text-sm leading-6 text-gray-900 placeholder-gray-400 focus:outline-none dark:text-white dark:placeholder-gray-500"
         />
+        </div>
         {errors.content && (
-          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.content}</p>
+          <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">{errors.content}</p>
         )}
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          {content.length} 字符
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          支持换行，尽量把观点说完整一些。
         </p>
       </div>
 
       {/* 按钮 */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-3 pt-1">
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 disabled:bg-gray-400 transition-colors font-medium"
+          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:from-blue-700 hover:to-cyan-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? '发送中...' : '发表评论'}
         </button>
@@ -119,7 +153,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white text-sm rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 disabled:bg-gray-200 transition-colors"
+            className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
           >
             取消
           </button>
