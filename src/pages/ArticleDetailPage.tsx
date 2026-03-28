@@ -6,6 +6,7 @@ import { CommentForm } from "@/features/comments/components/CommentForm";
 import { CommentList } from "@/features/comments/components/CommentList";
 import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { estimateReadingTime, formatArticleDate } from "@/lib/utils";
 
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,8 @@ export default function ArticleDetailPage() {
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const postId = id ? Number(id) : 0;
+  const readingTime = estimateReadingTime(currentPost?.content);
+  const publishedAt = formatArticleDate(currentPost?.createdAt);
 
   useEffect(() => {
     if (id) {
@@ -126,19 +129,21 @@ export default function ArticleDetailPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             {currentPost.title}
           </h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
             {currentPost.author && (
-              <span>作者: {currentPost.author}</span>
+              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">作者: {currentPost.author}</span>
             )}
-            {currentPost.createdAt && (
-              <span>发布: {new Date(currentPost.createdAt).toLocaleDateString()}</span>
+            {publishedAt && (
+              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">发布: {publishedAt}</span>
             )}
+            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">{readingTime} 分钟阅读</span>
+            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">{currentPost.tags.length} 个标签</span>
           </div>
         </header>
 
         {/* 摘要 */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-600 dark:border-blue-400 p-4 mb-8 rounded-r">
-          <p className="text-gray-700 dark:text-gray-300 text-lg">{currentPost.summary}</p>
+        <div className="bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50 dark:from-blue-900/20 dark:via-sky-900/10 dark:to-cyan-900/10 border border-blue-100 dark:border-blue-900/30 p-5 mb-8 rounded-2xl shadow-sm">
+          <p className="text-gray-700 dark:text-gray-300 text-lg leading-8">{currentPost.summary}</p>
         </div>
 
         {/* 标签 */}
@@ -159,7 +164,7 @@ export default function ArticleDetailPage() {
         <div className="prose prose-lg max-w-none mb-12">
           {currentPost.content ? (
             <div
-              className="text-gray-700 dark:text-gray-300 leading-relaxed"
+              className="text-gray-700 dark:text-gray-300 leading-relaxed prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:leading-8 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-strong:text-gray-900 dark:prose-strong:text-white"
               dangerouslySetInnerHTML={{ __html: currentPost.content }}
             />
           ) : (
