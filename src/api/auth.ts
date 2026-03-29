@@ -28,6 +28,21 @@ export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
 };
 
 /**
+ * 发送邮箱验证码
+ * @param email 邮箱地址
+ * @returns 是否发送成功
+ */
+export const sendVerificationCode = async (email: string): Promise<{ message: string }> => {
+  try {
+    const response = await apiClient.post<{ message: string }>("/api/v1/auth/sendEmail", { email });
+    return response.data;
+  } catch (error) {
+    console.error("发送验证码失败:", error);
+    throw error;
+  }
+};
+
+/**
  * 用户注册
  * @param userData 注册数据
  * @returns 注册成功的用户信息
