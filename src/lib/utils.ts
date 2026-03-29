@@ -32,6 +32,7 @@ export const formatArticleDate = (dateStr: string | undefined): string => {
  * - 先移除 HTML 标签与空白
  * - 统计中文字符与英文/数字词块
  * - 按每分钟约 300 个阅读单位换算
+ *
  */
 export const estimateReadingTime = (content?: string): number => {
   if (!content) {
@@ -51,7 +52,24 @@ export const estimateReadingTime = (content?: string): number => {
   const cjkCharacters = plainText.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
   const latinWords = plainText.match(/[a-zA-Z0-9]+/g)?.length ?? 0;
 
-  return Math.max(1, Math.ceil((cjkCharacters + latinWords * 2) / 300));
+  const readingUnits = cjkCharacters + latinWords * 2;
+
+  return Math.max(1, Math.ceil(readingUnits / 300));
+};
+
+/**
+ * 提取纯文本摘要
+ */
+export const extractPlainText = (content?: string): string => {
+  if (!content) {
+    return "";
+  }
+
+  return content
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 };
 
 /**

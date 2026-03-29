@@ -132,18 +132,12 @@ export default function ArticleDetailPage() {
           </h1>
           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
             {currentPost.author && (
-              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">
-                作者: {currentPost.author}
-              </span>
+              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">作者: {currentPost.author}</span>
             )}
             {publishedAt && (
-              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">
-                发布: {publishedAt}
-              </span>
+              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">发布: {publishedAt}</span>
             )}
-            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">
-              {readingTime} 分钟阅读
-            </span>
+            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">{readingTime} 分钟阅读</span>
           </div>
         </header>
 
@@ -172,9 +166,7 @@ export default function ArticleDetailPage() {
             <span className="h-2 w-2 rounded-full bg-blue-500" />
             文章摘要
           </div>
-          <p className="text-lg leading-8 text-gray-700 dark:text-gray-300">
-            {currentPost.summary}
-          </p>
+          <p className="text-lg leading-8 text-gray-700 dark:text-gray-300">{currentPost.summary}</p>
         </section>
 
         {/* 标签 */}
