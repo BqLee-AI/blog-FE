@@ -1,6 +1,12 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 interface LoginPopoverProps {
   isOpen: boolean;
@@ -9,45 +15,64 @@ interface LoginPopoverProps {
 
 type TabType = "login" | "register";
 
+const loginSchema = z.object({
+  email: z.string().email("请输入有效的邮箱"),
+  password: z.string().min(6, "密码至少 6 位"),
+});
+
+const registerSchema = z
+  .object({
+    username: z.string().min(2, "用户名至少 2 个字符"),
+    email: z.string().email("请输入有效的邮箱"),
+    password: z.string().min(6, "密码至少 6 位"),
+    confirmPassword: z.string().min(6, "请再次输入密码"),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: "两次输入的密码不一致",
+    path: ["confirmPassword"],
+  });
+
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   const { login, register, isLoading, error, clearError } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<TabType>("login");
 
-  // 登录表单状态
-  const [loginForm, setLoginForm] = useState<LoginForm>({
-    email: "",
-    password: "",
-  });
-
-  // 注册表单状态
-  const [registerForm, setRegisterForm] = useState<RegisterForm>({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+
+  const loginForm = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const registerForm = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
   // 处理标签页切换
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     clearError();
-    // 清空表单
-    setLoginForm({ email: "", password: "" });
-    setRegisterForm({ username: "", email: "", password: "", confirmPassword: "" });
+    loginForm.reset();
+    registerForm.reset();
     setIsPasswordVisible(false);
     setIsConfirmPasswordVisible(false);
   };
 
   // 处理登录
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLoginSubmit = async (values: LoginForm) => {
     try {
-      await login(loginForm);
-      // 登录成功
+      await login(values);
+      loginForm.reset();
       setTimeout(() => {
         onClose();
         window.location.reload();
@@ -58,11 +83,10 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   };
 
   // 处理注册
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegisterSubmit = async (values: RegisterForm) => {
     try {
-      await register(registerForm);
-      // 注册成功
+      await register(values);
+      registerForm.reset();
       setTimeout(() => {
         onClose();
         window.location.reload();
@@ -152,34 +176,52 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             )}
 
             {/* 登录表单 */}
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div>
-                <input
-                  type="email"
-                  value={loginForm.email}
-                  onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                  placeholder="邮箱地址"
-                  className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">邮箱</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="邮箱地址"
+                          autoComplete="email"
+                          className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <div>
-                <input
-                  type="password"
-                  value={loginForm.password}
-                  onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                  placeholder="密码"
-                  className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="hover-button w-full px-4 py-2 bg-blue-600 text-white rounded-lg dark:bg-blue-700 font-medium disabled:opacity-50"
-              >
-                {isLoading ? "登录中..." : "立即登录"}
-              </button>
-            </form>
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">密码</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="密码"
+                          autoComplete="current-password"
+                          className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" className="hover-button w-full px-4 py-2 bg-blue-600 text-white rounded-lg dark:bg-blue-700 font-medium disabled:opacity-50" disabled={isLoading}>
+                  {isLoading ? "登录中..." : "立即登录"}
+                </Button>
+              </form>
+            </Form>
 
             {/* 测试账号提示 */}
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
@@ -201,69 +243,109 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             )}
 
             {/* 注册表单 */}
-            <form onSubmit={handleRegisterSubmit} className="space-y-4">
-              <div>
-                <input
-                  type="text"
-                  value={registerForm.username}
-                  onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
-                  placeholder="用户名（至少 2 个字符）"
-                  className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+            <Form {...registerForm}>
+              <form onSubmit={registerForm.handleSubmit(handleRegisterSubmit)} className="space-y-4">
+                <FormField
+                  control={registerForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">用户名</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="用户名（至少 2 个字符）"
+                          autoComplete="nickname"
+                          className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div>
-                <input
-                  type="email"
-                  value={registerForm.email}
-                  onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
-                  placeholder="邮箱地址"
-                  className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                <FormField
+                  control={registerForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">邮箱</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="邮箱地址"
+                          autoComplete="email"
+                          className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div className="relative">
-                <input
-                  type={isPasswordVisible ? "text" : "password"}
-                  value={registerForm.password}
-                  onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
-                  placeholder="密码（至少 6 个字符）"
-                  className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
+                <FormField
+                  control={registerForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">密码</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={isPasswordVisible ? "text" : "password"}
+                            placeholder="密码（至少 6 个字符）"
+                            autoComplete="new-password"
+                            className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-12"
+                            {...field}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                          >
+                            {isPasswordVisible ? "隐" : "显"}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <button
-                  type="button"
-                  onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
-                >
-                  {isPasswordVisible ? "隐" : "显"}
-                </button>
-              </div>
 
-              <div className="relative">
-                <input
-                  type={isConfirmPasswordVisible ? "text" : "password"}
-                  value={registerForm.confirmPassword}
-                  onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
-                  placeholder="再次输入密码"
-                  className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
+                <FormField
+                  control={registerForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="sr-only">确认密码</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={isConfirmPasswordVisible ? "text" : "password"}
+                            placeholder="再次输入密码"
+                            autoComplete="new-password"
+                            className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-12"
+                            {...field}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                          >
+                            {isConfirmPasswordVisible ? "隐" : "显"}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <button
-                  type="button"
-                  onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"
-                >
-                  {isConfirmPasswordVisible ? "隐" : "显"}
-                </button>
-              </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="hover-button w-full px-4 py-2 bg-green-600 text-white rounded-lg dark:bg-green-700 font-medium disabled:opacity-50"
-              >
-                {isLoading ? "注册中..." : "立即注册"}
-              </button>
-            </form>
+                <Button type="submit" className="hover-button w-full px-4 py-2 bg-green-600 text-white rounded-lg dark:bg-green-700 font-medium disabled:opacity-50" disabled={isLoading}>
+                  {isLoading ? "注册中..." : "立即注册"}
+                </Button>
+              </form>
+            </Form>
 
             {/* 测试账号提示 */}
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
