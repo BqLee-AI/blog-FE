@@ -10,5 +10,7 @@ if (!container) {
 }
 
 createRoot(container).render(
+  <React.StrictMode>
     <App />
+  </React.StrictMode>
 );
