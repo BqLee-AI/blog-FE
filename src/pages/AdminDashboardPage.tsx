@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { usePostStore } from "@/store/postStore";
 import { CommentManagement } from "@/features/comments/components/CommentManagement";
 import { PlusIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminDashboardPage() {
+  const navigate = useNavigate();
   const { posts, fetchPosts } = usePostStore();
   const [activeTab, setActiveTab] = useState<'articles' | 'comments'>('articles');
 
@@ -25,42 +29,47 @@ export default function AdminDashboardPage() {
       {/* 页面标题和操作 */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-600">文章管理</h1>
-          <p className="text-gray-600 mt-2">管理和编辑你的所有文章</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">文章管理</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">管理和编辑你的所有文章</p>
         </div>
         {activeTab === 'articles' && (
-          <Link
-            to="/admin/create"
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          <Button
+            type="button"
+            onClick={() => navigate("/admin/create")}
+            className="gap-2 bg-blue-600 text-white hover:bg-blue-700"
           >
             <PlusIcon className="w-5 h-5" />
             新建文章
-          </Link>
+          </Button>
         )}
       </div>
 
       {/* 标签页 */}
-      <div className="flex gap-4 mb-8 border-b border-gray-200">
-        <button
+      <div className="flex gap-4 mb-8 border-b border-gray-200 dark:border-gray-800">
+        <Button
+          type="button"
           onClick={() => setActiveTab('articles')}
-          className={`px-4 py-3 font-medium border-b-2 transition-colors ${
+          variant="ghost"
+          className={`rounded-none border-b-2 px-4 py-3 font-medium transition-colors ${
             activeTab === 'articles'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
           }`}
         >
           文章管理
-        </button>
-        <button
+        </Button>
+        <Button
+          type="button"
           onClick={() => setActiveTab('comments')}
-          className={`px-4 py-3 font-medium border-b-2 transition-colors ${
+          variant="ghost"
+          className={`rounded-none border-b-2 px-4 py-3 font-medium transition-colors ${
             activeTab === 'comments'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
           }`}
         >
           评论管理
-        </button>
+        </Button>
       </div>
 
       {/* 文章管理标签页 */}
@@ -68,41 +77,47 @@ export default function AdminDashboardPage() {
         <>
           {/* 统计卡片 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-gray-500 text-sm font-medium mb-2">总文章数</div>
-              <div className="text-3xl font-bold text-gray-900">{posts.length}</div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-gray-500 text-sm font-medium mb-2">最近更新</div>
-              <div className="text-lg font-semibold text-gray-900">
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">总文章数</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{posts.length}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">最近更新</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white">
                 {posts[0]?.createdAt 
                   ? new Date(posts[0].createdAt).toLocaleDateString() 
                   : "-"}
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-gray-500 text-sm font-medium mb-2">总标签数</div>
-              <div className="text-3xl font-bold text-gray-900">
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">总标签数</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">
                 {new Set(posts.flatMap((p) => p.tags)).size}
-              </div>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* 文章列表表格 */}
-          <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-x-auto dark:border-gray-800 dark:bg-gray-900">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 border-b border-gray-200 dark:bg-gray-800/60 dark:border-gray-800">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
                     标题
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
                     标签
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
                     发布日期
                   </th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-white">
                     操作
                   </th>
                 </tr>
@@ -110,63 +125,68 @@ export default function AdminDashboardPage() {
               <tbody>
                 {posts.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                       暂无文章，
-                      <Link to="/admin/create" className="text-blue-600 hover:underline">
+                      <button type="button" onClick={() => navigate("/admin/create")} className="text-blue-600 hover:underline dark:text-blue-400">
                         创建一篇
-                      </Link>
+                      </button>
                     </td>
                   </tr>
                 ) : (
                   posts.map((post) => (
                     <tr
                       key={post.id}
-                      className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                      className="border-b border-gray-200 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50"
                     >
                       <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">{post.title}</div>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-1">
+                        <div className="font-medium text-gray-900 dark:text-white">{post.title}</div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-1">
                           {post.summary}
                         </p>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
                           {post.tags.slice(0, 2).map((tag) => (
-                            <span
+                            <Badge
                               key={tag}
-                              className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                              variant="secondary"
+                              className="text-xs"
                             >
                               {tag}
-                            </span>
+                            </Badge>
                           ))}
                           {post.tags.length > 2 && (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               +{post.tags.length - 2}
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                         {post.createdAt 
                           ? new Date(post.createdAt).toLocaleDateString() 
                           : "-"}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Link
-                            to={`/admin/edit/${post.id}`}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          <Button
+                            type="button"
+                            onClick={() => navigate(`/admin/edit/${post.id}`)}
+                            variant="ghost"
+                            className="h-9 w-9 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/40"
                             title="编辑"
                           >
                             <Pencil1Icon className="w-5 h-5" />
-                          </Link>
-                          <button
+                          </Button>
+                          <Button
+                            type="button"
                             onClick={() => handleDelete(post.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            variant="ghost"
+                            className="h-9 w-9 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/40"
                             title="删除"
                           >
                             <TrashIcon className="w-5 h-5" />
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
