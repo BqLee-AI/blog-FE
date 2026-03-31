@@ -1,5 +1,5 @@
-import apiClient from './index';
-import type{ LoginForm, RegisterForm, AuthUser } from '../types/auth';
+import { api } from './index';
+import type { LoginForm, RegisterForm, AuthUser } from '../types/auth';
 
 // 定义登录响应类型
 interface LoginResponse {
@@ -15,7 +15,7 @@ interface LoginResponse {
  */
 export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
   try {
-    const response = await apiClient.post<LoginResponse>('/api/v1/auth/login', credentials);
+    const response = await api.post<LoginResponse, LoginForm>('/auth/login', credentials);
     // 登录成功后保存token到localStorage
     if (response.data && response.data.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);
@@ -34,7 +34,7 @@ export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
  */
 export const register = async (userData: RegisterForm): Promise<AuthUser> => {
   try {
-    const response = await apiClient.post<AuthUser>('/api/v1/auth/register', userData);
+    const response = await api.post<AuthUser, RegisterForm>('/auth/register', userData);
     return response.data;
   } catch (error) {
     console.error('注册失败:', error);
@@ -48,7 +48,7 @@ export const register = async (userData: RegisterForm): Promise<AuthUser> => {
  */
 export const logout = async (): Promise<void> => {
   try {
-    await apiClient.post('/auth/logout');
+    await api.post('/auth/logout');
     // 清除本地存储的令牌
     localStorage.removeItem('accessToken');
   } catch (error) {
@@ -64,7 +64,7 @@ export const logout = async (): Promise<void> => {
  */
 export const refreshToken = async (): Promise<string> => {
   try {
-    const response = await apiClient.post('/auth/refresh');
+    const response = await api.post<{ accessToken: string }>('/auth/refresh');
     const newToken = response.data.accessToken;
     if (newToken) {
       localStorage.setItem('accessToken', newToken);
