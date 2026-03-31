@@ -16,6 +16,12 @@ export type PaginationInfo = {
   totalPages: number;
 };
 
+export type ApiResponse<T> = {
+  code: number;
+  message: string;
+  data: T;
+};
+
 export type ListResponse<T> = {
   items: T[];
   pagination: PaginationInfo;
