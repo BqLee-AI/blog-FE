@@ -26,6 +26,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     email: "",
     password: "",
     confirmPassword: "",
+    code: "",
   });
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -37,7 +38,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     clearError();
     // 清空表单
     setLoginForm({ email: "", password: "" });
-    setRegisterForm({ username: "", email: "", password: "", confirmPassword: "" });
+    setRegisterForm({ username: "", email: "", password: "", confirmPassword: "", code: "" });
     setIsPasswordVisible(false);
     setIsConfirmPasswordVisible(false);
   };
