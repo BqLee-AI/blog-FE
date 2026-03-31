@@ -1,5 +1,5 @@
-import { api } from './index';
-import type { User, UserProfileForm, PasswordChangeForm } from '../types/user';
+import apiClient from './index';
+import type{ User, UserProfileForm, PasswordChangeForm } from '../types/user';
 
 /**
  * 获取当前用户信息
@@ -7,7 +7,7 @@ import type { User, UserProfileForm, PasswordChangeForm } from '../types/user';
  */
 export const getCurrentUser = async (): Promise<User> => {
   try {
-    const response = await api.get<User>('/users/profile');
+    const response = await apiClient.get<User>('/users/profile');
     return response.data;
   } catch (error) {
     console.error('获取当前用户信息失败:', error);
@@ -22,7 +22,7 @@ export const getCurrentUser = async (): Promise<User> => {
  */
 export const getUserById = async (userId: number | string): Promise<User> => {
   try {
-    const response = await api.get<User>(`/users/${userId}`);
+    const response = await apiClient.get<User>(`/users/${userId}`);
     return response.data;
   } catch (error) {
     console.error(`获取用户信息失败 (ID: ${userId}):`, error);
@@ -37,7 +37,7 @@ export const getUserById = async (userId: number | string): Promise<User> => {
  */
 export const updateProfile = async (userData: UserProfileForm): Promise<User> => {
   try {
-    const response = await api.put<User, UserProfileForm>('/users/profile', userData);
+    const response = await apiClient.put<User>('/users/profile', userData);
     return response.data;
   } catch (error) {
     console.error('更新用户信息失败:', error);
@@ -52,7 +52,7 @@ export const updateProfile = async (userData: UserProfileForm): Promise<User> =>
  */
 export const updateAvatar = async (avatarUrl: string): Promise<User> => {
   try {
-    const response = await api.patch<User, { avatarUrl: string }>('/users/profile/avatar', { avatarUrl });
+    const response = await apiClient.patch<User>('/users/profile/avatar', { avatarUrl });
     return response.data;
   } catch (error) {
     console.error('更新头像失败:', error);
@@ -67,7 +67,7 @@ export const updateAvatar = async (avatarUrl: string): Promise<User> => {
  */
 export const changePassword = async (passwordData: PasswordChangeForm): Promise<boolean> => {
   try {
-    const response = await api.patch<{ success: boolean }, PasswordChangeForm>('/users/profile/password', passwordData);
+    const response = await apiClient.patch('/users/profile/password', passwordData);
     return response.data.success;
   } catch (error) {
     console.error('更改密码失败:', error);

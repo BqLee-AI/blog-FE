@@ -1,15 +1,11 @@
-import { api } from './index';
-import type { LoginForm, RegisterForm, AuthUser } from '../types/auth';
+import apiClient from './index';
+import type{ LoginForm, RegisterForm, AuthUser } from '../types/auth';
 
+// 定义登录响应类型
 interface LoginResponse {
   user: AuthUser;
   accessToken: string;
   refreshToken: string;
-}
-
-interface RegisterResponse {
-  user: AuthUser;
-  accessToken?: string;
 }
 
 /**
@@ -19,14 +15,14 @@ interface RegisterResponse {
  */
 export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
   try {
-    const response = await api.post<LoginResponse | { data: LoginResponse }, LoginForm>('/auth/login', credentials);
-    const loginData = 'data' in response.data ? response.data.data : response.data;
-
+    const response = await apiClient.post<{ data: LoginResponse; code?: number; message?: string } | LoginResponse>('/auth/login', credentials);
+    // 后端返回的数据结构可能是 { data: { user, accessToken, refreshToken } } 或者直接是 { user, accessToken, refreshToken }
+    const loginData = (response.data as any)?.data || response.data;
+    // 登录成功后保存token到localStorage
     if (loginData.accessToken) {
       localStorage.setItem('accessToken', loginData.accessToken);
     }
-
-    return loginData;
+    return loginData as LoginResponse;
   } catch (error) {
     console.error('登录失败:', error);
     throw error;
@@ -40,10 +36,10 @@ export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
  */
 export const sendVerificationCode = async (email: string): Promise<{ message: string }> => {
   try {
-    const response = await api.post<{ message: string }, { email: string }>('/auth/sendcode', { email });
+    const response = await apiClient.post<{ message: string }>("/auth/sendcode", { email });
     return response.data;
   } catch (error) {
-    console.error('发送验证码失败:', error);
+    console.error("发送验证码失败:", error);
     throw error;
   }
 };
@@ -55,17 +51,14 @@ export const sendVerificationCode = async (email: string): Promise<{ message: st
  */
 export const register = async (userData: RegisterForm): Promise<AuthUser> => {
   try {
-    const response = await api.post<RegisterResponse | AuthUser | { data: RegisterResponse | AuthUser }, RegisterForm>(
-      '/auth/register',
-      userData
-    );
-    const registerData = 'data' in response.data ? response.data.data : response.data;
-
-    if ('accessToken' in registerData && registerData.accessToken) {
-      localStorage.setItem('accessToken', registerData.accessToken);
+    const response = await apiClient.post<{ data: AuthUser; code?: number; message?: string } | AuthUser>('/auth/register', userData);
+    // 后端可能返回 { data: user } 或直接返回 user
+    const user = (response.data as any)?.data || response.data;
+    // 如果注册返回 token，保存到 localStorage
+    if ((response.data as any)?.accessToken) {
+      localStorage.setItem('accessToken', (response.data as any).accessToken);
     }
-
-    return 'user' in registerData ? registerData.user : registerData;
+    return user as AuthUser;
   } catch (error) {
     console.error('注册失败:', error);
     throw error;
@@ -78,10 +71,12 @@ export const register = async (userData: RegisterForm): Promise<AuthUser> => {
  */
 export const logout = async (): Promise<void> => {
   try {
-    await api.post('/auth/logout');
+    await apiClient.post('/auth/logout');
+    // 清除本地存储的令牌
     localStorage.removeItem('accessToken');
   } catch (error) {
     console.error('登出失败:', error);
+    // 即使API调用失败，也要清除本地token
     localStorage.removeItem('accessToken');
   }
 };
@@ -92,7 +87,7 @@ export const logout = async (): Promise<void> => {
  */
 export const refreshToken = async (): Promise<string> => {
   try {
-    const response = await api.post<{ accessToken: string }>('/auth/refresh');
+    const response = await apiClient.post('/auth/refresh');
     const newToken = response.data.accessToken;
     if (newToken) {
       localStorage.setItem('accessToken', newToken);
