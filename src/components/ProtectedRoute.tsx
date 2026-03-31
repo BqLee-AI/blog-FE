@@ -30,9 +30,40 @@ export function ProtectedRoute({
     );
   }
 
-  // 已登录但角色不匹配：重定向到无权限页面
-  if (allowedRoles && user && !allowedRoles.includes(user.role as UserRole)) {
-    return <Navigate to="/unauthorized" replace />;
+  // 🛡️ 兜底检查：isLoggedIn=true 但 user 为 null（异常状态）
+  if (!user) {
+    console.warn(
+      "[ProtectedRoute] 异常状态检测：isLoggedIn=true 但 user 为 null，重定向至登录",
+      { isLoggedIn, user }
+    );
+    return (
+      <Navigate
+        to={`${redirectTo}?redirect=${encodeURIComponent(location.pathname)}`}
+        state={{ from: location }}
+        replace
+      />
+    );
+  }
+
+  // 🛡️ 需要特定角色时的权限检查（显式处理）
+  if (allowedRoles) {
+    // 兜底检查：user.role 缺失（值为 undefined 或其他异常值）
+    if (!user.role) {
+      console.warn(
+        "[ProtectedRoute] 权限异常：已登录但 user.role 缺失，拒绝访问",
+        { user, allowedRoles, path: location.pathname }
+      );
+      return <Navigate to="/unauthorized" replace />;
+    }
+
+    // 显式检查权限是否匹配
+    if (!allowedRoles.includes(user.role as UserRole)) {
+      console.warn(
+        "[ProtectedRoute] 权限不足：用户角色不在允许列表中",
+        { userRole: user.role, allowedRoles, path: location.pathname }
+      );
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   // 通过验证：渲染子路由
