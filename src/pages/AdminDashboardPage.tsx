@@ -127,9 +127,14 @@ export default function AdminDashboardPage() {
                   <tr>
                     <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                       暂无文章，
-                      <button type="button" onClick={() => navigate("/admin/create")} className="text-blue-600 hover:underline dark:text-blue-400">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => navigate("/admin/create")}
+                        className="h-auto p-0 text-blue-600 hover:bg-transparent hover:underline dark:text-blue-400"
+                      >
                         创建一篇
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ) : (

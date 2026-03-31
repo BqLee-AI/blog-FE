@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import PostCard from "@/features/articles/components/PostCard";
 import { usePostStore } from "@/store/postStore";
 import { estimateReadingTime } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export default function ArticlesPage() {
   const { posts, isLoading, fetchPosts } = usePostStore();
@@ -89,13 +90,14 @@ export default function ArticlesPage() {
               const categoryCount = category === "全部" ? posts.length : categoryCounts.get(category) ?? 0;
 
               return (
-                <button
+                <Button
                   key={category}
                   type="button"
                   onClick={() => setActiveCategory(category)}
+                  variant="ghost"
                   className={
                     isActive
-                      ? "inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-white font-medium shadow-sm"
+                      ? "inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-white font-medium shadow-sm hover:bg-blue-600 hover:text-white"
                       : "inline-flex items-center gap-2 rounded-full bg-white dark:bg-gray-900 px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   }
                 >
@@ -109,7 +111,7 @@ export default function ArticlesPage() {
                   >
                     {categoryCount}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>
