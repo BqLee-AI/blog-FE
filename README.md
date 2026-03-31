@@ -1,6 +1,6 @@
 # 📚 Blog-FE - 现代化个人博客前端
 
-一个基于 **React 19 + TypeScript** 构建的现代化个人博客平台。提供博客浏览和后台管理两大核心功能，支持深色模式、响应式设计和完整的文章 CRUD 操作。
+一个基于 **React 19 + TypeScript** 构建的现代化个人博客平台。当前处于 MVP 阶段，围绕博客浏览、文章管理、评论交互、认证和后台管理持续演进，并逐步接入真实后端 API 与 ShadcnUI 组件体系。
 
 ## ✨ 核心功能
 
@@ -15,6 +15,11 @@
 - ✏️ **编辑文章** - 修改现有文章内容
 - 🗑️ **删除文章** - 管理后台一键删除
 - 📊 **仪表板** - 实时显示文章总数、最后更新时间、标签统计
+
+### 🔐 认证与账号模块
+- 👤 **登录 / 注册** - 支持弹窗式登录注册交互
+- 🧭 **登录态管理** - 基于 Zustand 保存认证状态
+- 🛡️ **路由守卫** - 后续将逐步补齐受保护路由和角色限制
 
 ### 💬 评论系统
 - 📝 **发表评论** - 仅需输入评论内容（无需名字、邮箱）
@@ -33,6 +38,12 @@ src/
 │   ├── Header.tsx       # 头部导航栏
 │   └── ThemeProvider.tsx # 主题提供器
 ├── features/            # 按业务域组织的可复用组件
+│   ├── account/
+│   │   └── components/
+│   │       └── AvatarUpload.tsx # 头像上传
+│   ├── auth/
+│   │   └── components/
+│   │       └── LoginPopover.tsx # 登录/注册弹窗
 │   ├── articles/
 │   │   └── components/
 │   │       ├── ArticleForm.tsx  # 文章表单（新建/编辑）
@@ -43,12 +54,6 @@ src/
 │   │       ├── CommentCard.tsx  # 评论卡片（含点赞/踩/回复按钮）
 │   │       ├── CommentList.tsx  # 评论列表
 │   │       └── CommentManagement.tsx # 评论管理（后台）
-│   ├── auth/
-│   │   └── components/
-│   │       └── LoginPopover.tsx # 登录/注册弹窗
-│   └── account/
-│       └── components/
-│           └── AvatarUpload.tsx # 头像上传
 ├── hooks/               # 自定义 Hooks
 │   └── usePost.ts       # 文章存储 hook
 ├── layouts/             # 布局组件
@@ -115,6 +120,19 @@ src/
 | **创建文章** | `/admin/create` | 表单编辑器，支持标题、作者、摘要、内容和标签输入 |
 | **编辑文章** | `/admin/edit/:id` | 修改现有文章内容 |
 
+## 🚧 当前阶段重点
+
+### Week 1-4 MVP
+- P0: 认证链路、JWT 对接、文章模型/API、API v1 稳定。
+- P1: axios 拦截器、Protected Route、真实登录/注册、文章列表和详情联调。
+- P2: ShadcnUI 表单与基础组件、TinyMCE、reCAPTCHA、评论真实 API。
+- P3: Docker、Nginx、基础 CI/CD。
+
+### 分支规则
+- 新任务优先从 `develop` 或当前集成分支切出。
+- 分支命名建议：`feat/FE-xxx-*`、`feat/BE-xxx-*`、`fix/FE-xxx-*`、`fix/BE-xxx-*`、`chore/CI-xxx-*`。
+- 每个分支尽量对应一个 Issue 和明确验收标准。
+
 ## 🛠️ 技术栈
 
 | 技术 | 用途 |
@@ -126,6 +144,7 @@ src/
 | **Tailwind CSS** | 原子化样式系统 |
 | **PostCSS** | CSS 处理 |
 | **Vite** | 快速构建工具 |
+| **ShadcnUI** | 组件体系（逐步接入） |
 | **Radix UI Icons** | 图标库 |
 | **Bun** | 包管理器和运行时 |
 
@@ -149,6 +168,8 @@ bun run dev
 ```bash
 bun run build
 ```
+
+> 说明：当前仓库未配置独立 lint 脚本，`bun run build` 是最低校验门槛。涉及登录、路由、表单和评论交互时，构建通过后还需要手工走一遍关键路径。
 
 ### 预览构建结果
 ```bash
@@ -202,6 +223,19 @@ theme: "light" | "dark"    // 当前主题
 toggleTheme()              // 切换主题（自动保存到 localStorage）
 ```
 
+## 🔌 API 与联调
+
+- 当前项目正逐步从 mock 数据迁移到真实 API。
+- 认证、文章、评论等接口后续将统一走 `/api/v1/*`。
+- 建议在新功能开发前先确认后端是否已提供对应接口契约。
+
+## 🧪 协作约定
+
+- 先看对应 Issue 的优先级和验收标准，再开始改动。
+- P0 优先处理安全和阻塞链路，其次是 P1 核心功能，再处理体验和工程项。
+- 变更涉及路由、状态流、依赖或全局样式时，先确认影响范围。
+- 功能变化影响用户理解或使用时，README 需要同步更新。
+
 ## 🎨 主要组件
 
 ### `src/components/` 全局通用组件
@@ -253,6 +287,10 @@ toggleTheme()              // 切换主题（自动保存到 localStorage）
 ### AvatarUpload 组件
 - 头像预览与本地选择上传
 - 支持校验文件类型和大小
+
+### ShadcnUI 集成说明
+- 当前已处于接入阶段，优先用于表单、按钮、输入框等高频交互组件。
+- 组件替换遵循“先可用、后统一”的原则，不一次性重写整套 UI。
 
 ## 📱 响应式设计
 
