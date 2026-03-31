@@ -178,14 +178,15 @@ export default function AvatarSettings({
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">或选择预设头像</h3>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-            <button
+            <Button
               key={i}
               type="button"
               onClick={() => {
                 const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=avatar${i}`;
                 setPreview(avatarUrl);
               }}
-              className="relative group"
+              variant="ghost"
+              className="relative h-auto p-0 group"
             >
               <img
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=avatar${i}`}
@@ -195,7 +196,7 @@ export default function AvatarSettings({
               <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 transition-colors group-hover:bg-black/10">
                 <span className="text-sm font-semibold text-white opacity-0 group-hover:opacity-100">选择</span>
               </div>
-            </button>
+            </Button>
           ))}
         </div>
       </div>
