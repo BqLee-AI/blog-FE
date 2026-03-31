@@ -7,6 +7,7 @@ import { CommentForm } from "@/features/comments/components/CommentForm";
 import { CommentCard } from "@/features/comments/components/CommentCard";
 import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
 
 /**
  * 回复详情页 - 显示某条评论的所有回复
@@ -143,12 +144,13 @@ export default function ReplyDetailPage() {
         <div className="text-6xl mb-4">😕</div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">评论不存在</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">无法找到您要查看的评论</p>
-        <button
+        <Button
+          type="button"
           onClick={() => navigate(-1)}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+          className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           返回
-        </button>
+        </Button>
       </div>
     );
   }
@@ -156,13 +158,15 @@ export default function ReplyDetailPage() {
   return (
     <div className="space-y-8">
       {/* 返回按钮 */}
-      <button
+      <Button
+        type="button"
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium mb-8"
+        variant="ghost"
+        className="mb-8 gap-2 px-0 text-blue-600 hover:bg-transparent hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
       >
         <ArrowLeftIcon className="w-4 h-4" />
         回到原评论区
-      </button>
+      </Button>
 
       {/* 文章标题 */}
       <header className="mb-8">
@@ -176,12 +180,13 @@ export default function ReplyDetailPage() {
       <div ref={rootCommentRef} className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-600 rounded p-6">
         <div className="flex items-center justify-between gap-3 mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">原评论</h2>
-          <button
+          <Button
+            type="button"
             onClick={handleBackToOriginalComment}
-            className="text-sm px-3 py-1 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            className="h-8 rounded-full bg-blue-600 px-3 text-sm text-white hover:bg-blue-700"
           >
             回到原评论区
-          </button>
+          </Button>
         </div>
         <CommentCard
           comment={comment}
@@ -214,12 +219,14 @@ export default function ReplyDetailPage() {
         <div className="flex items-center justify-between gap-3 mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">添加回复</h2>
           {replyTarget && replyTarget.id !== comment.id && (
-            <button
+            <Button
+              type="button"
               onClick={() => setReplyTarget(comment)}
-              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+              variant="ghost"
+              className="px-0 text-sm text-blue-600 hover:bg-transparent hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
               回到原评论区
-            </button>
+            </Button>
           )}
         </div>
 

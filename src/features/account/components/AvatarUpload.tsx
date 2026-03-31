@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
 
 interface AvatarUploadProps {
   currentAvatar: string;
@@ -120,30 +121,34 @@ export default function AvatarUpload({
             disabled={isUploading || isLoading}
           />
 
-          <button
+          <Button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading || isLoading}
-            className="hover-button w-full px-4 py-2 bg-blue-600 text-white rounded-lg dark:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
+            className="mb-3 w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
           >
             {isUploading ? "上传中..." : "选择图片"}
-          </button>
+          </Button>
 
           {preview && (
             <div className="flex gap-2">
-              <button
+              <Button
+                type="button"
                 onClick={handleUpload}
                 disabled={isUploading || isLoading}
-                className="hover-button flex-1 px-4 py-2 bg-green-600 text-white rounded-lg dark:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="flex-1 bg-green-600 text-white hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
               >
                 {isUploading ? "保存中..." : "保存"}
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
                 onClick={handleCancel}
                 disabled={isUploading || isLoading}
-                className="hover-button flex-1 px-4 py-2 bg-gray-300 text-gray-900 rounded-lg dark:bg-gray-600 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                variant="outline"
+                className="flex-1"
               >
                 取消
-              </button>
+              </Button>
             </div>
           )}
 
