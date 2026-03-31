@@ -1,5 +1,6 @@
-import apiClient from './index';
-import type{ Post, PaginationInfo, ApiResponse, ListResponse } from '../types/post';
+import { api } from './index';
+import type { Post, PaginationInfo, ListResponse } from '../types/post';
+import type { ApiResponse } from '../types/api';
 
 // 定义文章查询参数
 interface PostQuery {
@@ -18,7 +19,7 @@ interface PostQuery {
  */
 export const getPosts = async (params?: PostQuery): Promise<ListResponse<Post>> => {
   try {
-    const response = await apiClient.get<ApiResponse<ListResponse<Post>>>('/posts', { params });
+    const response = await api.get<ApiResponse<ListResponse<Post>>>('/posts', { params });
     return response.data.data;
   } catch (error) {
     console.error('获取文章列表失败:', error);
@@ -33,7 +34,7 @@ export const getPosts = async (params?: PostQuery): Promise<ListResponse<Post>> 
  */
 export const getPostById = async (id: number | string): Promise<Post> => {
   try {
-    const response = await apiClient.get<ApiResponse<Post>>(`/posts/${id}`);
+    const response = await api.get<ApiResponse<Post>>(`/posts/${id}`);
     return response.data.data;
   } catch (error) {
     console.error(`获取文章详情失败 (ID: ${id}):`, error);
@@ -48,7 +49,7 @@ export const getPostById = async (id: number | string): Promise<Post> => {
  */
 export const createPost = async (postData: Omit<Post, 'id' | 'author' | 'createdAt' | 'updatedAt'>): Promise<Post> => {
   try {
-    const response = await apiClient.post<ApiResponse<Post>>('/posts', postData);
+    const response = await api.post<ApiResponse<Post>, Omit<Post, 'id' | 'author' | 'createdAt' | 'updatedAt'>>('/posts', postData);
     return response.data.data;
   } catch (error) {
     console.error('创建文章失败:', error);
@@ -64,7 +65,7 @@ export const createPost = async (postData: Omit<Post, 'id' | 'author' | 'created
  */
 export const updatePost = async (id: number | string, postData: Partial<Post>): Promise<Post> => {
   try {
-    const response = await apiClient.put<ApiResponse<Post>>(`/posts/${id}`, postData);
+    const response = await api.put<ApiResponse<Post>, Partial<Post>>(`/posts/${id}`, postData);
     return response.data.data;
   } catch (error) {
     console.error(`更新文章失败 (ID: ${id}):`, error);
@@ -79,7 +80,7 @@ export const updatePost = async (id: number | string, postData: Partial<Post>): 
  */
 export const deletePost = async (id: number | string): Promise<boolean> => {
   try {
-    const response = await apiClient.delete<ApiResponse<boolean>>(`/posts/${id}`);
+    const response = await api.delete<ApiResponse<boolean>>(`/posts/${id}`);
     return response.data.data;
   } catch (error) {
     console.error(`删除文章失败 (ID: ${id}):`, error);
@@ -94,7 +95,7 @@ export const deletePost = async (id: number | string): Promise<boolean> => {
  */
 export const publishPost = async (id: number | string): Promise<Post> => {
   try {
-    const response = await apiClient.patch<ApiResponse<Post>>(`/posts/${id}/publish`);
+    const response = await api.patch<ApiResponse<Post>>(`/posts/${id}/publish`);
     return response.data.data;
   } catch (error) {
     console.error(`发布文章失败 (ID: ${id}):`, error);
@@ -109,7 +110,7 @@ export const publishPost = async (id: number | string): Promise<Post> => {
  */
 export const draftPost = async (id: number | string): Promise<Post> => {
   try {
-    const response = await apiClient.patch<ApiResponse<Post>>(`/posts/${id}/draft`);
+    const response = await api.patch<ApiResponse<Post>>(`/posts/${id}/draft`);
     return response.data.data;
   } catch (error) {
     console.error(`草稿文章失败 (ID: ${id}):`, error);
