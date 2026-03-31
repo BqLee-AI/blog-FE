@@ -7,6 +7,7 @@ import type { LoginForm, RegisterForm } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
 
 interface LoginPopoverProps {
   isOpen: boolean;
@@ -109,19 +110,23 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
       {/* 弹窗内容 */}
       <div className="hover-card relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden w-full max-w-sm mx-4">
         {/* 关闭按钮 */}
-        <button
+        <Button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 z-10"
+          variant="ghost"
+          className="absolute right-4 top-4 z-10 h-10 w-10 p-0 text-gray-500 hover:bg-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
-        </button>
+        </Button>
 
         {/* 选项卡标签 */}
         <div className="flex border-b border-gray-200 dark:border-gray-700">
-          <button
+          <Button
+            type="button"
             onClick={() => handleTabChange("login")}
+            variant="ghost"
             className={`flex-1 px-6 py-4 font-semibold transition-all ${
               activeTab === "login"
                 ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
@@ -129,9 +134,11 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             }`}
           >
             登录
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
             onClick={() => handleTabChange("register")}
+            variant="ghost"
             className={`flex-1 px-6 py-4 font-semibold transition-all ${
               activeTab === "register"
                 ? "text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400"
@@ -139,7 +146,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             }`}
           >
             注册
-          </button>
+          </Button>
         </div>
 
         {/* 登录标签页 */}
@@ -296,13 +303,14 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                             className="pr-12"
                             {...field}
                           />
-                          <button
+                          <Button
                             type="button"
                             onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                            variant="ghost"
+                            className="absolute right-1 top-1/2 h-8 -translate-y-1/2 px-2 text-gray-500 hover:bg-transparent dark:text-gray-400"
                           >
                             {isPasswordVisible ? "隐" : "显"}
-                          </button>
+                          </Button>
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -325,13 +333,14 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                             className="pr-12"
                             {...field}
                           />
-                          <button
+                          <Button
                             type="button"
                             onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                            variant="ghost"
+                            className="absolute right-1 top-1/2 h-8 -translate-y-1/2 px-2 text-gray-500 hover:bg-transparent dark:text-gray-400"
                           >
                             {isConfirmPasswordVisible ? "隐" : "显"}
-                          </button>
+                          </Button>
                         </div>
                       </FormControl>
                       <FormMessage />
