@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { commentStore } from '@/store/commentStore';
 import type { Comment } from '@/types';
 import { TrashIcon, ChatBubbleIcon } from '@radix-ui/react-icons';
+import { Button } from '@/components/ui/button';
 
 /**
  * 评论管理组件 - 在管理后台中显示
@@ -141,14 +142,16 @@ export const CommentManagement: React.FC = () => {
                   </div>
 
                   {/* 删除按钮 */}
-                  <button
+                  <Button
+                    type="button"
                     onClick={() => handleDeleteComment(comment.postId, comment.id)}
                     disabled={deletingCommentId === comment.id}
-                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50 shrink-0"
+                    variant="ghost"
+                    className="shrink-0 rounded p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                     title="删除评论"
                   >
                     <TrashIcon className="w-5 h-5" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}

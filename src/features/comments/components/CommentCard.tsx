@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { Comment } from '@/types';
 import { ChatBubbleIcon, TrashIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface CommentCardProps {
   comment: Comment;
@@ -111,29 +112,34 @@ export const CommentCard: React.FC<CommentCardProps> = ({
           <div className="shrink-0">
             {showDeleteConfirm ? (
               <div className="flex gap-2 rounded-full bg-gray-50 p-1 dark:bg-gray-700/70">
-                <button
+                <Button
+                  type="button"
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="rounded-full bg-red-500 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-gray-400"
+                  className="h-8 rounded-full bg-red-500 px-3 text-xs font-medium text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
                   确定
-                </button>
-                <button
+                </Button>
+                <Button
+                  type="button"
                   onClick={() => setShowDeleteConfirm(false)}
                   disabled={isDeleting}
-                  className="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-gray-900 transition-colors hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+                  variant="outline"
+                  className="h-8 rounded-full px-3 text-xs font-medium"
                 >
                   取消
-                </button>
+                </Button>
               </div>
             ) : (
-              <button
+              <Button
+                type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="rounded-full p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                variant="ghost"
+                className="rounded-full p-2 text-gray-500 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
                 title="删除评论"
               >
                 <TrashIcon className="w-4 h-4" />
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -147,10 +153,12 @@ export const CommentCard: React.FC<CommentCardProps> = ({
       {/* 操作按钮 - 参考B站设计 */}
       <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4 dark:border-gray-700/80">
         {/* 点赞 */}
-        <button
+        <Button
+          type="button"
           onClick={handleLike}
           disabled={isLiking}
           aria-pressed={currentReaction === 'like'}
+          variant="ghost"
           className={cn(
             'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50',
             currentReaction === 'like'
@@ -161,13 +169,15 @@ export const CommentCard: React.FC<CommentCardProps> = ({
         >
           <span className={cn('text-base transition-transform', currentReaction === 'like' && 'scale-110')}>👍</span>
           <span>{comment.likes}</span>
-        </button>
+        </Button>
 
         {/* 踩 */}
-        <button
+        <Button
+          type="button"
           onClick={handleDislike}
           disabled={isDisliking}
           aria-pressed={currentReaction === 'dislike'}
+          variant="ghost"
           className={cn(
             'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50',
             currentReaction === 'dislike'
@@ -178,30 +188,34 @@ export const CommentCard: React.FC<CommentCardProps> = ({
         >
           <span className={cn('text-base transition-transform', currentReaction === 'dislike' && 'scale-110')}>👎</span>
           <span>{comment.dislikes}</span>
-        </button>
+        </Button>
 
         {/* 回复 */}
         {onReply && (
-          <button
+          <Button
+            type="button"
             onClick={() => onReply(comment)}
+            variant="ghost"
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-blue-300"
             title="回复"
           >
             <ChatBubbleIcon className="w-4 h-4" />
             <span>回复</span>
-          </button>
+          </Button>
         )}
 
         {/* 查看回复 */}
         {!comment.replyTo && replyCount > 0 && onViewReplies && (
-          <button
+          <Button
+            type="button"
             onClick={() => onViewReplies(comment)}
+            variant="ghost"
             className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/35"
             title="查看回复"
           >
             <ChatBubbleIcon className="w-4 h-4" />
             <span>{replyCount} 条回复</span>
-          </button>
+          </Button>
         )}
       </div>
     </div>

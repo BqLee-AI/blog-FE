@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import type { Comment } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 interface CommentFormProps {
   postId: number;
@@ -119,17 +121,17 @@ export const CommentForm: React.FC<CommentFormProps> = ({
               : 'border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 dark:border-gray-700 dark:focus-within:border-blue-500 dark:focus-within:ring-blue-900/30'
           }`}
         >
-        <textarea
-          value={content}
-          onChange={e => {
-            setContent(e.target.value);
-            if (errors.content) setErrors({});
-          }}
-          placeholder={placeholder}
-          disabled={isLoading}
-          rows={3}
-          className="min-h-[120px] w-full resize-none rounded-xl border-0 bg-transparent px-3 py-2 text-sm leading-6 text-gray-900 placeholder-gray-400 focus:outline-none dark:text-white dark:placeholder-gray-500"
-        />
+          <Textarea
+            value={content}
+            onChange={e => {
+              setContent(e.target.value);
+              if (errors.content) setErrors({});
+            }}
+            placeholder={placeholder}
+            disabled={isLoading}
+            rows={3}
+            className="min-h-[120px] resize-none border-0 bg-transparent px-3 py-2 text-sm leading-6 shadow-none focus-visible:ring-0"
+          />
         </div>
         {errors.content && (
           <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">{errors.content}</p>
@@ -141,22 +143,23 @@ export const CommentForm: React.FC<CommentFormProps> = ({
 
       {/* 按钮 */}
       <div className="flex flex-wrap gap-3 pt-1">
-        <button
+        <Button
           type="submit"
           disabled={isLoading}
-          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:from-blue-700 hover:to-cyan-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+          className="bg-gradient-to-r from-blue-600 to-cyan-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:from-blue-700 hover:to-cyan-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? '发送中...' : '发表评论'}
-        </button>
+        </Button>
         {replyTo && onCancel && (
-          <button
+          <Button
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+            variant="outline"
+            className="rounded-full px-5 py-2.5 text-sm font-medium"
           >
             取消
-          </button>
+          </Button>
         )}
       </div>
     </form>
