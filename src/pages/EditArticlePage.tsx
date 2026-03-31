@@ -52,7 +52,7 @@ export default function EditArticlePage() {
             {error || "文章不存在"}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">无法找到您要编辑的文章</p>
-          <Button onClick={() => navigate("/admin")} className="bg-blue-600 text-white hover:bg-blue-700">
+          <Button onClick={() => navigate("/admin")}>
             返回后台管理
           </Button>
         </CardContent>

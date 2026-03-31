@@ -191,7 +191,7 @@ export default function ArticleForm({
             <Button
               type="button"
               onClick={handleAddTag}
-              className="gap-2 bg-blue-600 text-white hover:bg-blue-700"
+              className="gap-2"
             >
               <PlusIcon className="w-4 h-4" />
               添加
@@ -242,7 +242,7 @@ export default function ArticleForm({
           <Button
             type="submit"
             disabled={isLoading}
-            className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700"
+            className="px-6 py-3"
           >
             {isLoading ? "保存中..." : initialData ? "更新文章" : "发布文章"}
           </Button>
