@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { usePostStore } from "@/store/postStore";
 import { commentStore } from "@/store/commentStore";
 import { CommentForm } from "@/features/comments/components/CommentForm";
@@ -7,6 +7,8 @@ import { CommentList } from "@/features/comments/components/CommentList";
 import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { estimateReadingTime, formatArticleDate } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -94,19 +96,22 @@ export default function ArticleDetailPage() {
           {error || "文章不存在"}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">无法找到您要查看的文章</p>
-        <button
+        <Button
+          type="button"
           onClick={() => navigate("/")}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+          className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           返回首页
-        </button>
+        </Button>
         {error && (
-          <button
+          <Button
+            type="button"
             onClick={clearError}
-            className="ml-2 px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            variant="outline"
+            className="ml-2"
           >
             清除错误
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -117,13 +122,15 @@ export default function ArticleDetailPage() {
       {/* 左侧：文章内容 */}
       <article className="lg:col-span-2">
         {/* 返回按钮 */}
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium mb-8"
+        <Button
+          type="button"
+          onClick={() => navigate("/")}
+          variant="ghost"
+          className="mb-8 gap-2 px-0 text-blue-600 hover:bg-transparent hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         >
           <ArrowLeftIcon className="w-4 h-4" />
           返回首页
-        </Link>
+        </Button>
 
         {/* 文章标题和元信息 */}
         <header className="mb-8 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm md:p-8">
@@ -173,12 +180,13 @@ export default function ArticleDetailPage() {
         {currentPost.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-8">
             {currentPost.tags.map((tag) => (
-              <span
+              <Badge
                 key={tag}
-                className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                variant="secondary"
+                className="text-sm font-medium"
               >
                 #{tag}
-              </span>
+              </Badge>
             ))}
           </div>
         )}
@@ -211,12 +219,13 @@ export default function ArticleDetailPage() {
 
         {/* 底部导航 */}
         <div className="border-t dark:border-gray-700 pt-8">
-          <Link
-            to="/"
-            className="inline-block px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium"
+          <Button
+            type="button"
+            onClick={() => navigate("/")}
+            className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
           >
             ← 返回文章列表
-          </Link>
+          </Button>
         </div>
       </article>
 
