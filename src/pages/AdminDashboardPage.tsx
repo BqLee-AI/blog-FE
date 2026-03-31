@@ -36,7 +36,7 @@ export default function AdminDashboardPage() {
           <Button
             type="button"
             onClick={() => navigate("/admin/create")}
-            className="gap-2 bg-blue-600 text-white hover:bg-blue-700"
+            className="gap-2"
           >
             <PlusIcon className="w-5 h-5" />
             新建文章
