@@ -61,17 +61,22 @@ export const useAuthStore = create<AuthStore>((set) => ({
       // 调用后端API
       const response = await apiLogin(form);
 
+      // response 现在直接是 LoginResponse，包含 user 和 accessToken
       set({
         user: response.user,
         isLoggedIn: true,
         isLoading: false,
+        error: null,
       });
 
       // 保存到 localStorage
       try {
         localStorage.setItem("blog-auth-user", JSON.stringify(response.user));
+        if (response.accessToken) {
+          localStorage.setItem("accessToken", response.accessToken);
+        }
       } catch (e) {
-        console.error("Failed to save user to localStorage:", e);
+        console.error("Failed to save to localStorage:", e);
       }
     } catch (error) {
       set({
@@ -117,6 +122,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         user: user,
         isLoggedIn: true,
         isLoading: false,
+        error: null,
       });
 
       // 保存到 localStorage

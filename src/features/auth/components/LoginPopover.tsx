@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
 
@@ -10,6 +11,7 @@ interface LoginPopoverProps {
 type TabType = "login" | "register";
 
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
+  const navigate = useNavigate();
   const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<TabType>("login");
@@ -49,11 +51,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     e.preventDefault();
     try {
       await login(loginForm);
-      // 登录成功
-      setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 300);
+      // 登录成功，关闭弹窗并导航到首页
+      onClose();
+      navigate("/");
     } catch (err) {
       console.error("登录失败:", err);
     }
@@ -64,11 +64,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     e.preventDefault();
     try {
       await register(registerForm);
-      // 注册成功
-      setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 300);
+      // 注册成功，关闭弹窗并导航到首页
+      onClose();
+      navigate("/");
     } catch (err) {
       console.error("注册失败:", err);
     }

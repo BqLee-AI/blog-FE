@@ -15,12 +15,14 @@ interface LoginResponse {
  */
 export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
   try {
-    const response = await apiClient.post<LoginResponse>('/api/v1/auth/login', credentials);
+    const response = await apiClient.post<{ data: LoginResponse; code?: number; message?: string } | LoginResponse>('/auth/login', credentials);
+    // 后端返回的数据结构可能是 { data: { user, accessToken, refreshToken } } 或者直接是 { user, accessToken, refreshToken }
+    const loginData = (response.data as any)?.data || response.data;
     // 登录成功后保存token到localStorage
-    if (response.data && response.data.accessToken) {
-      localStorage.setItem('accessToken', response.data.accessToken);
+    if (loginData.accessToken) {
+      localStorage.setItem('accessToken', loginData.accessToken);
     }
-    return response.data;
+    return loginData as LoginResponse;
   } catch (error) {
     console.error('登录失败:', error);
     throw error;
@@ -34,7 +36,7 @@ export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
  */
 export const sendVerificationCode = async (email: string): Promise<{ message: string }> => {
   try {
-    const response = await apiClient.post<{ message: string }>("/api/v1/auth/sendEmail", { email });
+    const response = await apiClient.post<{ message: string }>("/auth/sendcode", { email });
     return response.data;
   } catch (error) {
     console.error("发送验证码失败:", error);
@@ -49,8 +51,14 @@ export const sendVerificationCode = async (email: string): Promise<{ message: st
  */
 export const register = async (userData: RegisterForm): Promise<AuthUser> => {
   try {
-    const response = await apiClient.post<AuthUser>('/api/v1/auth/register', userData);
-    return response.data;
+    const response = await apiClient.post<{ data: AuthUser; code?: number; message?: string } | AuthUser>('/auth/register', userData);
+    // 后端可能返回 { data: user } 或直接返回 user
+    const user = (response.data as any)?.data || response.data;
+    // 如果注册返回 token，保存到 localStorage
+    if ((response.data as any)?.accessToken) {
+      localStorage.setItem('accessToken', (response.data as any).accessToken);
+    }
+    return user as AuthUser;
   } catch (error) {
     console.error('注册失败:', error);
     throw error;
