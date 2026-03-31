@@ -1,5 +1,5 @@
-import apiClient from './index';
-import type{ Comment, CommentListResponse } from '../types/comment';
+import { api } from './index';
+import type { Comment, CommentListResponse } from '../types/comment';
 
 // 定义分页参数
 interface PaginationParams {
@@ -18,7 +18,7 @@ export const getCommentsByPost = async (
   params?: PaginationParams
 ): Promise<CommentListResponse> => {
   try {
-    const response = await apiClient.get(`/posts/${postId}/comments`, { params });
+    const response = await api.get<CommentListResponse>(`/posts/${postId}/comments`, { params });
     return response.data;
   } catch (error) {
     console.error(`获取文章评论失败 (Post ID: ${postId}):`, error);
@@ -33,7 +33,7 @@ export const getCommentsByPost = async (
  */
 export const createComment = async (commentData: Omit<Comment, 'id' | 'createdAt' | 'likes' | 'dislikes' | 'replyCount'>): Promise<Comment> => {
   try {
-    const response = await apiClient.post<Comment>('/comments', commentData);
+    const response = await api.post<Comment, Omit<Comment, 'id' | 'createdAt' | 'likes' | 'dislikes' | 'replyCount'>>('/comments', commentData);
     return response.data;
   } catch (error) {
     console.error('发表评论失败:', error);
@@ -49,7 +49,7 @@ export const createComment = async (commentData: Omit<Comment, 'id' | 'createdAt
  */
 export const replyToComment = async (commentId: number | string, content: string): Promise<Comment> => {
   try {
-    const response = await apiClient.post<Comment>(`/comments/${commentId}/reply`, { content });
+    const response = await api.post<Comment, { content: string }>(`/comments/${commentId}/reply`, { content });
     return response.data;
   } catch (error) {
     console.error(`回复评论失败 (Comment ID: ${commentId}):`, error);
@@ -64,7 +64,7 @@ export const replyToComment = async (commentId: number | string, content: string
  */
 export const deleteComment = async (commentId: number | string): Promise<boolean> => {
   try {
-    const response = await apiClient.delete(`/comments/${commentId}`);
+    const response = await api.delete<{ success: boolean }>(`/comments/${commentId}`);
     return response.data.success;
   } catch (error) {
     console.error(`删除评论失败 (Comment ID: ${commentId}):`, error);
@@ -79,7 +79,7 @@ export const deleteComment = async (commentId: number | string): Promise<boolean
  */
 export const likeComment = async (commentId: number | string): Promise<Comment> => {
   try {
-    const response = await apiClient.patch<Comment>(`/comments/${commentId}/like`);
+    const response = await api.patch<Comment>(`/comments/${commentId}/like`);
     return response.data;
   } catch (error) {
     console.error(`点赞评论失败 (Comment ID: ${commentId}):`, error);
