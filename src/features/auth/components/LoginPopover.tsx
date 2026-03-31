@@ -255,7 +255,6 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                         <Input
                           placeholder="用户名（至少 2 个字符）"
                           autoComplete="nickname"
-                          className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                           {...field}
                         />
                       </FormControl>
@@ -274,7 +273,6 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                         <Input
                           placeholder="邮箱地址"
                           autoComplete="email"
-                          className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                           {...field}
                         />
                       </FormControl>
@@ -295,7 +293,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                             type={isPasswordVisible ? "text" : "password"}
                             placeholder="密码（至少 6 个字符）"
                             autoComplete="new-password"
-                            className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-12"
+                            className="pr-12"
                             {...field}
                           />
                           <button
@@ -324,7 +322,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                             type={isConfirmPasswordVisible ? "text" : "password"}
                             placeholder="再次输入密码"
                             autoComplete="new-password"
-                            className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-12"
+                            className="pr-12"
                             {...field}
                           />
                           <button
@@ -341,8 +339,12 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                   )}
                 />
 
-                <Button type="submit" className="hover-button w-full px-4 py-2 bg-green-600 text-white rounded-lg dark:bg-green-700 font-medium disabled:opacity-50" disabled={isLoading}>
-                  {isLoading ? "注册中..." : "立即注册"}
+                <Button
+                  type="submit"
+                  className="hover-button w-full px-4 py-2 bg-green-600 text-white rounded-lg dark:bg-green-700 font-medium disabled:opacity-50"
+                  disabled={isLoading || registerForm.formState.isSubmitting}
+                >
+                  {isLoading || registerForm.formState.isSubmitting ? "注册中..." : "立即注册"}
                 </Button>
               </form>
             </Form>
