@@ -1,5 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import type { UserProfileForm } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+const profileSchema = z.object({
+  username: z.string().min(2, "用户名至少需要 2 个字符"),
+  email: z.string().email("邮箱格式不正确"),
+  bio: z.string().optional().default(""),
+});
 
 interface ProfileInfoProps {
   username: string;
@@ -19,42 +32,44 @@ export default function ProfileInfo({
   onSave,
 }: ProfileInfoProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState<UserProfileForm>({
-    username,
-    email,
-    bio,
+  const form = useForm<UserProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      username,
+      email,
+      bio,
+    },
   });
+
+  useEffect(() => {
+    form.reset({
+      username,
+      email,
+      bio,
+    });
+  }, [username, email, bio, form]);
+
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: UserProfileForm) => {
     setError(null);
 
     try {
-      // 基础验证
-      if (!formData.username.trim()) {
-        throw new Error("用户名不能为空");
-      }
-      if (formData.username.length < 2) {
-        throw new Error("用户名至少需要 2 个字符");
-      }
-      if (!formData.email.includes("@")) {
-        throw new Error("邮箱格式不正确");
-      }
-
-      await onSave(formData);
+      await onSave(values);
       setIsEditing(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存失败，请重试");
     }
+  };
+
+  const handleCancel = () => {
+    form.reset({
+    username,
+    email,
+    bio,
+  });
+    setError(null);
+    setIsEditing(false);
   };
 
   return (
@@ -89,68 +104,70 @@ export default function ProfileInfo({
         )}
 
         {isEditing ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* 用户名 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                用户名
-              </label>
-              <input
-                type="text"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              {error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                </div>
+              )}
+
+              <FormField
+                control={form.control}
                 name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>用户名</FormLabel>
+                    <FormControl>
+                      <Input placeholder="请输入用户名" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* 邮箱 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                邮箱
-              </label>
-              <input
-                type="email"
+              <FormField
+                control={form.control}
                 name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>邮箱</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="请输入邮箱地址" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* 个人简介 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                个人简介
-              </label>
-              <textarea
+              <FormField
+                control={form.control}
                 name="bio"
-                value={formData.bio}
-                onChange={handleChange}
-                rows={4}
-                placeholder="分享一点关于你自己的信息..."
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>个人简介</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="分享一点关于你自己的信息..." rows={4} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* 按钮 */}
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
-              >
-                {isLoading ? "保存中..." : "保存更改"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                取消
-              </button>
-            </div>
-          </form>
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="submit"
+                  className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                  disabled={isLoading || form.formState.isSubmitting}
+                >
+                  {isLoading || form.formState.isSubmitting ? "保存中..." : "保存更改"}
+                </Button>
+                <Button type="button" variant="outline" className="flex-1" onClick={handleCancel}>
+                  取消
+                </Button>
+              </div>
+            </form>
+          </Form>
         ) : (
           <div className="space-y-4">
             {/* 用户名 */}
