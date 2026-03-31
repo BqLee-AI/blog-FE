@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useThemeStore } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
 import { MoonIcon, SunIcon, MagnifyingGlassIcon, PersonIcon, HomeIcon, FileTextIcon, GearIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // 全局登录弹窗控制函数
 export function setLoginPopoverOpen(open: boolean) {
@@ -57,12 +59,12 @@ export default function Header() {
 
           {/* 搜索栏 */}
           <div className="relative">
-            <input
+            <Input
               type="text"
               placeholder="搜索文章..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 w-64 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="h-10 w-64 pl-10 pr-4"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
@@ -90,7 +92,7 @@ export default function Header() {
             <li>
               <Link
                 to="/admin"
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg hover-button flex items-center gap-2"
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg hover-button"
               >
                 <GearIcon className="w-5 h-5" />
                 <span>管理后台</span>
@@ -112,20 +114,23 @@ export default function Header() {
               </li>
             ) : (
               <li>
-                <button
+                <Button
+                  type="button"
                   onClick={() => setLoginPopoverOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg hover-button"
+                  className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
                 >
                   <PersonIcon className="w-4 h-4" />
                   <span>登录</span>
-                </button>
+                </Button>
               </li>
             )}
             {/* 主题切换按钮 */}           
             <li>
-              <button
+              <Button
+                type="button"
                 onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 hover:shadow-md group"
+                variant="ghost"
+                className="group h-10 w-10 rounded-lg bg-gray-100 p-0 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-yellow-400 dark:hover:bg-gray-700"
                 title={theme === "light" ? "切换到暗夜模式" : "切换到日间模式"}
               >
                 {theme === "light" ? (
@@ -133,7 +138,7 @@ export default function Header() {
                 ) : (
                   <SunIcon className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                 )}
-              </button>
+              </Button>
             </li>
           </ul>
         </nav>
