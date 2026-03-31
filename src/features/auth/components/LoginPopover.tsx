@@ -110,16 +110,15 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
       {/* 弹窗内容 */}
       <div className="hover-card relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden w-full max-w-sm mx-4">
         {/* 关闭按钮 */}
-        <Button
+        <button
           type="button"
           onClick={onClose}
-          variant="ghost"
-          className="absolute right-4 top-4 z-10 h-10 w-10 p-0 text-gray-500 hover:bg-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="absolute right-4 top-4 z-10 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
-        </Button>
+        </button>
 
         {/* 选项卡标签 */}
         <div className="flex border-b border-gray-200 dark:border-gray-700">
