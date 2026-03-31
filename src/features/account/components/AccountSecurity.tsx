@@ -128,17 +128,18 @@ export default function AccountSecurity({
                         className="pr-10"
                         {...field}
                       />
-                      <button
+                      <Button
                         type="button"
                         onClick={() => togglePasswordVisibility("current")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                        variant="ghost"
+                        className="absolute right-1 top-1/2 h-8 -translate-y-1/2 px-2 text-gray-500 hover:bg-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                       >
                         {showPasswords.current ? (
                           <EyeClosedIcon className="w-5 h-5" />
                         ) : (
                           <EyeOpenIcon className="w-5 h-5" />
                         )}
-                      </button>
+                      </Button>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -160,17 +161,18 @@ export default function AccountSecurity({
                         className="pr-10"
                         {...field}
                       />
-                      <button
+                      <Button
                         type="button"
                         onClick={() => togglePasswordVisibility("new")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                        variant="ghost"
+                        className="absolute right-1 top-1/2 h-8 -translate-y-1/2 px-2 text-gray-500 hover:bg-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                       >
                         {showPasswords.new ? (
                           <EyeClosedIcon className="w-5 h-5" />
                         ) : (
                           <EyeOpenIcon className="w-5 h-5" />
                         )}
-                      </button>
+                      </Button>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -192,17 +194,18 @@ export default function AccountSecurity({
                         className="pr-10"
                         {...field}
                       />
-                      <button
+                      <Button
                         type="button"
                         onClick={() => togglePasswordVisibility("confirm")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                        variant="ghost"
+                        className="absolute right-1 top-1/2 h-8 -translate-y-1/2 px-2 text-gray-500 hover:bg-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                       >
                         {showPasswords.confirm ? (
                           <EyeClosedIcon className="w-5 h-5" />
                         ) : (
                           <EyeOpenIcon className="w-5 h-5" />
                         )}
-                      </button>
+                      </Button>
                     </div>
                   </FormControl>
                   <FormMessage />
