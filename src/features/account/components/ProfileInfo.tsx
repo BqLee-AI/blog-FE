@@ -191,12 +191,13 @@ export default function ProfileInfo({
             </div>
 
             {/* 编辑按钮 */}
-            <button
+            <Button
+              type="button"
               onClick={() => setIsEditing(true)}
-              className="w-full mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+              className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700"
             >
               编辑信息
-            </button>
+            </Button>
           </div>
         )}
       </div>
