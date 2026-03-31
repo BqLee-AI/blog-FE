@@ -2,6 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Post } from "@/types";
 import { TrashIcon, PlusIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ArticleFormProps {
   initialData?: Post;
@@ -90,22 +95,21 @@ export default function ArticleForm({
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-lg p-8 transition-colors">
+      <Card className="transition-colors">
+        <CardContent className="p-8">
         {/* 标题 */}
         <div className="mb-6">
           <label htmlFor="title" className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
             文章标题 <span className="text-red-600">*</span>
           </label>
-          <input
+          <Input
             id="title"
             type="text"
             name="title"
             value={formData.title}
             onChange={handleInputChange}
             placeholder="输入文章标题"
-            className={`hover-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-              errors.title ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-            }`}
+            className={errors.title ? "border-red-500 focus-visible:ring-red-500" : undefined}
           />
           {errors.title && (
             <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.title}</p>
@@ -117,14 +121,13 @@ export default function ArticleForm({
           <label htmlFor="author" className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
             作者
           </label>
-          <input
+          <Input
             id="author"
             type="text"
             name="author"
             value={formData.author}
             onChange={handleInputChange}
             placeholder="输入作者名称"
-            className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
@@ -133,16 +136,14 @@ export default function ArticleForm({
           <label htmlFor="summary" className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
             摘要 <span className="text-red-600">*</span>
           </label>
-          <textarea
+          <Textarea
             id="summary"
             name="summary"
             value={formData.summary}
             onChange={handleInputChange}
             placeholder="输入文章摘要（简短描述）"
             rows={3}
-            className={`hover-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-              errors.summary ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-            }`}
+            className={errors.summary ? "border-red-500 focus-visible:ring-red-500" : undefined}
           />
           {errors.summary && (
             <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.summary}</p>
@@ -154,16 +155,14 @@ export default function ArticleForm({
           <label htmlFor="content" className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
             文章内容 <span className="text-red-600">*</span>
           </label>
-          <textarea
+          <Textarea
             id="content"
             name="content"
             value={formData.content}
             onChange={handleInputChange}
             placeholder="输入文章内容（支持 HTML）"
             rows={12}
-            className={`hover-input w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-              errors.content ? "border-red-500" : "border-gray-300 dark:border-gray-600"
-            }`}
+            className={`font-mono text-sm ${errors.content ? "border-red-500 focus-visible:ring-red-500" : ""}`}
           />
           {errors.content && (
             <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.content}</p>
@@ -176,7 +175,7 @@ export default function ArticleForm({
             标签 <span className="text-red-600">*</span>
           </label>
           <div className="flex gap-2 mb-3">
-            <input
+            <Input
               id="tags"
               type="text"
               value={tagInput}
@@ -188,34 +187,35 @@ export default function ArticleForm({
                 }
               }}
               placeholder="输入标签后按 Enter 或点击添加"
-              className="hover-input flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
-            <button
+            <Button
               type="button"
               onClick={handleAddTag}
-              className="hover-button px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg flex items-center gap-2"
+              className="gap-2 bg-blue-600 text-white hover:bg-blue-700"
             >
               <PlusIcon className="w-4 h-4" />
               添加
-            </button>
+            </Button>
           </div>
 
           {/* 标签列表 */}
           <div className="flex flex-wrap gap-2">
             {formData.tags.map((tag) => (
-              <div
+              <Badge
                 key={tag}
-                className="flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full"
+                variant="secondary"
+                className="flex items-center gap-2 px-3 py-1"
               >
                 <span className="text-sm font-medium">{tag}</span>
-                <button
+                <Button
                   type="button"
                   onClick={() => handleRemoveTag(tag)}
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                  variant="ghost"
+                  className="h-auto p-0 text-blue-600 hover:bg-transparent hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
                 >
                   <TrashIcon className="w-4 h-4" />
-                </button>
-              </div>
+                </Button>
+              </Badge>
             ))}
           </div>
           {errors.tags && (
@@ -228,34 +228,35 @@ export default function ArticleForm({
           <label htmlFor="createdAt" className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
             发布日期
           </label>
-          <input
+          <Input
             id="createdAt"
             type="date"
             name="createdAt"
             value={formData.createdAt || ""}
             onChange={handleInputChange}
-            className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
         {/* 提交按钮 */}
         <div className="flex gap-3">
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="hover-button px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700"
           >
             {isLoading ? "保存中..." : initialData ? "更新文章" : "发布文章"}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => navigate(-1)}
-            className="hover-button px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium"
+            variant="outline"
+            className="px-6 py-3"
           >
             取消
-          </button>
+          </Button>
         </div>
-      </div>
+        </CardContent>
+      </Card>
     </form>
   );
 }
