@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 const profileSchema = z.object({
   username: z.string().min(2, "用户名至少需要 2 个字符"),
   email: z.string().email("邮箱格式不正确"),
-  bio: z.string().optional().default(""),
+  bio: z.string(),
 });
 
 interface ProfileInfoProps {
