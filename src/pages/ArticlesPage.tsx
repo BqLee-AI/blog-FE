@@ -94,10 +94,10 @@ export default function ArticlesPage() {
                   key={category}
                   type="button"
                   onClick={() => setActiveCategory(category)}
-                  variant="ghost"
+                  variant={isActive ? "default" : "ghost"}
                   className={
                     isActive
-                      ? "inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-white font-medium shadow-sm hover:bg-blue-600 hover:text-white"
+                      ? "inline-flex items-center gap-2 rounded-full px-4 py-2 font-medium shadow-sm"
                       : "inline-flex items-center gap-2 rounded-full bg-white dark:bg-gray-900 px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   }
                 >
