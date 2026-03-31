@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
 
@@ -10,7 +11,8 @@ interface LoginPopoverProps {
 type TabType = "login" | "register";
 
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
-  const { login, register, isLoading, error, clearError } = useAuthStore();
+  const navigate = useNavigate();
+  const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<TabType>("login");
 
@@ -26,6 +28,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     email: "",
     password: "",
     confirmPassword: "",
+    code: "",
   });
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -35,9 +38,10 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     clearError();
+    setCountdown(0);
     // 清空表单
     setLoginForm({ email: "", password: "" });
-    setRegisterForm({ username: "", email: "", password: "", confirmPassword: "" });
+    setRegisterForm({ username: "", email: "", password: "", confirmPassword: "", code: "" });
     setIsPasswordVisible(false);
     setIsConfirmPasswordVisible(false);
   };
@@ -47,11 +51,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     e.preventDefault();
     try {
       await login(loginForm);
-      // 登录成功
-      setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 300);
+      // 登录成功，关闭弹窗并导航到首页
+      onClose();
+      navigate("/");
     } catch (err) {
       console.error("登录失败:", err);
     }
@@ -62,11 +64,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     e.preventDefault();
     try {
       await register(registerForm);
-      // 注册成功
-      setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 300);
+      // 注册成功，关闭弹窗并导航到首页
+      onClose();
+      navigate("/");
     } catch (err) {
       console.error("注册失败:", err);
     }
@@ -222,6 +222,24 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                 />
               </div>
 
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={registerForm.code}
+                  onChange={(e) => setRegisterForm({ ...registerForm, code: e.target.value })}
+                  placeholder="邮箱验证码"
+                  className="hover-input flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => sendCode(registerForm.email)}
+                  disabled={countdown > 0 || isSendingCode || !registerForm.email}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg dark:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {countdown > 0 ? `${countdown}秒后重试` : isSendingCode ? "发送中..." : "发送验证码"}
+                </button>
+              </div>
+
               <div className="relative">
                 <input
                   type={isPasswordVisible ? "text" : "password"}
@@ -270,6 +288,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
               <p className="font-semibold mb-2">💡 注册说明：</p>
               <p>用户名至少 2 个字符</p>
               <p>密码至少 6 个字符</p>
+              <p>请输入有效的邮箱地址以接收验证码</p>
             </div>
           </div>
         )}
