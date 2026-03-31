@@ -28,7 +28,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     email: "",
     password: "",
     confirmPassword: "",
-    verificationCode: "",
+    code: "",
   });
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -41,7 +41,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     setCountdown(0);
     // 清空表单
     setLoginForm({ email: "", password: "" });
-    setRegisterForm({ username: "", email: "", password: "", confirmPassword: "", verificationCode: "" });
+    setRegisterForm({ username: "", email: "", password: "", confirmPassword: "", code: "" });
     setIsPasswordVisible(false);
     setIsConfirmPasswordVisible(false);
   };
@@ -225,8 +225,8 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={registerForm.verificationCode}
-                  onChange={(e) => setRegisterForm({ ...registerForm, verificationCode: e.target.value })}
+                  value={registerForm.code}
+                  onChange={(e) => setRegisterForm({ ...registerForm, code: e.target.value })}
                   placeholder="邮箱验证码"
                   className="hover-input flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />

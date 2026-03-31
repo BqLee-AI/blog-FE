@@ -111,7 +111,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error("两次输入的密码不一致");
       }
 
-      if (!form.verificationCode || form.verificationCode.trim() === "") {
+      if (!form.code || form.code.trim() === "") {
         throw new Error("请输入邮箱验证码");
       }
 
