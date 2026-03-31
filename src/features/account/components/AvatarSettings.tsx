@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { UploadIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
 
 interface AvatarSettingsProps {
   currentAvatar: string;
@@ -84,17 +85,17 @@ export default function AvatarSettings({
       </div>
 
       {/* 头像编辑卡片 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
+      <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-800">
         {/* 成功提示 */}
         {success && (
-          <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
             <p className="text-green-600 dark:text-green-400 text-sm">✓ 头像上传成功！</p>
           </div>
         )}
 
         {/* 错误提示 */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
             <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
           </div>
         )}
@@ -106,11 +107,11 @@ export default function AvatarSettings({
               <img
                 src={preview || currentAvatar}
                 alt={username}
-                className="w-40 h-40 rounded-full border-4 border-gray-200 dark:border-gray-700 object-cover shadow-lg"
+                className="w-40 h-40 rounded-full border-4 border-gray-200 object-cover shadow-lg dark:border-gray-700"
               />
               {preview && (
-                <div className="absolute inset-0 rounded-full bg-blue-500/10 border-4 border-blue-500 flex items-center justify-center">
-                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-full">
+                <div className="absolute inset-0 flex items-center justify-center rounded-full border-4 border-blue-500 bg-blue-500/10">
+                  <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-blue-600 dark:bg-gray-800 dark:text-blue-400">
                     预览
                   </span>
                 </div>
@@ -130,35 +131,39 @@ export default function AvatarSettings({
             />
 
             <div className="space-y-4">
-              <button
+              <Button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading || isLoading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
+                className="w-full gap-2 bg-blue-600 text-white hover:bg-blue-700"
               >
                 <UploadIcon className="w-5 h-5" />
                 <span>{isUploading ? "上传中..." : "选择图片"}</span>
-              </button>
+              </Button>
 
               {preview && (
                 <div className="flex gap-3">
-                  <button
+                  <Button
+                    type="button"
                     onClick={handleUpload}
                     disabled={isUploading || isLoading}
-                    className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
+                    className="flex-1 bg-green-600 text-white hover:bg-green-700"
                   >
                     {isUploading ? "保存中..." : "保存"}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
                     onClick={handleCancel}
                     disabled={isUploading || isLoading}
-                    className="flex-1 px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50"
+                    variant="outline"
+                    className="flex-1"
                   >
                     取消
-                  </button>
+                  </Button>
                 </div>
               )}
 
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">✓ 支持格式：JPG、PNG、GIF</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">✓ 文件大小：不超过 5MB</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">✓ 建议尺寸：200×200 像素或更大</p>
@@ -169,12 +174,13 @@ export default function AvatarSettings({
       </div>
 
       {/* 预设头像 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">或选择预设头像</h3>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
             <button
               key={i}
+              type="button"
               onClick={() => {
                 const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=avatar${i}`;
                 setPreview(avatarUrl);
@@ -184,10 +190,10 @@ export default function AvatarSettings({
               <img
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=avatar${i}`}
                 alt={`预设头像 ${i}`}
-                className="w-full aspect-square rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-colors object-cover"
+                className="w-full aspect-square rounded-lg border-2 border-gray-200 object-cover transition-colors hover:border-blue-500 dark:border-gray-700 dark:hover:border-blue-400"
               />
-              <div className="absolute inset-0 rounded-lg bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                <span className="opacity-0 group-hover:opacity-100 text-white text-sm font-semibold">选择</span>
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 transition-colors group-hover:bg-black/10">
+                <span className="text-sm font-semibold text-white opacity-0 group-hover:opacity-100">选择</span>
               </div>
             </button>
           ))}
