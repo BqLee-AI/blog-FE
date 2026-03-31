@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import ArticleForm from "@/features/articles/components/ArticleForm";
 import { usePostStore } from "@/store/postStore";
 import type { Post } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function EditArticlePage() {
   const { id } = useParams<{ id: string }>();
@@ -43,19 +45,18 @@ export default function EditArticlePage() {
 
   if (error || !currentPost) {
     return (
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">😕</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {error || "文章不存在"}
-        </h2>
-        <p className="text-gray-600 mb-6">无法找到您要编辑的文章</p>
-        <button
-          onClick={() => navigate("/admin")}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          返回后台管理
-        </button>
-      </div>
+      <Card className="mx-auto max-w-lg border-dashed">
+        <CardContent className="py-12 text-center">
+          <div className="text-6xl mb-4">😕</div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {error || "文章不存在"}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">无法找到您要编辑的文章</p>
+          <Button onClick={() => navigate("/admin")} className="bg-blue-600 text-white hover:bg-blue-700">
+            返回后台管理
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
