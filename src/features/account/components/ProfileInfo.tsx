@@ -157,7 +157,7 @@ export default function ProfileInfo({
               <div className="flex gap-3 pt-4">
                 <Button
                   type="submit"
-                  className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                  className="flex-1"
                   disabled={isLoading || form.formState.isSubmitting}
                 >
                   {isLoading || form.formState.isSubmitting ? "保存中..." : "保存更改"}
@@ -194,7 +194,7 @@ export default function ProfileInfo({
             <Button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700"
+              className="mt-4 w-full"
             >
               编辑信息
             </Button>
