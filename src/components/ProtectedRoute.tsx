@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useHydration } from "@/hooks/useHydration";
 import { useAuthStore } from "@/store/authStore";
 import type { UserRole } from "@/types/auth";
 
@@ -16,8 +17,20 @@ export function ProtectedRoute({
   allowedRoles,
   redirectTo = "/",
 }: ProtectedRouteProps) {
+  const hasHydrated = useHydration();
   const { isLoggedIn, user } = useAuthStore();
   const location = useLocation();
+
+  if (!hasHydrated) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white/90 px-5 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-900/90">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">正在恢复登录状态...</p>
+        </div>
+      </div>
+    );
+  }
 
   // 未登录：重定向到首页，保存当前路径用于登录后跳转
   if (!isLoggedIn) {

@@ -13,6 +13,7 @@ interface AuthStore {
   isLoading: boolean;
   error: string | null;
   isLoggedIn: boolean;
+  hasHydrated: boolean;
 
   // 登录
   login: (form: LoginForm) => Promise<void>;
@@ -41,6 +42,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isLoading: false,
   error: null,
   isLoggedIn: false,
+  hasHydrated: false,
 
   login: async (form: LoginForm) => {
     set({ isLoading: true, error: null });
@@ -74,6 +76,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         user: mockUser,
         isLoggedIn: true,
         isLoading: false,
+        hasHydrated: true,
       });
 
       // 保存到 localStorage
@@ -86,6 +89,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({
         error: error instanceof Error ? error.message : "登录失败",
         isLoading: false,
+        hasHydrated: true,
       });
       throw error;
     }
@@ -131,6 +135,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         user: mockUser,
         isLoggedIn: true,
         isLoading: false,
+        hasHydrated: true,
       });
 
       // 保存到 localStorage
@@ -143,13 +148,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({
         error: error instanceof Error ? error.message : "注册失败",
         isLoading: false,
+        hasHydrated: true,
       });
       throw error;
     }
   },
 
   logout: () => {
-    set({ user: null, isLoggedIn: false, error: null });
+    set({ user: null, isLoggedIn: false, error: null, hasHydrated: true });
     // 清除 localStorage
     try {
       localStorage.removeItem("blog-auth-user");
@@ -163,7 +169,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   setUser: (user: AuthUser) => {
-    set({ user: normalizeAuthUser(user), isLoggedIn: true });
+    set({ user: normalizeAuthUser(user), isLoggedIn: true, hasHydrated: true });
   },
 
   updateAvatar: (avatarUrl: string) => {
@@ -195,5 +201,7 @@ export const initializeAuth = () => {
     }
   } catch (e) {
     console.error("Failed to restore auth state:", e);
+  } finally {
+    useAuthStore.setState({ hasHydrated: true });
   }
 };
