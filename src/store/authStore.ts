@@ -2,6 +2,13 @@ import { create } from "zustand";
 import type { AuthUser, LoginForm, RegisterForm } from "@/types/auth";
 import { login as apiLogin, register as apiRegister, logout as apiLogout, sendVerificationCode } from "@/api/auth";
 
+function normalizeAuthUser(user: AuthUser): AuthUser {
+  return {
+    ...user,
+    role: user.role ?? "user",
+  };
+}
+
 interface AuthStore {
   user: AuthUser | null;
   isLoading: boolean;
@@ -162,7 +169,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   setUser: (user: AuthUser) => {
-    set({ user, isLoggedIn: true });
+    set({ user: normalizeAuthUser(user), isLoggedIn: true });
   },
 
   updateAvatar: (avatarUrl: string) => {
@@ -223,7 +230,7 @@ export const initializeAuth = () => {
   try {
     const savedUser = localStorage.getItem("blog-auth-user");
     if (savedUser) {
-      const user = JSON.parse(savedUser) as AuthUser;
+      const user = normalizeAuthUser(JSON.parse(savedUser) as AuthUser);
       useAuthStore.setState({ user, isLoggedIn: true });
     }
   } catch (e) {

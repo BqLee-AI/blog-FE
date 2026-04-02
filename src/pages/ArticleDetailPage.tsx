@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { usePostStore } from "@/store/postStore";
 import { commentStore } from "@/store/commentStore";
 import { CommentForm } from "@/features/comments/components/CommentForm";
 import { CommentList } from "@/features/comments/components/CommentList";
 import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import { estimateReadingTime, formatArticleDate } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +22,9 @@ export default function ArticleDetailPage() {
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const postId = id ? Number(id) : 0;
+  const readingTime = estimateReadingTime(currentPost?.content);
+  const publishedAt = formatArticleDate(currentPost?.createdAt);
+  const topLevelCommentCount = comments.filter((comment) => !comment.replyTo).length;
 
   useEffect(() => {
     if (id) {
@@ -90,19 +96,22 @@ export default function ArticleDetailPage() {
           {error || "文章不存在"}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">无法找到您要查看的文章</p>
-        <button
+        <Button
+          type="button"
           onClick={() => navigate("/")}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+          className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           返回首页
-        </button>
+        </Button>
         {error && (
-          <button
+          <Button
+            type="button"
             onClick={clearError}
-            className="ml-2 px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            variant="outline"
+            className="ml-2"
           >
             清除错误
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -113,70 +122,110 @@ export default function ArticleDetailPage() {
       {/* 左侧：文章内容 */}
       <article className="lg:col-span-2">
         {/* 返回按钮 */}
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium mb-8"
+        <Button
+          type="button"
+          onClick={() => navigate("/")}
+          variant="ghost"
+          className="mb-8 gap-2 px-0 text-blue-600 hover:bg-transparent hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         >
           <ArrowLeftIcon className="w-4 h-4" />
           返回首页
-        </Link>
+        </Button>
 
         {/* 文章标题和元信息 */}
-        <header className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+        <header className="mb-8 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm md:p-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-5">
             {currentPost.title}
           </h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
             {currentPost.author && (
-              <span>作者: {currentPost.author}</span>
+              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">作者: {currentPost.author}</span>
             )}
-            {currentPost.createdAt && (
-              <span>发布: {new Date(currentPost.createdAt).toLocaleDateString()}</span>
+            {publishedAt && (
+              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">发布: {publishedAt}</span>
             )}
+            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">{readingTime} 分钟阅读</span>
           </div>
         </header>
 
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase text-gray-500 dark:text-gray-400 mb-2">
+              阅读
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{readingTime} 分钟</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">预计完整阅读时长</p>
+          </div>
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
+            <p className="text-xs font-bold tracking-[0.25em] uppercase text-gray-500 dark:text-gray-400 mb-2">
+              评论
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{comments.length}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {topLevelCommentCount} 条主评论
+            </p>
+          </div>
+        </section>
+
         {/* 摘要 */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-600 dark:border-blue-400 p-4 mb-8 rounded-r">
-          <p className="text-gray-700 dark:text-gray-300 text-lg">{currentPost.summary}</p>
-        </div>
+        <section className="mb-8 rounded-2xl border border-blue-100 dark:border-blue-900/30 bg-gradient-to-r from-blue-50 via-sky-50 to-cyan-50 dark:from-blue-900/20 dark:via-sky-900/10 dark:to-cyan-900/10 p-5 shadow-sm">
+          <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-[0.3em] uppercase text-blue-700 dark:text-blue-300">
+            <span className="h-2 w-2 rounded-full bg-blue-500" />
+            文章摘要
+          </div>
+          <p className="text-lg leading-8 text-gray-700 dark:text-gray-300">{currentPost.summary}</p>
+        </section>
 
         {/* 标签 */}
         {currentPost.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-8">
             {currentPost.tags.map((tag) => (
-              <span
+              <Badge
                 key={tag}
-                className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                variant="secondary"
+                className="text-sm font-medium"
               >
                 #{tag}
-              </span>
+              </Badge>
             ))}
           </div>
         )}
 
         {/* 文章内容 */}
-        <div className="prose prose-lg max-w-none mb-12">
+        <section className="mb-12 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm md:p-8">
+          <div className="mb-6 flex items-end justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
+            <div>
+              <p className="text-xs font-bold tracking-[0.35em] uppercase text-gray-500 dark:text-gray-400 mb-2">
+                正文
+              </p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">文章内容</h2>
+            </div>
+            <p className="hidden text-sm text-gray-500 dark:text-gray-400 md:block">
+              建议先看摘要，再顺着正文往下读
+            </p>
+          </div>
+
           {currentPost.content ? (
-            <div
-              className="text-gray-700 dark:text-gray-300 leading-relaxed"
+            <article
+              className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300 prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:leading-8 prose-p:mb-5 prose-strong:text-gray-900 dark:prose-strong:text-white prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-img:rounded-2xl prose-img:shadow-sm prose-img:my-6 prose-blockquote:border-blue-400 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-300"
               dangerouslySetInnerHTML={{ __html: currentPost.content }}
             />
           ) : (
-            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-lg text-center text-gray-500 dark:text-gray-400">
+            <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center text-gray-500 dark:text-gray-400">
               <p>暂无详细内容</p>
             </div>
           )}
-        </div>
+        </section>
 
         {/* 底部导航 */}
         <div className="border-t dark:border-gray-700 pt-8">
-          <Link
-            to="/"
-            className="inline-block px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium"
+          <Button
+            type="button"
+            onClick={() => navigate("/")}
+            className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
           >
             ← 返回文章列表
-          </Link>
+          </Button>
         </div>
       </article>
 
@@ -184,17 +233,17 @@ export default function ArticleDetailPage() {
       <aside className="lg:col-span-1">
         <div className="sticky top-24 space-y-6">
           {/* 评论区标题 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
               评论 ({comments.length})
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {comments.filter(c => !c.replyTo).length} 条主评论
+              {topLevelCommentCount} 条主评论 · {comments.length - topLevelCommentCount} 条回复
             </p>
           </div>
 
           {/* 评论表单 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CommentForm
               postId={postId}
               replyTo={replyingTo || undefined}
@@ -205,7 +254,7 @@ export default function ArticleDetailPage() {
           </div>
 
           {/* 评论列表 - 可滚动 */}
-          <div className="max-h-[60vh] overflow-y-auto space-y-4 bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="max-h-[60vh] overflow-y-auto space-y-4 bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
             {comments.length === 0 ? (
               <div className="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
                 暂无评论，来发表第一条吧！

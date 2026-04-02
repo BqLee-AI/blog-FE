@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
 
 interface LoginPopoverProps {
   isOpen: boolean;
@@ -9,6 +15,23 @@ interface LoginPopoverProps {
 }
 
 type TabType = "login" | "register";
+
+const loginSchema = z.object({
+  email: z.string().email("请输入有效的邮箱"),
+  password: z.string().min(6, "密码至少 6 位"),
+});
+
+const registerSchema = z
+  .object({
+    username: z.string().min(2, "用户名至少 2 个字符"),
+    email: z.string().email("请输入有效的邮箱"),
+    password: z.string().min(6, "密码至少 6 位"),
+    confirmPassword: z.string().min(6, "请再次输入密码"),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: "两次输入的密码不一致",
+    path: ["confirmPassword"],
+  });
 
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown } = useAuthStore();
@@ -36,6 +59,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+
 
   // 处理标签页切换
   const handleTabChange = (tab: TabType) => {
@@ -85,8 +109,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
       <div className="hover-card relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden w-full max-w-sm mx-4">
         {/* 关闭按钮 */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 z-10"
+          className="absolute right-4 top-4 z-10 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -95,8 +120,10 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
 
         {/* 选项卡标签 */}
         <div className="flex border-b border-gray-200 dark:border-gray-700">
-          <button
+          <Button
+            type="button"
             onClick={() => handleTabChange("login")}
+            variant="ghost"
             className={`flex-1 px-6 py-4 font-semibold transition-all ${
               activeTab === "login"
                 ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
@@ -104,9 +131,11 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             }`}
           >
             登录
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
             onClick={() => handleTabChange("register")}
+            variant="ghost"
             className={`flex-1 px-6 py-4 font-semibold transition-all ${
               activeTab === "register"
                 ? "text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400"
@@ -114,7 +143,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             }`}
           >
             注册
-          </button>
+          </Button>
         </div>
 
         {/* 登录标签页 */}

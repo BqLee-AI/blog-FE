@@ -15,6 +15,36 @@ interface ActivityLogProps {
   activities?: ActivityItem[];
 }
 
+const STAT_CARDS = [
+  {
+    label: "总登录次数",
+    value: "12",
+    className: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300",
+  },
+  {
+    label: "最后登录",
+    value: "今天",
+    className: "border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-300",
+  },
+  {
+    label: "信息修改",
+    value: "3次",
+    className: "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-900 dark:bg-purple-950/30 dark:text-purple-300",
+  },
+  {
+    label: "安全事件",
+    value: "0",
+    className: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300",
+  },
+];
+
+const ACTIVITY_CARD_STYLES: Record<string, string> = {
+  login: "border-blue-200 bg-blue-50/70 dark:border-blue-900 dark:bg-blue-950/20",
+  profile_update: "border-purple-200 bg-purple-50/70 dark:border-purple-900 dark:bg-purple-950/20",
+  avatar_update: "border-pink-200 bg-pink-50/70 dark:border-pink-900 dark:bg-pink-950/20",
+  password_change: "border-yellow-200 bg-yellow-50/70 dark:border-yellow-900 dark:bg-yellow-950/20",
+};
+
 const MOCK_ACTIVITIES: ActivityItem[] = [
   {
     id: "1",
@@ -68,15 +98,7 @@ export default function ActivityLog({ activities = MOCK_ACTIVITIES }: ActivityLo
   };
 
   const getActivityColor = (type: string) => {
-    const colors: Record<string, string> = {
-      login: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
-      profile_update:
-        "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800",
-      avatar_update: "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800",
-      password_change:
-        "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800",
-    };
-    return colors[type] || "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700";
+    return ACTIVITY_CARD_STYLES[type] || "border-gray-200 bg-gray-50/70 dark:border-gray-800 dark:bg-gray-900/20";
   };
 
   const getActivityTitle = (type: string) => {
@@ -99,28 +121,16 @@ export default function ActivityLog({ activities = MOCK_ACTIVITIES }: ActivityLo
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[
-          { label: "总登录次数", value: "12", color: "blue" },
-          { label: "最后登录", value: "今天", color: "green" },
-          { label: "信息修改", value: "3次", color: "purple" },
-          { label: "安全事件", value: "0", color: "red" },
-        ].map((stat, index) => (
-          <div
-            key={index}
-            className={`bg-${stat.color}-50 dark:bg-${stat.color}-900/20 border border-${stat.color}-200 dark:border-${stat.color}-800 rounded-lg p-4`}
-          >
-            <p className={`text-sm text-${stat.color}-600 dark:text-${stat.color}-400`}>
-              {stat.label}
-            </p>
-            <p className={`text-2xl font-bold text-${stat.color}-700 dark:text-${stat.color}-300 mt-2`}>
-              {stat.value}
-            </p>
+        {STAT_CARDS.map((stat) => (
+          <div key={stat.label} className={`rounded-lg border p-4 shadow-sm ${stat.className}`}>
+            <p className="text-sm opacity-90">{stat.label}</p>
+            <p className="mt-2 text-2xl font-bold">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* 活动时间线 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
           最近活动
         </h3>
@@ -135,7 +145,7 @@ export default function ActivityLog({ activities = MOCK_ACTIVITIES }: ActivityLo
             {activities.map((activity, index) => (
               <div
                 key={activity.id}
-                className={`border border-l-4 rounded-lg p-4 ${getActivityColor(activity.type)}`}
+                className={`rounded-lg border border-l-4 p-4 ${getActivityColor(activity.type)}`}
               >
                 <div className="flex items-start gap-4">
                   {/* 图标 */}
@@ -152,7 +162,7 @@ export default function ActivityLog({ activities = MOCK_ACTIVITIES }: ActivityLo
                           {activity.description}
                         </p>
                       </div>
-                      <span className="flex-shrink-0 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                      <span className="flex-shrink-0 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-500 whitespace-nowrap dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-400">
                         {activity.timestamp}
                       </span>
                     </div>
@@ -173,7 +183,7 @@ export default function ActivityLog({ activities = MOCK_ACTIVITIES }: ActivityLo
       </div>
 
       {/* 安全建议 */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-800 dark:bg-blue-900/20">
         <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">
           💡 安全建议
         </h3>
