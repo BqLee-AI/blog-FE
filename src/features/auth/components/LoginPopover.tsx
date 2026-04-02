@@ -5,9 +5,6 @@ import * as z from "zod";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
 
 interface LoginPopoverProps {
   isOpen: boolean;
@@ -25,6 +22,7 @@ const registerSchema = z
   .object({
     username: z.string().min(2, "用户名至少 2 个字符"),
     email: z.string().email("请输入有效的邮箱"),
+    code: z.string().min(1, "请输入验证码"),
     password: z.string().min(6, "密码至少 6 位"),
     confirmPassword: z.string().min(6, "请再次输入密码"),
   })
@@ -44,6 +42,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
       email: "",
       password: "",
     },
+    resolver: zodResolver(loginSchema),
   });
 
   // 注册表单
@@ -55,10 +54,13 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
       confirmPassword: "",
       code: "",
     },
+    resolver: zodResolver(registerSchema),
   });
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const loginErrors = loginMethods.formState.errors;
+  const registerErrors = registerMethods.formState.errors;
 
   useEffect(() => {
     if (!isOpen) {
@@ -174,12 +176,18 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                 {...loginMethods.register("email")}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {loginErrors.email && (
+                <p className="text-sm text-red-500">{loginErrors.email.message}</p>
+              )}
               <input
                 type="password"
                 placeholder="密码"
                 {...loginMethods.register("password")}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {loginErrors.password && (
+                <p className="text-sm text-red-500">{loginErrors.password.message}</p>
+              )}
 
               <button
                 type="submit"
@@ -208,6 +216,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                 {...registerMethods.register("username")}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
+              {registerErrors.username && (
+                <p className="text-sm text-red-500">{registerErrors.username.message}</p>
+              )}
 
               <input
                 type="email"
@@ -215,14 +226,22 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                 {...registerMethods.register("email")}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
+              {registerErrors.email && (
+                <p className="text-sm text-red-500">{registerErrors.email.message}</p>
+              )}
 
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="验证码"
-                  {...registerMethods.register("code")}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="验证码"
+                    {...registerMethods.register("code")}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                  {registerErrors.code && (
+                    <p className="mt-1 text-sm text-red-500">{registerErrors.code.message}</p>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => sendCode(registerMethods.watch("email"))}
@@ -240,6 +259,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                   {...registerMethods.register("password")}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
                 />
+                {registerErrors.password && (
+                  <p className="mt-1 text-sm text-red-500">{registerErrors.password.message}</p>
+                )}
                 <button
                   type="button"
                   onClick={() => setIsPasswordVisible(!isPasswordVisible)}
@@ -256,6 +278,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                   {...registerMethods.register("confirmPassword")}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
                 />
+                {registerErrors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-500">{registerErrors.confirmPassword.message}</p>
+                )}
                 <button
                   type="button"
                   onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
