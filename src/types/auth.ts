@@ -1,11 +1,8 @@
-export type UserRole = "user" | "admin" | "superadmin";
-
 export type AuthUser = {
   id: number;
   username: string;
   email: string;
   avatar?: string;
-  role: UserRole;
 };
 
 export type LoginForm = {

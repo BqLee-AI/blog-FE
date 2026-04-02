@@ -1,13 +1,6 @@
 import { create } from "zustand";
 import type { AuthUser, LoginForm, RegisterForm } from "@/types/auth";
 
-function normalizeAuthUser(user: AuthUser): AuthUser {
-  return {
-    ...user,
-    role: user.role ?? "user",
-  };
-}
-
 interface AuthStore {
   user: AuthUser | null;
   isLoading: boolean;
@@ -67,7 +60,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
         username: form.email.split("@")[0] ?? "",
         email: form.email,
         avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + form.email,
-        role: "user",
       };
 
       set({
@@ -124,7 +116,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
         username: form.username,
         email: form.email,
         avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + form.email,
-        role: "user",
       };
 
       set({
@@ -163,7 +154,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   setUser: (user: AuthUser) => {
-    set({ user: normalizeAuthUser(user), isLoggedIn: true });
+    set({ user, isLoggedIn: true });
   },
 
   updateAvatar: (avatarUrl: string) => {
@@ -190,7 +181,7 @@ export const initializeAuth = () => {
   try {
     const savedUser = localStorage.getItem("blog-auth-user");
     if (savedUser) {
-      const user = normalizeAuthUser(JSON.parse(savedUser) as AuthUser);
+      const user = JSON.parse(savedUser) as AuthUser;
       useAuthStore.setState({ user, isLoggedIn: true });
     }
   } catch (e) {
