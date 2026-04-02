@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
 
@@ -11,24 +11,27 @@ interface LoginPopoverProps {
 type TabType = "login" | "register";
 
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
-  const navigate = useNavigate();
   const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<TabType>("login");
 
-  // 登录表单状态
-  const [loginForm, setLoginForm] = useState<LoginForm>({
-    email: "",
-    password: "",
+  // 登录表单
+  const loginMethods = useForm<LoginForm>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  // 注册表单状态
-  const [registerForm, setRegisterForm] = useState<RegisterForm>({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    code: "",
+  // 注册表单
+  const registerMethods = useForm<RegisterForm>({
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      code: "",
+    },
   });
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -40,37 +43,33 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     clearError();
     setCountdown(0);
     // 清空表单
-    setLoginForm({ email: "", password: "" });
-    setRegisterForm({ username: "", email: "", password: "", confirmPassword: "", code: "" });
+    loginMethods.reset();
+    registerMethods.reset();
     setIsPasswordVisible(false);
     setIsConfirmPasswordVisible(false);
   };
 
   // 处理登录
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLoginSubmit = loginMethods.handleSubmit(async (data) => {
     try {
-      await login(loginForm);
-      // 登录成功，关闭弹窗并导航到首页
+      await login(data);
+      // 登录成功，关闭弹窗
       onClose();
-      navigate("/");
     } catch (err) {
       console.error("登录失败:", err);
     }
-  };
+  });
 
   // 处理注册
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegisterSubmit = registerMethods.handleSubmit(async (data) => {
     try {
-      await register(registerForm);
-      // 注册成功，关闭弹窗并导航到首页
+      await register(data);
+      // 注册成功，关闭弹窗
       onClose();
-      navigate("/");
     } catch (err) {
       console.error("注册失败:", err);
     }
-  };
+  });
 
   if (!isOpen) return null;
 
@@ -130,16 +129,14 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             <form onSubmit={handleLoginSubmit} className="space-y-3">
               <input
                 type="email"
-                value={loginForm.email}
-                onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                 placeholder="邮箱"
+                {...loginMethods.register("email")}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="password"
-                value={loginForm.password}
-                onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                 placeholder="密码"
+                {...loginMethods.register("password")}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
 
@@ -166,32 +163,29 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             <form onSubmit={handleRegisterSubmit} className="space-y-3">
               <input
                 type="text"
-                value={registerForm.username}
-                onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
                 placeholder="用户名"
+                {...registerMethods.register("username")}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
 
               <input
                 type="email"
-                value={registerForm.email}
-                onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
                 placeholder="邮箱"
+                {...registerMethods.register("email")}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
 
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={registerForm.code}
-                  onChange={(e) => setRegisterForm({ ...registerForm, code: e.target.value })}
                   placeholder="验证码"
+                  {...registerMethods.register("code")}
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
                 <button
                   type="button"
-                  onClick={() => sendCode(registerForm.email)}
-                  disabled={countdown > 0 || isSendingCode || !registerForm.email}
+                  onClick={() => sendCode(registerMethods.watch("email"))}
+                  disabled={countdown > 0 || isSendingCode || !registerMethods.watch("email")}
                   className="px-3 py-2 bg-green-600 text-white rounded dark:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm"
                 >
                   {countdown > 0 ? `${countdown}s` : isSendingCode ? "发送中..." : "发送"}
@@ -201,9 +195,8 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
               <div className="relative">
                 <input
                   type={isPasswordVisible ? "text" : "password"}
-                  value={registerForm.password}
-                  onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
                   placeholder="密码"
+                  {...registerMethods.register("password")}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
                 />
                 <button
@@ -218,9 +211,8 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
               <div className="relative">
                 <input
                   type={isConfirmPasswordVisible ? "text" : "password"}
-                  value={registerForm.confirmPassword}
-                  onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
                   placeholder="确认密码"
+                  {...registerMethods.register("confirmPassword")}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
                 />
                 <button
