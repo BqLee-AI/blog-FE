@@ -221,3 +221,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ timerId: null, countdown: 0 });
   },
 }));
+
+/**
+ * 初始化认证状态（从 localStorage 恢复）
+ */
+export const initializeAuth = () => {
+  try {
+    const savedUser = localStorage.getItem("blog-auth-user");
+    if (savedUser) {
+      const user = normalizeAuthUser(JSON.parse(savedUser) as AuthUser);
+      useAuthStore.setState({ user, isLoggedIn: true });
+    }
+  } catch (error) {
+    console.error("Failed to restore auth state:", error);
+  }
+};
