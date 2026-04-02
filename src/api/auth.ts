@@ -8,6 +8,12 @@ interface LoginResponse {
   refreshToken: string;
 }
 
+interface RegisterResponse {
+  user: AuthUser;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 /**
  * 用户登录
  * @param credentials 登录凭证（邮箱和密码）
@@ -51,12 +57,13 @@ export const sendVerificationCode = async (email: string): Promise<{ message: st
  */
 export const register = async (userData: RegisterForm): Promise<AuthUser> => {
   try {
-    const response = await api.post<{ data: AuthUser; code?: number; message?: string } | AuthUser>('/auth/register', userData);
-    // 后端可能返回 { data: user } 或直接返回 user
-    const user = (response.data as any)?.data || response.data;
+    const response = await api.post<{ data: RegisterResponse; code?: number; message?: string } | RegisterResponse>('/auth/register', userData);
+    // 后端可能返回 { data: { user, accessToken } } 或直接返回 { user, accessToken }
+    const registerData = 'data' in response.data ? response.data.data : response.data;
+    const user = registerData.user;
     // 如果注册返回 token，保存到 localStorage
-    if ((response.data as any)?.accessToken) {
-      localStorage.setItem('accessToken', (response.data as any).accessToken);
+    if (registerData.accessToken) {
+      localStorage.setItem('accessToken', registerData.accessToken);
     }
     return user as AuthUser;
   } catch (error) {
