@@ -14,6 +14,7 @@ interface AuthStore {
   isLoading: boolean;
   error: string | null;
   isLoggedIn: boolean;
+  hasHydrated: boolean;
   isSendingCode: boolean;
   countdown: number;
   timerId: ReturnType<typeof setInterval> | null;
@@ -37,6 +38,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   isLoading: false,
   error: null,
   isLoggedIn: false,
+  hasHydrated: false,
   isSendingCode: false,
   countdown: 0,
   timerId: null,
@@ -236,5 +238,7 @@ export const initializeAuth = () => {
     }
   } catch (error) {
     console.error("Failed to restore auth state:", error);
+  } finally {
+    useAuthStore.setState({ hasHydrated: true });
   }
 };
