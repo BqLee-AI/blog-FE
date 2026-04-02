@@ -21,7 +21,7 @@ interface AuthStore {
 
   login: (form: LoginForm) => Promise<void>;
   register: (form: RegisterForm) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearError: () => void;
   setUser: (user: AuthUser) => void;
   updateAvatar: (avatarUrl: string) => void;
