@@ -62,6 +62,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         isLoggedIn: true,
         isLoading: false,
         error: null,
+        hasHydrated: true,
       });
 
       try {
@@ -116,6 +117,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         isLoggedIn: true,
         isLoading: false,
         error: null,
+        hasHydrated: true,
       });
 
       try {
@@ -140,7 +142,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     } catch (error) {
       console.error("登出API调用失败:", error);
     } finally {
-      set({ user: null, isLoggedIn: false, error: null });
+      set({ user: null, isLoggedIn: false, error: null, hasHydrated: true });
       try {
         localStorage.removeItem("blog-auth-user");
       } catch (e) {
