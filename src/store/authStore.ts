@@ -74,6 +74,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({
         error: error instanceof Error ? error.message : "登录失败",
         isLoading: false,
+        hasHydrated: true,
       });
       throw error;
     }
@@ -124,6 +125,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({
         error: error instanceof Error ? error.message : "注册失败",
         isLoading: false,
+        hasHydrated: true,
       });
       throw error;
     }
@@ -150,7 +152,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   setUser: (user: AuthUser) => {
-    set({ user: normalizeAuthUser(user), isLoggedIn: true });
+    set({ user: normalizeAuthUser(user), isLoggedIn: true, hasHydrated: true });
   },
 
   updateAvatar: (avatarUrl: string) => {
