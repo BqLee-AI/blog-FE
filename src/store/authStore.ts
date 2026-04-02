@@ -16,47 +16,34 @@ interface AuthStore {
   isLoggedIn: boolean;
   isSendingCode: boolean;
   countdown: number;
+  timerId: ReturnType<typeof setInterval> | null;
 
-  // 登录
   login: (form: LoginForm) => Promise<void>;
-
-  // 注册
   register: (form: RegisterForm) => Promise<void>;
-
-  // 登出
   logout: () => void;
-
-  // 清空错误
   clearError: () => void;
-
-  // 设置用户信息（用于页面跳转后更新）
   setUser: (user: AuthUser) => void;
-
-  // 更新头像
   updateAvatar: (avatarUrl: string) => void;
-
-  // 发送验证码
   sendCode: (email: string) => Promise<void>;
-
-  // 设置倒计时
   setCountdown: (count: number) => void;
+  clearCountdownTimer: () => void;
 }
 
 /**
  * 认证状态管理 Store
  */
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   isLoading: false,
   error: null,
   isLoggedIn: false,
   isSendingCode: false,
   countdown: 0,
+  timerId: null,
 
   login: async (form: LoginForm) => {
     set({ isLoading: true, error: null });
     try {
-      // 基础验证
       if (!form.email || !form.password) {
         throw new Error("邮箱和密码不能为空");
       }
@@ -65,11 +52,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error("请输入正确的邮箱地址");
       }
 
-      // 调用后端API
       const response = await apiLogin(form);
       const normalizedUser = normalizeAuthUser(response.user);
 
-      // response 现在直接是 LoginResponse，包含 user 和 accessToken
       set({
         user: normalizedUser,
         isLoggedIn: true,
@@ -77,7 +62,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
         error: null,
       });
 
-      // 保存到 localStorage
       try {
         localStorage.setItem("blog-auth-user", JSON.stringify(normalizedUser));
         if (response.accessToken) {
@@ -98,7 +82,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
   register: async (form: RegisterForm) => {
     set({ isLoading: true, error: null });
     try {
-      // 验证
       if (!form.username || !form.email || !form.password) {
         throw new Error("所有字段都不能为空");
       }
@@ -123,17 +106,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error("请输入邮箱验证码");
       }
 
-      // 调用后端API
       const user = normalizeAuthUser(await apiRegister(form));
 
       set({
-        user: user,
+        user,
         isLoggedIn: true,
         isLoading: false,
         error: null,
       });
 
-      // 保存到 localStorage
       try {
         localStorage.setItem("blog-auth-user", JSON.stringify(user));
       } catch (e) {
@@ -150,13 +131,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   logout: async () => {
     try {
-      // 调用后端API
+      get().clearCountdownTimer();
       await apiLogout();
     } catch (error) {
       console.error("登出API调用失败:", error);
     } finally {
       set({ user: null, isLoggedIn: false, error: null });
-      // 清除 localStorage
       try {
         localStorage.removeItem("blog-auth-user");
       } catch (e) {
@@ -178,7 +158,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       user: state.user ? { ...state.user, avatar: avatarUrl } : null,
     }));
 
-    // 更新 localStorage
     try {
       const updatedUser = useAuthStore.getState().user;
       if (updatedUser) {
@@ -197,17 +176,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
       }
 
       await sendVerificationCode(email);
-      
-      // 开始倒计时
+      get().clearCountdownTimer();
+
       let count = 60;
-      set({ countdown: count });
-      const timer = setInterval(() => {
+      const timerId = setInterval(() => {
         count -= 1;
-        set({ countdown: count });
+
         if (count <= 0) {
-          clearInterval(timer);
+          get().clearCountdownTimer();
+          return;
         }
+
+        set({ countdown: count });
       }, 1000);
+
+      set({ countdown: count, timerId });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : "发送验证码失败",
@@ -220,21 +203,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   setCountdown: (count: number) => {
+    if (count <= 0) {
+      get().clearCountdownTimer();
+      return;
+    }
+
     set({ countdown: count });
   },
-}));
 
-/**
- * 初始化认证状态（从 localStorage 恢复）
- */
-export const initializeAuth = () => {
-  try {
-    const savedUser = localStorage.getItem("blog-auth-user");
-    if (savedUser) {
-      const user = normalizeAuthUser(JSON.parse(savedUser) as AuthUser);
-      useAuthStore.setState({ user, isLoggedIn: true });
+  clearCountdownTimer: () => {
+    const { timerId } = get();
+
+    if (timerId !== null) {
+      clearInterval(timerId);
     }
-  } catch (e) {
-    console.error("Failed to restore auth state:", e);
-  }
-};
+
+    set({ timerId: null, countdown: 0 });
+  },
+}));

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,7 +34,7 @@ const registerSchema = z
   });
 
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
-  const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown } = useAuthStore();
+  const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown, clearCountdownTimer } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<TabType>("login");
 
@@ -59,6 +59,18 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      clearCountdownTimer();
+    }
+  }, [isOpen, clearCountdownTimer]);
+
+  useEffect(() => {
+    return () => {
+      clearCountdownTimer();
+    };
+  }, [clearCountdownTimer]);
 
 
   // 处理标签页切换
