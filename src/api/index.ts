@@ -27,7 +27,7 @@ const apiClient: AxiosInstance = axios.create({
  */
 const isTokenExemptAuthEndpoint = (url?: string): boolean => {
   if (!url) return false;
-  return /\/auth\/(login|register|refresh)(?:\/|$)/.test(url);
+  return /\/auth\/(login|register|refresh|sendcode)(?:\/|$)/.test(url);
 };
 
 /**
