@@ -67,10 +67,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       // 调用后端API
       const response = await apiLogin(form);
+      const normalizedUser = normalizeAuthUser(response.user);
 
       // response 现在直接是 LoginResponse，包含 user 和 accessToken
       set({
-        user: response.user,
+        user: normalizedUser,
         isLoggedIn: true,
         isLoading: false,
         error: null,
@@ -78,7 +79,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       // 保存到 localStorage
       try {
-        localStorage.setItem("blog-auth-user", JSON.stringify(response.user));
+        localStorage.setItem("blog-auth-user", JSON.stringify(normalizedUser));
         if (response.accessToken) {
           localStorage.setItem("accessToken", response.accessToken);
         }
@@ -123,7 +124,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       }
 
       // 调用后端API
-      const user = await apiRegister(form);
+      const user = normalizeAuthUser(await apiRegister(form));
 
       set({
         user: user,
