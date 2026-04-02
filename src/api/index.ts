@@ -23,9 +23,17 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 /**
- * 判断是否为认证端点（不需要 token）
+ * 判断是否为不需要注入 access token 的认证端点
  */
-const isAuthEndpoint = (url?: string): boolean => {
+const isTokenExemptAuthEndpoint = (url?: string): boolean => {
+  if (!url) return false;
+  return /\/auth\/(login|register|refresh)(?:\/|$)/.test(url);
+};
+
+/**
+ * 判断是否为不应触发 401 全局登出的端点
+ */
+const isAuthErrorBypassEndpoint = (url?: string): boolean => {
   if (!url) return false;
   return /\/auth\/(login|register|logout|refresh)(?:\/|$)/.test(url);
 };
@@ -79,12 +87,12 @@ const normalizeErrorMessage = (error: AxiosError): string => {
 };
 
 /**
- * 请求拦截器 - 自动注入 Token（认证端点除外）
+ * 请求拦截器 - 自动注入 Token（token 免注入端点除外）
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 认证端点不需要 token
-    if (isAuthEndpoint(config.url)) {
+    // 认证端点不需要注入 access token
+    if (isTokenExemptAuthEndpoint(config.url)) {
       return config;
     }
 
@@ -108,7 +116,7 @@ apiClient.interceptors.response.use(
     const requestUrl = error.config?.url;
 
     // 401 未授权：清除状态并跳转到登录，保留 redirect 参数
-    if (status === 401 && !isAuthEndpoint(requestUrl)) {
+    if (status === 401 && !isAuthErrorBypassEndpoint(requestUrl)) {
       clearAuthState();
       if (typeof window !== 'undefined') {
         window.location.assign(buildLoginRedirectUrl());
