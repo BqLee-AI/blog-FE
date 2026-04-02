@@ -170,23 +170,39 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             )}
 
             <form onSubmit={handleLoginSubmit} className="space-y-3">
+              <label htmlFor="login-email" className="sr-only">
+                邮箱
+              </label>
               <input
+                id="login-email"
                 type="email"
                 placeholder="邮箱"
                 {...loginMethods.register("email")}
+                aria-invalid={Boolean(loginErrors.email)}
+                aria-describedby={loginErrors.email ? "login-email-error" : undefined}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {loginErrors.email && (
-                <p className="text-sm text-red-500">{loginErrors.email.message}</p>
+                <p id="login-email-error" className="text-sm text-red-500">
+                  {loginErrors.email.message}
+                </p>
               )}
+              <label htmlFor="login-password" className="sr-only">
+                密码
+              </label>
               <input
+                id="login-password"
                 type="password"
                 placeholder="密码"
                 {...loginMethods.register("password")}
+                aria-invalid={Boolean(loginErrors.password)}
+                aria-describedby={loginErrors.password ? "login-password-error" : undefined}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {loginErrors.password && (
-                <p className="text-sm text-red-500">{loginErrors.password.message}</p>
+                <p id="login-password-error" className="text-sm text-red-500">
+                  {loginErrors.password.message}
+                </p>
               )}
 
               <button
@@ -210,36 +226,60 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
             )}
 
             <form onSubmit={handleRegisterSubmit} className="space-y-3">
+              <label htmlFor="register-username" className="sr-only">
+                用户名
+              </label>
               <input
+                id="register-username"
                 type="text"
                 placeholder="用户名"
                 {...registerMethods.register("username")}
+                aria-invalid={Boolean(registerErrors.username)}
+                aria-describedby={registerErrors.username ? "register-username-error" : undefined}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               {registerErrors.username && (
-                <p className="text-sm text-red-500">{registerErrors.username.message}</p>
+                <p id="register-username-error" className="text-sm text-red-500">
+                  {registerErrors.username.message}
+                </p>
               )}
 
+              <label htmlFor="register-email" className="sr-only">
+                邮箱
+              </label>
               <input
+                id="register-email"
                 type="email"
                 placeholder="邮箱"
                 {...registerMethods.register("email")}
+                aria-invalid={Boolean(registerErrors.email)}
+                aria-describedby={registerErrors.email ? "register-email-error" : undefined}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               {registerErrors.email && (
-                <p className="text-sm text-red-500">{registerErrors.email.message}</p>
+                <p id="register-email-error" className="text-sm text-red-500">
+                  {registerErrors.email.message}
+                </p>
               )}
 
               <div className="flex gap-2">
                 <div className="flex-1">
+                  <label htmlFor="register-code" className="sr-only">
+                    验证码
+                  </label>
                   <input
+                    id="register-code"
                     type="text"
                     placeholder="验证码"
                     {...registerMethods.register("code")}
+                    aria-invalid={Boolean(registerErrors.code)}
+                    aria-describedby={registerErrors.code ? "register-code-error" : undefined}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                   {registerErrors.code && (
-                    <p className="mt-1 text-sm text-red-500">{registerErrors.code.message}</p>
+                    <p id="register-code-error" className="mt-1 text-sm text-red-500">
+                      {registerErrors.code.message}
+                    </p>
                   )}
                 </div>
                 <button
@@ -253,14 +293,22 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
               </div>
 
               <div className="relative">
+                <label htmlFor="register-password" className="sr-only">
+                  密码
+                </label>
                 <input
+                  id="register-password"
                   type={isPasswordVisible ? "text" : "password"}
                   placeholder="密码"
                   {...registerMethods.register("password")}
+                  aria-invalid={Boolean(registerErrors.password)}
+                  aria-describedby={registerErrors.password ? "register-password-error" : undefined}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
                 />
                 {registerErrors.password && (
-                  <p className="mt-1 text-sm text-red-500">{registerErrors.password.message}</p>
+                  <p id="register-password-error" className="mt-1 text-sm text-red-500">
+                    {registerErrors.password.message}
+                  </p>
                 )}
                 <button
                   type="button"
@@ -272,14 +320,22 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
               </div>
 
               <div className="relative">
+                <label htmlFor="register-confirm-password" className="sr-only">
+                  确认密码
+                </label>
                 <input
+                  id="register-confirm-password"
                   type={isConfirmPasswordVisible ? "text" : "password"}
                   placeholder="确认密码"
                   {...registerMethods.register("confirmPassword")}
+                  aria-invalid={Boolean(registerErrors.confirmPassword)}
+                  aria-describedby={registerErrors.confirmPassword ? "register-confirm-password-error" : undefined}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
                 />
                 {registerErrors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-500">{registerErrors.confirmPassword.message}</p>
+                  <p id="register-confirm-password-error" className="mt-1 text-sm text-red-500">
+                    {registerErrors.confirmPassword.message}
+                  </p>
                 )}
                 <button
                   type="button"
