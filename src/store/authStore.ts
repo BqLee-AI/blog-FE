@@ -235,9 +235,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 export const initializeAuth = () => {
   try {
     const savedUser = localStorage.getItem("blog-auth-user");
-    if (savedUser) {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (savedUser && accessToken) {
       const user = normalizeAuthUser(JSON.parse(savedUser) as AuthUser);
       useAuthStore.setState({ user, isLoggedIn: true });
+    } else if (savedUser || accessToken) {
+      try {
+        localStorage.removeItem("blog-auth-user");
+        localStorage.removeItem("accessToken");
+      } catch (storageError) {
+        console.error("Failed to clear stale auth state:", storageError);
+      }
+
+      useAuthStore.setState({ user: null, isLoggedIn: false });
     }
   } catch (error) {
     console.error("Failed to restore auth state:", error);
