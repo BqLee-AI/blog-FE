@@ -97,11 +97,11 @@ export const useUserStore = create<UserStore>((set) => ({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "修改密码失败";
       console.warn("API 修改密码失败:", errorMessage);
-      // 降级方案：本地模拟成功
       set({
-        error: `${errorMessage}（本地处理）`,
+        error: errorMessage,
         isLoading: false,
       });
+      throw error;
     }
   },
 
