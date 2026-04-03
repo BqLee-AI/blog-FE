@@ -313,6 +313,8 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                 <button
                   type="button"
                   onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                  aria-label={isPasswordVisible ? "隐藏密码" : "显示密码"}
+                  aria-pressed={isPasswordVisible}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
                 >
                   {isPasswordVisible ? "隐" : "显"}
@@ -340,6 +342,8 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
                 <button
                   type="button"
                   onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                  aria-label={isConfirmPasswordVisible ? "隐藏确认密码" : "显示确认密码"}
+                  aria-pressed={isConfirmPasswordVisible}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
                 >
                   {isConfirmPasswordVisible ? "隐" : "显"}
