@@ -63,18 +63,11 @@ export const useUserStore = create<UserStore>((set) => ({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "更新个人信息失败";
       console.warn("API 更新个人信息失败:", errorMessage);
-      // 降级方案：模拟更新
-      set((state) => ({
-        user: state.user
-          ? {
-              ...state.user,
-              ...profile,
-              updatedAt: new Date().toISOString(),
-            }
-          : null,
-        error: `${errorMessage}（本地更新）`,
+      set({
+        error: errorMessage,
         isLoading: false,
-      }));
+      });
+      throw error;
     }
   },
 
