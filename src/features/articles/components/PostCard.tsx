@@ -52,7 +52,7 @@ export default function PostCard({ post }: PostCardProps) {
               {hasCoverImage ? "后端文章" : "文章推荐"}
             </span>
             {metaItems.map((item, index) => (
-              <span key={item}>
+              <span key={`${item}-${index}`}>
                 {index > 0 && <span className="mx-1">·</span>}
                 <span>{item}</span>
               </span>
