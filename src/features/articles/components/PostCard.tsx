@@ -15,10 +15,11 @@ export default function PostCard({ post }: PostCardProps) {
   const readingTime = estimateReadingTime("content" in post ? post.content : undefined);
   const publishedAt = formatArticleDate(isBackendArticle(post) ? post.created_at : post.createdAt);
   const authorName = isBackendArticle(post) ? post.author.username : post.author;
+  const backendArticle = isBackendArticle(post) ? post : null;
   const tags = "tags" in post && Array.isArray(post.tags)
     ? post.tags.map((tag) => (typeof tag === "string" ? tag : tag.name))
     : [];
-  const hasCoverImage = isBackendArticle(post) && Boolean(post.cover_image);
+  const hasCoverImage = Boolean(backendArticle?.cover_image);
 
   return (
     <Link to={`/article/${post.id}`} className="block">
@@ -26,7 +27,7 @@ export default function PostCard({ post }: PostCardProps) {
         {hasCoverImage ? (
           <div className="relative h-48 overflow-hidden">
             <img
-              src={post.cover_image}
+              src={backendArticle.cover_image}
               alt={post.title}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
