@@ -41,12 +41,18 @@ export default function HomePage() {
         if (!isActive) return;
 
         setArticles(Array.isArray(response.items) ? response.items : []);
-        setPagination(response.pagination ?? {
+        const nextPagination = response.pagination ?? {
           page: 1,
           page_size: PAGE_SIZE,
           total: 0,
           total_pages: 0,
-        });
+        };
+
+        setPagination(nextPagination);
+
+        if (nextPagination.page !== page) {
+          setPage(nextPagination.page);
+        }
       } catch (requestError) {
         if (!isActive) return;
 
@@ -123,7 +129,7 @@ export default function HomePage() {
             <div className="rounded-2xl bg-white/80 dark:bg-gray-950/40 p-4 border border-white/70 dark:border-gray-800/60">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">当前页</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {pagination.page} / {totalPages}
+                {page} / {totalPages}
               </p>
             </div>
             <div className="rounded-2xl bg-white/80 dark:bg-gray-950/40 p-4 border border-white/70 dark:border-gray-800/60">
@@ -227,13 +233,13 @@ export default function HomePage() {
 
             <div className="mt-10 flex flex-col gap-4 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                第 {pagination.page} 页，共 {totalPages} 页 · 当前显示 {articles.length} 篇文章
+                第 {page} 页，共 {totalPages} 页 · 当前显示 {articles.length} 篇文章
               </div>
               <div className="flex items-center gap-3">
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={pagination.page <= 1}
+                  disabled={page <= 1}
                   onClick={() => setPage((current) => Math.max(1, current - 1))}
                 >
                   上一页
@@ -241,7 +247,7 @@ export default function HomePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={pagination.page >= totalPages}
+                  disabled={page >= totalPages}
                   onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                 >
                   下一页
