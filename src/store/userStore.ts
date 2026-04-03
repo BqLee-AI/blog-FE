@@ -3,18 +3,8 @@ import type { User, UserProfileForm, PasswordChangeForm } from "@/types/user";
 import { getCurrentUser as fetchCurrentUser, updateProfile as updateProfileAPI, updateAvatar as updateAvatarAPI, changePassword as changePasswordAPI } from "@/api/user";
 
 /**
- * Mock 用户数据（用于 API 未实现时的降级方案）
+ * 用户状态管理 Store
  */
-const createMockUser = (): User => ({
-  id: 1,
-  username: "测试用户",
-  email: "test@example.com",
-  bio: "这是一个测试用户",
-  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=testuser",
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-});
-
 interface UserStore {
   user: User | null;
   isLoading: boolean;
@@ -55,12 +45,10 @@ export const useUserStore = create<UserStore>((set) => ({
       set({ user, isLoading: false });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "获取用户信息失败";
-      console.warn("API 获取用户信息失败，使用 mock 数据:", errorMessage);
-      // 降级方案：使用 mock 数据
-      const mockUser = createMockUser();
+      console.warn("API 获取用户信息失败:", errorMessage);
       set({
-        user: mockUser,
-        error: `${errorMessage}（使用测试数据）`,
+        user: null,
+        error: errorMessage,
         isLoading: false,
       });
     }
