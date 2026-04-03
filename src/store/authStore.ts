@@ -145,6 +145,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({ user: null, isLoggedIn: false, error: null, hasHydrated: true });
       try {
         localStorage.removeItem("blog-auth-user");
+        localStorage.removeItem("accessToken");
       } catch (e) {
         console.error("Failed to clear localStorage:", e);
       }
