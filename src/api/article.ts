@@ -28,7 +28,7 @@ export interface Article {
 export interface ArticleDetail extends Article {
   content: string;
   tags: ArticleTag[];
-  category: ArticleCategory;
+  category: ArticleCategory | null;
 }
 
 export interface ArticleListParams {
@@ -66,7 +66,7 @@ const normalizeArticleDetail = (article: ArticleDetail): ArticleDetail => ({
   ...normalizeArticle(article),
   content: article.content ?? "",
   tags: Array.isArray(article.tags) ? article.tags : [],
-  category: article.category ?? { id: 0, name: "" },
+  category: article.category ?? null,
 });
 
 const unwrapResponse = <T>(payload: T | { data: T }): T => {

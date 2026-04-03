@@ -200,8 +200,10 @@ export default function ArticleDetailPage() {
           </h1>
           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
             <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">作者: {article.author.username}</span>
-            {article.category && (
+            {article.category ? (
               <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">分类: {article.category.name}</span>
+            ) : (
+              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">分类: 未分类</span>
             )}
             {publishedAt && (
               <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">发布: {publishedAt}</span>
