@@ -43,7 +43,8 @@ export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
 export const sendVerificationCode = async (email: string): Promise<{ message: string }> => {
   try {
     const response = await api.post<{ message: string }>("/auth/sendcode", { email });
-    return response.data;
+    const codeData = (response.data as any)?.data || response.data;
+    return codeData as { message: string };
   } catch (error) {
     console.error("发送验证码失败:", error);
     throw error;
