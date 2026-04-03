@@ -16,6 +16,11 @@ export default function PostCard({ post }: PostCardProps) {
   const publishedAt = formatArticleDate(isBackendArticle(post) ? post.created_at : post.createdAt);
   const authorName = isBackendArticle(post) ? post.author.username : post.author;
   const backendArticle = isBackendArticle(post) ? post : null;
+  const metaItems = [
+    publishedAt,
+    authorName ? `作者：${authorName}` : null,
+    isBackendArticle(post) ? `${post.view_count} 次阅读` : `${readingTime} 分钟阅读`,
+  ].filter(Boolean) as string[];
   const tags = "tags" in post && Array.isArray(post.tags)
     ? post.tags.map((tag) => (typeof tag === "string" ? tag : tag.name))
     : [];
@@ -46,10 +51,12 @@ export default function PostCard({ post }: PostCardProps) {
             <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1 text-blue-600 dark:text-blue-300">
               {hasCoverImage ? "后端文章" : "文章推荐"}
             </span>
-            {publishedAt && <span>{publishedAt}</span>}
-            {authorName && <span>· 作者：{authorName}</span>}
-            <span>·</span>
-            {isBackendArticle(post) ? <span>{post.view_count} 次阅读</span> : <span>{readingTime} 分钟阅读</span>}
+            {metaItems.map((item, index) => (
+              <span key={item}>
+                {index > 0 && <span className="mx-1">·</span>}
+                <span>{item}</span>
+              </span>
+            ))}
           </div>
 
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
