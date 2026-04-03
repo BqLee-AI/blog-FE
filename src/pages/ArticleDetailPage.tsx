@@ -8,6 +8,7 @@ import { CommentList } from "@/features/comments/components/CommentList";
 import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { estimateReadingTime, formatArticleDate } from "@/lib/utils";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -28,6 +29,7 @@ export default function ArticleDetailPage() {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const readingTime = estimateReadingTime(article?.content);
   const publishedAt = formatArticleDate(article?.created_at);
+  const safeContent = article ? sanitizeHtml(article.content) : "";
   const topLevelCommentCount = comments.filter((comment) => !comment.replyTo).length;
 
   useEffect(() => {
@@ -263,10 +265,10 @@ export default function ArticleDetailPage() {
             </p>
           </div>
 
-          {article.content ? (
+          {safeContent ? (
             <article
               className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300 prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:leading-8 prose-p:mb-5 prose-strong:text-gray-900 dark:prose-strong:text-white prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-img:rounded-2xl prose-img:shadow-sm prose-img:my-6 prose-blockquote:border-blue-400 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-300"
-              dangerouslySetInnerHTML={{ __html: article.content }}
+              dangerouslySetInnerHTML={{ __html: safeContent }}
             />
           ) : (
             <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center text-gray-500 dark:text-gray-400">
