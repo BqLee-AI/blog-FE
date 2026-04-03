@@ -198,7 +198,7 @@ export default function HomePage() {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center min-h-75 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70">
+          <div className="flex items-center justify-center min-h-80 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70">
             <div className="text-center">
               <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 dark:border-blue-800 dark:border-t-blue-400" />
               <p className="text-gray-600 dark:text-gray-400">加载文章中...</p>
