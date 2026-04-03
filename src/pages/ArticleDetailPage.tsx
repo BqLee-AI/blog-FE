@@ -17,7 +17,7 @@ export default function ArticleDetailPage() {
   const navigate = useNavigate();
   const [article, setArticle] = useState<ArticleDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string; retryable: boolean } | null>(null);
   const [isNotFound, setIsNotFound] = useState(false);
   const [retryToken, setRetryToken] = useState(0);
   
@@ -38,7 +38,7 @@ export default function ArticleDetailPage() {
     const loadArticle = async () => {
       if (!id || Number.isNaN(Number(id))) {
         setArticle(null);
-        setError("文章ID无效");
+        setError({ message: "文章ID无效", retryable: false });
         setIsLoading(false);
         setIsNotFound(false);
         return;
@@ -61,7 +61,10 @@ export default function ArticleDetailPage() {
           setIsNotFound(true);
           setError(null);
         } else {
-          setError(requestError instanceof Error ? requestError.message : "获取文章详情失败");
+          setError({
+            message: requestError instanceof Error ? requestError.message : "获取文章详情失败",
+            retryable: true,
+          });
         }
 
         setArticle(null);
@@ -140,7 +143,7 @@ export default function ArticleDetailPage() {
       <div className="text-center py-12">
         <div className="text-6xl mb-4">😕</div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          {error || "文章不存在"}
+          {error?.message || "文章不存在"}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           {isNotFound ? "无法找到您要查看的文章" : "文章加载失败，请稍后重试"}
@@ -152,7 +155,7 @@ export default function ArticleDetailPage() {
         >
           返回首页
         </Button>
-        {error && (
+        {error?.retryable && (
           <Button
             type="button"
             onClick={() => setRetryToken((value) => value + 1)}
