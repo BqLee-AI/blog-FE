@@ -57,6 +57,18 @@ const defaultPagination: ArticlePagination = {
   total_pages: 0,
 };
 
+const normalizeArticle = (article: Article): Article => ({
+  ...article,
+  cover_image: article.cover_image ?? "",
+});
+
+const normalizeArticleDetail = (article: ArticleDetail): ArticleDetail => ({
+  ...normalizeArticle(article),
+  content: article.content ?? "",
+  tags: Array.isArray(article.tags) ? article.tags : [],
+  category: article.category ?? { id: 0, name: "" },
+});
+
 const unwrapResponse = <T>(payload: T | { data: T }): T => {
   if (payload && typeof payload === 'object' && 'data' in payload) {
     return (payload as { data: T }).data;
@@ -79,7 +91,7 @@ export const articleApi = {
     };
 
     return {
-      items,
+      items: items.map(normalizeArticle),
       pagination,
     };
   },
@@ -87,6 +99,6 @@ export const articleApi = {
   getById: async (id: number): Promise<ArticleDetail> => {
     const response = await apiClient.get<ArticleDetail | { data: ArticleDetail }>(`/articles/${id}`);
 
-    return unwrapResponse(response.data);
+    return normalizeArticleDetail(unwrapResponse(response.data));
   },
 };
