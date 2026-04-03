@@ -1,4 +1,4 @@
-import apiClient from './index';
+import apiClient from './apiClient';
 import type{ Comment, CommentListResponse } from '../types/comment';
 
 // 定义分页参数

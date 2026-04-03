@@ -1,4 +1,4 @@
-import apiClient from './index';
+import apiClient from './apiClient';
 import type{ LoginForm, RegisterForm, AuthUser } from '../types/auth';
 
 // 定义登录响应类型

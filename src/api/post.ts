@@ -1,4 +1,4 @@
-import apiClient from './index';
+import apiClient from './apiClient';
 import type{ Post, PaginationInfo, ApiResponse, ListResponse } from '../types/post';
 
 // 定义文章查询参数

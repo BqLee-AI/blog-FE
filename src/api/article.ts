@@ -1,4 +1,4 @@
-import apiClient from './index';
+import apiClient from './apiClient';
 
 export interface ArticleAuthor {
   id: number;
