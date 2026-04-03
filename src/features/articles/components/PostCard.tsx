@@ -29,7 +29,7 @@ export default function PostCard({ post }: PostCardProps) {
   return (
     <Link to={`/article/${post.id}`} className="block">
       <article className="hover-card group bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-        {hasCoverImage ? (
+        {backendArticle?.cover_image ? (
           <div className="relative h-48 overflow-hidden">
             <img
               src={backendArticle.cover_image}
