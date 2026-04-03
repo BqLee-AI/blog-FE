@@ -61,8 +61,12 @@ const buildLoginRedirectUrl = (): string => {
  * 清除认证状态
  */
 const clearAuthState = (): void => {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(AUTH_STORAGE_KEY);
+  try {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+  } catch (error) {
+    console.error('Failed to clear auth state:', error);
+  }
 };
 
 /**
