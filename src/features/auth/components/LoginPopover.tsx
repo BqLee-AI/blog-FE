@@ -76,7 +76,6 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
       loginForm.reset();
       setTimeout(() => {
         onClose();
-        window.location.reload();
       }, 300);
     } catch (err) {
       console.error("登录失败:", err);
@@ -90,7 +89,6 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
       registerForm.reset();
       setTimeout(() => {
         onClose();
-        window.location.reload();
       }, 300);
     } catch (err) {
       console.error("注册失败:", err);
