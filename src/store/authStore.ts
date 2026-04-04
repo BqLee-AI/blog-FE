@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { AuthUser, LoginForm, RegisterForm } from "@/types/auth";
+import { login as apiLogin, register as apiRegister, logout as apiLogout, sendVerificationCode } from "@/api/auth";
 
 function normalizeAuthUser(user: AuthUser): AuthUser {
   return {
@@ -14,40 +15,37 @@ interface AuthStore {
   error: string | null;
   isLoggedIn: boolean;
   hasHydrated: boolean;
+  isSendingCode: boolean;
+  countdown: number;
+  timerId: ReturnType<typeof setInterval> | null;
 
-  // 登录
   login: (form: LoginForm) => Promise<void>;
-
-  // 注册
   register: (form: RegisterForm) => Promise<void>;
-
-  // 登出
-  logout: () => void;
-
-  // 清空错误
+  logout: () => Promise<void>;
   clearError: () => void;
-
-  // 设置用户信息（用于页面跳转后更新）
   setUser: (user: AuthUser) => void;
-
-  // 更新头像
   updateAvatar: (avatarUrl: string) => void;
+  sendCode: (email: string) => Promise<void>;
+  setCountdown: (count: number) => void;
+  clearCountdownTimer: () => void;
 }
 
 /**
  * 认证状态管理 Store
  */
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   isLoading: false,
   error: null,
   isLoggedIn: false,
   hasHydrated: false,
+  isSendingCode: false,
+  countdown: 0,
+  timerId: null,
 
   login: async (form: LoginForm) => {
     set({ isLoading: true, error: null });
     try {
-      // 基础验证
       if (!form.email || !form.password) {
         throw new Error("邮箱和密码不能为空");
       }
@@ -56,34 +54,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error("请输入正确的邮箱地址");
       }
 
-      if (form.password.length < 6) {
-        throw new Error("密码至少需要 6 个字符");
-      }
-
-      // 模拟 API 延迟
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // 模拟登录数据
-      const mockUser: AuthUser = {
-        id: 1,
-        username: form.email.split("@")[0] ?? "",
-        email: form.email,
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + form.email,
-        role: "user",
-      };
+      const response = await apiLogin(form);
+      const normalizedUser = normalizeAuthUser(response.user);
 
       set({
-        user: mockUser,
+        user: normalizedUser,
         isLoggedIn: true,
         isLoading: false,
+        error: null,
         hasHydrated: true,
       });
 
-      // 保存到 localStorage
       try {
-        localStorage.setItem("blog-auth-user", JSON.stringify(mockUser));
+        localStorage.setItem("blog-auth-user", JSON.stringify(normalizedUser));
+        if (response.accessToken) {
+          localStorage.setItem("accessToken", response.accessToken);
+        }
       } catch (e) {
-        console.error("Failed to save user to localStorage:", e);
+        console.error("Failed to save to localStorage:", e);
       }
     } catch (error) {
       set({
@@ -98,7 +86,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
   register: async (form: RegisterForm) => {
     set({ isLoading: true, error: null });
     try {
-      // 验证
       if (!form.username || !form.email || !form.password) {
         throw new Error("所有字段都不能为空");
       }
@@ -119,28 +106,22 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error("两次输入的密码不一致");
       }
 
-      // 模拟 API 延迟
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (!form.code || form.code.trim() === "") {
+        throw new Error("请输入邮箱验证码");
+      }
 
-      // 模拟注册数据
-      const mockUser: AuthUser = {
-        id: Math.random(),
-        username: form.username,
-        email: form.email,
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + form.email,
-        role: "user",
-      };
+      const user = normalizeAuthUser(await apiRegister(form));
 
       set({
-        user: mockUser,
+        user,
         isLoggedIn: true,
         isLoading: false,
+        error: null,
         hasHydrated: true,
       });
 
-      // 保存到 localStorage
       try {
-        localStorage.setItem("blog-auth-user", JSON.stringify(mockUser));
+        localStorage.setItem("blog-auth-user", JSON.stringify(user));
       } catch (e) {
         console.error("Failed to save user to localStorage:", e);
       }
@@ -154,13 +135,20 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 
-  logout: () => {
-    set({ user: null, isLoggedIn: false, error: null, hasHydrated: true });
-    // 清除 localStorage
+  logout: async () => {
     try {
-      localStorage.removeItem("blog-auth-user");
-    } catch (e) {
-      console.error("Failed to clear localStorage:", e);
+      get().clearCountdownTimer();
+      await apiLogout();
+    } catch (error) {
+      console.error("登出API调用失败:", error);
+    } finally {
+      set({ user: null, isLoggedIn: false, error: null, hasHydrated: true });
+      try {
+        localStorage.removeItem("blog-auth-user");
+        localStorage.removeItem("accessToken");
+      } catch (e) {
+        console.error("Failed to clear localStorage:", e);
+      }
     }
   },
 
@@ -177,7 +165,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       user: state.user ? { ...state.user, avatar: avatarUrl } : null,
     }));
 
-    // 更新 localStorage
     try {
       const updatedUser = useAuthStore.getState().user;
       if (updatedUser) {
@@ -187,6 +174,59 @@ export const useAuthStore = create<AuthStore>((set) => ({
       console.error("Failed to save avatar to localStorage:", e);
     }
   },
+
+  sendCode: async (email: string) => {
+    set({ isSendingCode: true, error: null });
+    try {
+      if (!email || !email.includes("@")) {
+        throw new Error("请输入有效的邮箱地址");
+      }
+
+      await sendVerificationCode(email);
+      get().clearCountdownTimer();
+
+      let count = 60;
+      const timerId = setInterval(() => {
+        count -= 1;
+
+        if (count <= 0) {
+          get().clearCountdownTimer();
+          return;
+        }
+
+        set({ countdown: count });
+      }, 1000);
+
+      set({ countdown: count, timerId });
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : "发送验证码失败",
+        isSendingCode: false,
+      });
+      throw error;
+    } finally {
+      set({ isSendingCode: false });
+    }
+  },
+
+  setCountdown: (count: number) => {
+    if (count <= 0) {
+      get().clearCountdownTimer();
+      return;
+    }
+
+    set({ countdown: count });
+  },
+
+  clearCountdownTimer: () => {
+    const { timerId } = get();
+
+    if (timerId !== null) {
+      clearInterval(timerId);
+    }
+
+    set({ timerId: null, countdown: 0 });
+  },
 }));
 
 /**
@@ -195,12 +235,23 @@ export const useAuthStore = create<AuthStore>((set) => ({
 export const initializeAuth = () => {
   try {
     const savedUser = localStorage.getItem("blog-auth-user");
-    if (savedUser) {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (savedUser && accessToken) {
       const user = normalizeAuthUser(JSON.parse(savedUser) as AuthUser);
       useAuthStore.setState({ user, isLoggedIn: true });
+    } else if (savedUser || accessToken) {
+      try {
+        localStorage.removeItem("blog-auth-user");
+        localStorage.removeItem("accessToken");
+      } catch (storageError) {
+        console.error("Failed to clear stale auth state:", storageError);
+      }
+
+      useAuthStore.setState({ user: null, isLoggedIn: false });
     }
-  } catch (e) {
-    console.error("Failed to restore auth state:", e);
+  } catch (error) {
+    console.error("Failed to restore auth state:", error);
   } finally {
     useAuthStore.setState({ hasHydrated: true });
   }

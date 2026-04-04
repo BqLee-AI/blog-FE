@@ -145,6 +145,15 @@ bun run dev
 ```
 自动在浏览器打开 `http://localhost:5173`
 
+### 本地环境变量
+在项目根目录创建 `.env.local`，覆盖开发时的代理目标地址：
+
+```bash
+VITE_API_PROXY_TARGET=http://172.207.24.18:8080
+```
+
+如果你在不同机器或 CI 预览环境中开发，只需要改这个值，`vite.config.ts` 会自动读取。
+
 ### 构建生产版本
 ```bash
 bun run build
