@@ -22,7 +22,7 @@ export default function PostCard({ post }: PostCardProps) {
     isBackendArticle(post) ? `${post.view_count} 次阅读` : `${readingTime} 分钟阅读`,
   ].filter(Boolean) as string[];
   const tags = "tags" in post && Array.isArray(post.tags)
-    ? post.tags.map((tag) => (typeof tag === "string" ? tag : tag.name))
+    ? post.tags.map((tag) => (typeof tag === "string" ? tag : (tag as { name: string }).name))
     : [];
   const hasCoverImage = Boolean(backendArticle?.cover_image);
 
