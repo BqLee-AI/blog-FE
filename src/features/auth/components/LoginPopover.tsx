@@ -1,13 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
 
 interface LoginPopoverProps {
   isOpen: boolean;
@@ -25,6 +22,7 @@ const registerSchema = z
   .object({
     username: z.string().min(2, "用户名至少 2 个字符"),
     email: z.string().email("请输入有效的邮箱"),
+    code: z.string().min(1, "请输入验证码"),
     password: z.string().min(6, "密码至少 6 位"),
     confirmPassword: z.string().min(6, "请再次输入密码"),
   })
@@ -34,68 +32,82 @@ const registerSchema = z
   });
 
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
-  const { login, register, isLoading, error, clearError } = useAuthStore();
+  const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown, clearCountdownTimer } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState<TabType>("login");
 
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-
-  const loginForm = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
+  // 登录表单
+  const loginMethods = useForm<LoginForm>({
     defaultValues: {
       email: "",
       password: "",
     },
+    resolver: zodResolver(loginSchema),
   });
 
-  const registerForm = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
+  // 注册表单
+  const registerMethods = useForm<RegisterForm>({
     defaultValues: {
       username: "",
       email: "",
       password: "",
       confirmPassword: "",
+      code: "",
     },
+    resolver: zodResolver(registerSchema),
   });
+
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const loginErrors = loginMethods.formState.errors;
+  const registerErrors = registerMethods.formState.errors;
+
+  useEffect(() => {
+    if (!isOpen) {
+      clearCountdownTimer();
+    }
+  }, [isOpen, clearCountdownTimer]);
+
+  useEffect(() => {
+    return () => {
+      clearCountdownTimer();
+    };
+  }, [clearCountdownTimer]);
+
 
   // 处理标签页切换
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     clearError();
-    loginForm.reset();
-    registerForm.reset();
+    setCountdown(0);
+    // 清空表单
+    loginMethods.reset();
+    registerMethods.reset();
     setIsPasswordVisible(false);
     setIsConfirmPasswordVisible(false);
   };
 
   // 处理登录
-  const handleLoginSubmit = async (values: LoginForm) => {
+  const handleLoginSubmit = loginMethods.handleSubmit(async (data) => {
     try {
-      await login(values);
-      loginForm.reset();
-      setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 300);
+      await login(data);
+      // 登录成功，关闭弹窗
+      onClose();
     } catch (err) {
       console.error("登录失败:", err);
     }
-  };
+  });
 
   // 处理注册
-  const handleRegisterSubmit = async (values: RegisterForm) => {
+  const handleRegisterSubmit = registerMethods.handleSubmit(async (data) => {
     try {
-      await register(values);
-      registerForm.reset();
-      setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 300);
+      await register(data);
+      // 注册成功，关闭弹窗
+      onClose();
     } catch (err) {
       console.error("注册失败:", err);
     }
-  };
+  });
 
   if (!isOpen) return null;
 
@@ -150,219 +162,202 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
 
         {/* 登录标签页 */}
         {activeTab === "login" && (
-          <div className="p-8">
-            {/* 权益说明 */}
-            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-3">登录后的权益：</p>
-              <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-lg leading-none mt-0.5">✓</span>
-                  <span>管理个人账号和发布内容</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-lg leading-none mt-0.5">✓</span>
-                  <span>创建和编辑文章</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-lg leading-none mt-0.5">✓</span>
-                  <span>查看和管理账户信息</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-lg leading-none mt-0.5">✓</span>
-                  <span>获得更多权限和特性</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* 错误提示 */}
+          <div className="p-6 space-y-4">
             {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <div className="p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                {error}
               </div>
             )}
 
-            {/* 登录表单 */}
-            <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
-                <FormField
-                  control={loginForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">邮箱</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="邮箱地址"
-                          autoComplete="email"
-                          className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <form onSubmit={handleLoginSubmit} className="space-y-3">
+              <label htmlFor="login-email" className="sr-only">
+                邮箱
+              </label>
+              <input
+                id="login-email"
+                type="email"
+                placeholder="邮箱"
+                {...loginMethods.register("email")}
+                aria-invalid={Boolean(loginErrors.email)}
+                aria-describedby={loginErrors.email ? "login-email-error" : undefined}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {loginErrors.email && (
+                <p id="login-email-error" className="text-sm text-red-500">
+                  {loginErrors.email.message}
+                </p>
+              )}
+              <label htmlFor="login-password" className="sr-only">
+                密码
+              </label>
+              <input
+                id="login-password"
+                type="password"
+                placeholder="密码"
+                {...loginMethods.register("password")}
+                aria-invalid={Boolean(loginErrors.password)}
+                aria-describedby={loginErrors.password ? "login-password-error" : undefined}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {loginErrors.password && (
+                <p id="login-password-error" className="text-sm text-red-500">
+                  {loginErrors.password.message}
+                </p>
+              )}
 
-                <FormField
-                  control={loginForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">密码</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="密码"
-                          autoComplete="current-password"
-                          className="hover-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button type="submit" className="hover-button w-full px-4 py-2 bg-blue-600 text-white rounded-lg dark:bg-blue-700 font-medium disabled:opacity-50" disabled={isLoading}>
-                  {isLoading ? "登录中..." : "立即登录"}
-                </Button>
-              </form>
-            </Form>
-
-            {/* 测试账号提示 */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-              <p className="font-semibold mb-2">💡 测试账号：</p>
-              <p>邮箱：test@example.com</p>
-              <p>密码：password123</p>
-            </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded dark:bg-blue-700 font-medium disabled:opacity-50"
+              >
+                {isLoading ? "登录中..." : "登录"}
+              </button>
+            </form>
           </div>
         )}
 
         {/* 注册标签页 */}
         {activeTab === "register" && (
-          <div className="p-8">
-            {/* 错误提示 */}
+          <div className="p-6 space-y-4">
             {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <div className="p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                {error}
               </div>
             )}
 
-            {/* 注册表单 */}
-            <Form {...registerForm}>
-              <form onSubmit={registerForm.handleSubmit(handleRegisterSubmit)} className="space-y-4">
-                <FormField
-                  control={registerForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">用户名</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="用户名（至少 2 个字符）"
-                          autoComplete="nickname"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <form onSubmit={handleRegisterSubmit} className="space-y-3">
+              <label htmlFor="register-username" className="sr-only">
+                用户名
+              </label>
+              <input
+                id="register-username"
+                type="text"
+                placeholder="用户名"
+                {...registerMethods.register("username")}
+                aria-invalid={Boolean(registerErrors.username)}
+                aria-describedby={registerErrors.username ? "register-username-error" : undefined}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {registerErrors.username && (
+                <p id="register-username-error" className="text-sm text-red-500">
+                  {registerErrors.username.message}
+                </p>
+              )}
 
-                <FormField
-                  control={registerForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">邮箱</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="邮箱地址"
-                          autoComplete="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <label htmlFor="register-email" className="sr-only">
+                邮箱
+              </label>
+              <input
+                id="register-email"
+                type="email"
+                placeholder="邮箱"
+                {...registerMethods.register("email")}
+                aria-invalid={Boolean(registerErrors.email)}
+                aria-describedby={registerErrors.email ? "register-email-error" : undefined}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {registerErrors.email && (
+                <p id="register-email-error" className="text-sm text-red-500">
+                  {registerErrors.email.message}
+                </p>
+              )}
 
-                <FormField
-                  control={registerForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">密码</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type={isPasswordVisible ? "text" : "password"}
-                            placeholder="密码（至少 6 个字符）"
-                            autoComplete="new-password"
-                            className="pr-12"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                            variant="ghost"
-                            className="absolute right-1 top-1/2 h-8 -translate-y-1/2 px-2 text-gray-500 hover:bg-transparent dark:text-gray-400"
-                          >
-                            {isPasswordVisible ? "隐" : "显"}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label htmlFor="register-code" className="sr-only">
+                    验证码
+                  </label>
+                  <input
+                    id="register-code"
+                    type="text"
+                    placeholder="验证码"
+                    {...registerMethods.register("code")}
+                    aria-invalid={Boolean(registerErrors.code)}
+                    aria-describedby={registerErrors.code ? "register-code-error" : undefined}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                  {registerErrors.code && (
+                    <p id="register-code-error" className="mt-1 text-sm text-red-500">
+                      {registerErrors.code.message}
+                    </p>
                   )}
-                />
-
-                <FormField
-                  control={registerForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">确认密码</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type={isConfirmPasswordVisible ? "text" : "password"}
-                            placeholder="再次输入密码"
-                            autoComplete="new-password"
-                            className="pr-12"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                            variant="ghost"
-                            className="absolute right-1 top-1/2 h-8 -translate-y-1/2 px-2 text-gray-500 hover:bg-transparent dark:text-gray-400"
-                          >
-                            {isConfirmPasswordVisible ? "隐" : "显"}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  className="hover-button w-full px-4 py-2 bg-green-600 text-white rounded-lg dark:bg-green-700 font-medium disabled:opacity-50"
-                  disabled={isLoading || registerForm.formState.isSubmitting}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => sendCode(registerMethods.watch("email"))}
+                  disabled={countdown > 0 || isSendingCode || !registerMethods.watch("email")}
+                  className="px-3 py-2 bg-green-600 text-white rounded dark:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm"
                 >
-                  {isLoading || registerForm.formState.isSubmitting ? "注册中..." : "立即注册"}
-                </Button>
-              </form>
-            </Form>
+                  {countdown > 0 ? `${countdown}s` : isSendingCode ? "发送中..." : "发送"}
+                </button>
+              </div>
 
-            {/* 测试账号提示 */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-              <p className="font-semibold mb-2">💡 注册说明：</p>
-              <p>用户名至少 2 个字符</p>
-              <p>密码至少 6 个字符</p>
-            </div>
+              <div className="relative">
+                <label htmlFor="register-password" className="sr-only">
+                  密码
+                </label>
+                <input
+                  id="register-password"
+                  type={isPasswordVisible ? "text" : "password"}
+                  placeholder="密码"
+                  {...registerMethods.register("password")}
+                  aria-invalid={Boolean(registerErrors.password)}
+                  aria-describedby={registerErrors.password ? "register-password-error" : undefined}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
+                />
+                {registerErrors.password && (
+                  <p id="register-password-error" className="mt-1 text-sm text-red-500">
+                    {registerErrors.password.message}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                  aria-label={isPasswordVisible ? "隐藏密码" : "显示密码"}
+                  aria-pressed={isPasswordVisible}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
+                >
+                  {isPasswordVisible ? "隐" : "显"}
+                </button>
+              </div>
+
+              <div className="relative">
+                <label htmlFor="register-confirm-password" className="sr-only">
+                  确认密码
+                </label>
+                <input
+                  id="register-confirm-password"
+                  type={isConfirmPasswordVisible ? "text" : "password"}
+                  placeholder="确认密码"
+                  {...registerMethods.register("confirmPassword")}
+                  aria-invalid={Boolean(registerErrors.confirmPassword)}
+                  aria-describedby={registerErrors.confirmPassword ? "register-confirm-password-error" : undefined}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
+                />
+                {registerErrors.confirmPassword && (
+                  <p id="register-confirm-password-error" className="mt-1 text-sm text-red-500">
+                    {registerErrors.confirmPassword.message}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                  aria-label={isConfirmPasswordVisible ? "隐藏确认密码" : "显示确认密码"}
+                  aria-pressed={isConfirmPasswordVisible}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
+                >
+                  {isConfirmPasswordVisible ? "隐" : "显"}
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full px-4 py-2 bg-green-600 text-white rounded dark:bg-green-700 font-medium disabled:opacity-50"
+              >
+                {isLoading ? "注册中..." : "注册"}
+              </button>
+            </form>
           </div>
         )}
       </div>
