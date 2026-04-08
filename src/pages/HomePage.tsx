@@ -41,11 +41,11 @@ export default function HomePage() {
         if (!isActive) return;
 
         setArticles(Array.isArray(response.items) ? response.items : []);
-        const nextPagination = response.pagination ?? {
-          page: 1,
-          page_size: PAGE_SIZE,
-          total: 0,
-          total_pages: 0,
+        const nextPagination = {
+          page: typeof response.page === "number" ? response.page : 1,
+          page_size: typeof response.page_size === "number" ? response.page_size : PAGE_SIZE,
+          total: typeof response.total === "number" ? response.total : 0,
+          total_pages: typeof response.total_pages === "number" ? response.total_pages : 0,
         };
 
         setPagination(nextPagination);

@@ -47,7 +47,10 @@ export interface ArticlePagination {
 
 export interface ArticleListResponse {
   items: Article[];
-  pagination: ArticlePagination;
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
 }
 
 const defaultPagination: ArticlePagination = {
@@ -110,20 +113,40 @@ const unwrapResponse = <T>(payload: T | { data: T }): T => {
 
 export const articleApi = {
   list: async (params: ArticleListParams = {}): Promise<ArticleListResponse> => {
-    const response = await apiClient.get<ArticleListResponse | { data: ArticleListResponse }>('/articles', {
+    const response = await apiClient.get<
+      ArticleListResponse | {
+        data: ArticleListResponse;
+      } | {
+        items?: Article[];
+        total?: number;
+        page?: number;
+        page_size?: number;
+        total_pages?: number;
+        pagination?: ArticlePagination;
+      }
+    >('/articles', {
       params,
     });
 
     const payload = unwrapResponse(response.data);
-    const items = Array.isArray(payload.items) ? payload.items : [];
+    const items = Array.isArray(payload.items) ? payload.items.map(normalizeArticle) : [];
     const pagination = {
       ...defaultPagination,
-      ...(payload.pagination ?? {}),
+      page: typeof payload.page === "number" ? payload.page : defaultPagination.page,
+      page_size: typeof payload.page_size === "number" ? payload.page_size : defaultPagination.page_size,
+      total: typeof payload.total === "number" ? payload.total : defaultPagination.total,
+      total_pages:
+        typeof payload.total_pages === "number"
+          ? payload.total_pages
+          : Math.max(1, Math.ceil((typeof payload.total === "number" ? payload.total : defaultPagination.total) / (typeof payload.page_size === "number" ? payload.page_size : defaultPagination.page_size))),
     };
 
     return {
-      items: items.map(normalizeArticle),
-      pagination,
+      items,
+      total: pagination.total,
+      page: pagination.page,
+      page_size: pagination.page_size,
+      total_pages: pagination.total_pages,
     };
   },
 
