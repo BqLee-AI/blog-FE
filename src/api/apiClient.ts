@@ -8,6 +8,22 @@ const apiClient = axios.create({
   },
 });
 
+const getCurrentRedirectTarget = (): string => {
+  if (typeof window === 'undefined') {
+    return '/';
+  }
+
+  return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+};
+
+const buildHomeRedirectUrl = (): string => {
+  if (typeof window === 'undefined') {
+    return '/';
+  }
+
+  return `/?redirect=${encodeURIComponent(getCurrentRedirectTarget())}`;
+};
+
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('accessToken');
@@ -29,7 +45,7 @@ apiClient.interceptors.response.use(
       switch (status) {
         case 401:
           localStorage.removeItem('accessToken');
-          window.location.href = '/login';
+          window.location.href = buildHomeRedirectUrl();
           break;
         case 404:
           console.error('请求的资源不存在');
