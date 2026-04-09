@@ -16,15 +16,15 @@ export default function PostCard({ post }: PostCardProps) {
   const publishedAt = formatArticleDate(isBackendArticle(post) ? post.created_at : post.createdAt);
   const authorName = isBackendArticle(post) ? post.author.username : post.author;
   const backendArticle = isBackendArticle(post) ? post : null;
+  const hasCoverImage = Boolean(backendArticle?.cover_image);
   const metaItems = [
-    publishedAt,
+    hasCoverImage ? null : publishedAt,
     authorName ? `作者：${authorName}` : null,
     isBackendArticle(post) ? `${post.view_count} 次阅读` : `${readingTime} 分钟阅读`,
   ].filter(Boolean) as string[];
   const tags = "tags" in post && Array.isArray(post.tags)
     ? post.tags.map((tag) => (typeof tag === "string" ? tag : (tag as { name: string }).name))
     : [];
-  const hasCoverImage = Boolean(backendArticle?.cover_image);
 
   return (
     <Link to={`/article/${post.id}`} className="block">
