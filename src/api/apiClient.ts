@@ -24,6 +24,15 @@ const buildHomeRedirectUrl = (): string => {
   return `/?redirect=${encodeURIComponent(getCurrentRedirectTarget())}`;
 };
 
+const isTokenExemptAuthEndpoint = (url?: string): boolean => {
+  if (!url) {
+    return false;
+  }
+
+  const normalizedUrl = url.replace(/[?#].*$/, '');
+  return /\/auth\/(login|register|refresh|sendcode)(?:\/|$)/.test(normalizedUrl);
+};
+
 const isAuthEndpoint = (url?: string): boolean => {
   if (!url) {
     return false;
@@ -35,6 +44,10 @@ const isAuthEndpoint = (url?: string): boolean => {
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    if (isTokenExemptAuthEndpoint(config.url)) {
+      return config;
+    }
+
     const token = localStorage.getItem('accessToken');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
