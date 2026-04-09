@@ -115,6 +115,7 @@ apiClient.interceptors.response.use(
         case 401:
           if (!isAuthEndpoint(requestUrl)) {
             localStorage.removeItem('accessToken');
+            localStorage.removeItem('blog-auth-user');
             window.location.href = buildHomeRedirectUrl();
           }
           console.error(message);
