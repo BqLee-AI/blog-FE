@@ -83,7 +83,11 @@ function FormLabel({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelE
 function FormControl({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
-  const child = React.Children.only(children) as React.ReactElement;
+  const child = React.Children.only(children) as React.ReactElement<{
+    id?: string;
+    "aria-describedby"?: string;
+    "aria-invalid"?: boolean;
+  }>;
 
   return (
     <div {...props}>
