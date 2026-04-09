@@ -24,6 +24,15 @@ const buildHomeRedirectUrl = (): string => {
   return `/?redirect=${encodeURIComponent(getCurrentRedirectTarget())}`;
 };
 
+const isAuthEndpoint = (url?: string): boolean => {
+  if (!url) {
+    return false;
+  }
+
+  const normalizedUrl = url.replace(/[?#].*$/, '');
+  return normalizedUrl.startsWith('/auth/');
+};
+
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('accessToken');
@@ -39,13 +48,17 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
+    const requestUrl = error.config?.url;
+
     if (error.response) {
       const { status } = error.response;
 
       switch (status) {
         case 401:
-          localStorage.removeItem('accessToken');
-          window.location.href = buildHomeRedirectUrl();
+          if (!isAuthEndpoint(requestUrl)) {
+            localStorage.removeItem('accessToken');
+            window.location.href = buildHomeRedirectUrl();
+          }
           break;
         case 404:
           console.error('请求的资源不存在');
