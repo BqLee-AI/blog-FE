@@ -51,6 +51,7 @@ export interface ArticleListResponse {
   page: number;
   page_size: number;
   total_pages: number;
+  pagination?: ArticlePagination;
 }
 
 const defaultPagination: ArticlePagination = {
@@ -130,15 +131,35 @@ export const articleApi = {
 
     const payload = unwrapResponse(response.data);
     const items = Array.isArray(payload.items) ? payload.items.map(normalizeArticle) : [];
+    const paginationPayload = payload.pagination;
+    const resolvedPageSize =
+      typeof paginationPayload?.page_size === "number"
+        ? paginationPayload.page_size
+        : typeof payload.page_size === "number"
+          ? payload.page_size
+          : defaultPagination.page_size;
+    const resolvedTotal =
+      typeof paginationPayload?.total === "number"
+        ? paginationPayload.total
+        : typeof payload.total === "number"
+          ? payload.total
+          : defaultPagination.total;
     const pagination = {
       ...defaultPagination,
-      page: typeof payload.page === "number" ? payload.page : defaultPagination.page,
-      page_size: typeof payload.page_size === "number" ? payload.page_size : defaultPagination.page_size,
-      total: typeof payload.total === "number" ? payload.total : defaultPagination.total,
+      page:
+        typeof paginationPayload?.page === "number"
+          ? paginationPayload.page
+          : typeof payload.page === "number"
+            ? payload.page
+            : defaultPagination.page,
+      page_size: resolvedPageSize,
+      total: resolvedTotal,
       total_pages:
-        typeof payload.total_pages === "number"
-          ? payload.total_pages
-          : Math.max(1, Math.ceil((typeof payload.total === "number" ? payload.total : defaultPagination.total) / (typeof payload.page_size === "number" ? payload.page_size : defaultPagination.page_size))),
+        typeof paginationPayload?.total_pages === "number"
+          ? paginationPayload.total_pages
+          : typeof payload.total_pages === "number"
+            ? payload.total_pages
+            : Math.max(1, Math.ceil(resolvedTotal / resolvedPageSize)),
     };
 
     return {
