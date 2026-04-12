@@ -129,7 +129,8 @@ apiClient.interceptors.response.use(
       console.error(message);
     }
 
-    return Promise.reject(new Error(message));
+    error.message = message;
+    return Promise.reject(error);
   }
 );
 
