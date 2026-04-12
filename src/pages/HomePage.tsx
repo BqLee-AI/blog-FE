@@ -159,6 +159,7 @@ export default function HomePage() {
           >
             <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
               <Input
+                aria-label="搜索标题、摘要或作者"
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 placeholder="搜索标题、摘要或作者"
