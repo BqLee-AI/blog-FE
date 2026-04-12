@@ -1,4 +1,4 @@
-import apiClient from './index';
+import apiClient from './apiClient';
 import type{ User, UserProfileForm, PasswordChangeForm } from '../types/user';
 
 /**

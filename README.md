@@ -154,6 +154,12 @@ VITE_API_PROXY_TARGET=http://172.207.24.18:8080
 
 如果你在不同机器或 CI 预览环境中开发，只需要改这个值，`vite.config.ts` 会自动读取。
 
+API 基础地址由 `VITE_API_BASE_URL` 控制，默认回退值为 `/api/v1`，与后端路由前缀保持一致。若后端地址变化，可在 `.env.local` 中显式覆盖：
+
+```bash
+VITE_API_BASE_URL=/api/v1
+```
+
 ### 构建生产版本
 ```bash
 bun run build
