@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,8 @@ const registerSchema = z
 
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown, clearCountdownTimer } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [activeTab, setActiveTab] = useState<TabType>("login");
 
@@ -61,6 +64,25 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const loginErrors = loginMethods.formState.errors;
   const registerErrors = registerMethods.formState.errors;
+
+  const getPostAuthRedirect = () => {
+    const redirectTarget = new URLSearchParams(location.search).get("redirect");
+
+    if (!redirectTarget || !redirectTarget.startsWith("/") || redirectTarget.startsWith("//")) {
+      return null;
+    }
+
+    return redirectTarget;
+  };
+
+  const closeAndRedirect = () => {
+    onClose();
+
+    const redirectTarget = getPostAuthRedirect();
+    if (redirectTarget) {
+      navigate(redirectTarget, { replace: true });
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -91,8 +113,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   const handleLoginSubmit = loginMethods.handleSubmit(async (data) => {
     try {
       await login(data);
-      // 登录成功，关闭弹窗
-      onClose();
+      closeAndRedirect();
     } catch (err) {
       console.error("登录失败:", err);
     }
@@ -102,8 +123,7 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   const handleRegisterSubmit = registerMethods.handleSubmit(async (data) => {
     try {
       await register(data);
-      // 注册成功，关闭弹窗
-      onClose();
+      closeAndRedirect();
     } catch (err) {
       console.error("注册失败:", err);
     }
