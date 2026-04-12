@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const parsedArticleId = id ? parseInt(id, 10) : NaN;
+  const isValidArticleId = Number.isInteger(parsedArticleId) && parsedArticleId > 0;
   const [article, setArticle] = useState<ArticleDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ message: string; retryable: boolean } | null>(null);
@@ -22,8 +24,8 @@ export default function ArticleDetailPage() {
   const [retryToken, setRetryToken] = useState(0);
   
   // 评论相关状态
-  const postId = id ? Number(id) : 0;
-  const comments = commentStore((state) => state.comments.get(postId) || []);
+  const articleId = isValidArticleId ? parsedArticleId : null;
+  const comments = commentStore((state) => (articleId ? state.comments.get(articleId) || [] : []));
   const { isLoading: commentsLoading, addComment, deleteComment, likeComment, dislikeComment } = commentStore();
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -36,11 +38,11 @@ export default function ArticleDetailPage() {
     let isActive = true;
 
     const loadArticle = async () => {
-      if (!id || Number.isNaN(Number(id))) {
+      if (!isValidArticleId) {
         setArticle(null);
-        setError({ message: "文章ID无效", retryable: false });
+        setError(null);
         setIsLoading(false);
-        setIsNotFound(false);
+        setIsNotFound(true);
         return;
       }
 
@@ -49,7 +51,7 @@ export default function ArticleDetailPage() {
       setIsNotFound(false);
 
       try {
-        const detail = await articleApi.getById(Number(id));
+        const detail = await articleApi.getById(parsedArticleId);
 
         if (!isActive) return;
 
@@ -80,13 +82,13 @@ export default function ArticleDetailPage() {
     return () => {
       isActive = false;
     };
-  }, [id, retryToken]);
+  }, [articleId, isValidArticleId, retryToken]);
 
   // 处理添加评论
   const handleAddComment = async (commentData: Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'author' | 'email' | 'likes' | 'dislikes' | 'replyCount'>) => {
     setIsSubmittingComment(true);
     try {
-      await addComment(postId, commentData);
+      await addComment(articleId ?? 0, commentData);
       setReplyingTo(null);
     } catch (err) {
       console.error('Failed to add comment:', err);
@@ -98,7 +100,7 @@ export default function ArticleDetailPage() {
   // 处理删除评论
   const handleDeleteComment = async (commentId: number) => {
     try {
-      await deleteComment(postId, commentId);
+      await deleteComment(articleId ?? 0, commentId);
     } catch (err) {
       console.error('Failed to delete comment:', err);
     }
@@ -124,7 +126,7 @@ export default function ArticleDetailPage() {
 
   // 处理查看回复
   const handleViewReplies = (comment: Comment) => {
-    navigate(`/article/${postId}/comment/${comment.id}/replies`);
+    navigate(`/article/${articleId ?? 0}/comment/${comment.id}/replies`);
   };
 
   if (isLoading) {
@@ -310,7 +312,7 @@ export default function ArticleDetailPage() {
           {/* 评论表单 */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CommentForm
-              postId={postId}
+              postId={articleId ?? 0}
               replyTo={replyingTo || undefined}
               isLoading={isSubmittingComment}
               onSubmit={handleAddComment}
@@ -326,7 +328,7 @@ export default function ArticleDetailPage() {
               </div>
             ) : (
               <CommentList
-                postId={postId}
+                postId={articleId ?? 0}
                 comments={comments}
                 isLoading={commentsLoading}
                 onReply={setReplyingTo}
