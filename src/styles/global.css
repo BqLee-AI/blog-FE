@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   color-scheme: light;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 :is(.dark) {
@@ -15,117 +15,105 @@
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top right, #f2f6ff, #e6ecf7 45%, #dae3f3);
-  color: #111827;
+  font-family: var(--font-sans);
+  background: radial-gradient(circle at top right, #f8faff, #f0f4ff 40%, #e8eeff);
+  color: #0f172a;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 :is(.dark) body {
-  background: radial-gradient(circle at top right, #1a1a2e, #16213e 45%, #0f0f23);
-  color: #e5e7eb;
+  background: radial-gradient(circle at top right, #0f172a, #020617 60%, #000000);
+  color: #f1f5f9;
 }
 
 .container {
-  width: min(900px, 92vw);
-  margin: 48px auto;
+  width: min(1000px, 94vw);
+  margin: 0 auto;
+}
+
+/* ========== Modern Typography ========== */
+
+h1, h2, h3, h4 {
+  letter-spacing: -0.02em;
 }
 
 .eyebrow {
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #1d4ed8;
-  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #3b82f6;
+  font-weight: 800;
+  font-size: 0.75rem;
 }
 
-h1 {
-  margin: 8px 0 12px;
-  font-size: clamp(2rem, 4vw, 3rem);
+/* ========== Glassmorphism & Cards ========== */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
-.subtitle {
-  margin: 0 0 28px;
-  color: #334155;
-}
-
-.post-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 16px;
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .post-card {
-  background: #ffffffcc;
-  border: 1px solid #c7d2fe;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px;
+  transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .dark .post-card {
-  background: #1f2937cc;
-  border: 1px solid #374151;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  background: #1e293b;
+  border: 1px solid #334155;
 }
 
-.post-card h3 {
-  margin-top: 0;
-}
+/* ========== Hover Effects ========== */
 
-.post-card p {
-  color: #334155;
-}
-
-.post-card ul {
-  list-style: none;
-  padding: 0;
-  margin: 12px 0 0;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.post-card li {
-  font-size: 0.82rem;
-  background: #dbeafe;
-  color: #1e3a8a;
-  padding: 4px 8px;
-  border-radius: 999px;
-}
-
-/* ========== 悬停效果 ========== */
-
-/* 卡片悬停 - 缩放和发光 */
+/* Card Hover - Interactive Slide and Glow */
 .hover-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .hover-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.25);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -12px rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .dark .hover-card:hover {
-  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 20px 40px -12px rgba(2, 6, 23, 0.8);
+  border-color: rgba(59, 130, 246, 0.4);
 }
 
-/* 按钮悬停 - 缩放和发光 */
+/* Button Hover - Scale and Inner Glow */
 .hover-button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  overflow: hidden;
 }
 
 .hover-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px) scale(1.02);
+  filter: brightness(1.1);
 }
 
-.dark .hover-button:hover {
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+.hover-button:active {
+  transform: scale(0.98);
 }
 
-/* 链接悬停 - 下划线发光效果 */
+/* Link Hover - Animated Multi-color Underline */
 .hover-link {
   position: relative;
+  text-decoration: none;
   transition: color 0.3s ease;
 }
 
@@ -136,54 +124,87 @@ h1 {
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
 }
 
 .hover-link:hover::after {
   width: 100%;
 }
 
-/* 头像悬停 - 温和发光 */
+/* Avatar Hover - Border Pulse */
 .hover-avatar {
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .hover-avatar:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  transform: scale(1.1) rotate(3deg);
+  ring: 4px solid rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
 }
 
-.dark .hover-avatar:hover {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
-}
-
-/* 输入框悬停 - 淡蓝色边框发光 */
+/* Input Focus Design */
 .hover-input {
   transition: all 0.3s ease;
 }
 
-.hover-input:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+.hover-input:focus {
+  outline: none;
+  ring: 2px solid #3b82f6;
+  border-color: transparent;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
-.dark .hover-input:hover {
-  border-color: #60a5fa;
-  box-shadow: 0 0 12px rgba(96, 165, 250, 0.3);
-}
-
-/* 表格行悬停 - 柔和背景变化 */
+/* Table Row Hover */
 .hover-row {
   transition: all 0.2s ease;
 }
 
 .hover-row:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+  background-color: rgba(59, 130, 246, 0.04);
 }
 
 .dark .hover-row:hover {
-  background-color: rgba(59, 130, 246, 0.15);
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+  background-color: rgba(59, 130, 246, 0.08);
 }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+}
+
