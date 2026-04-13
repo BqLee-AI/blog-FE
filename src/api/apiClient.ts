@@ -8,6 +8,8 @@ const apiClient = axios.create({
   },
 });
 
+let isRedirecting = false;
+
 const getCurrentRedirectTarget = (): string => {
   if (typeof window === 'undefined') {
     return '/';
@@ -56,6 +58,19 @@ const isAuthEndpoint = (url?: string): boolean => {
 
   const normalizedUrl = url.replace(/[?#].*$/, '');
   return normalizedUrl.startsWith('/auth/');
+};
+
+export const shouldHandleUnauthorizedResponse = (requestUrl?: string): boolean => {
+  if (isRedirecting || isAuthEndpoint(requestUrl)) {
+    return false;
+  }
+
+  isRedirecting = true;
+  return true;
+};
+
+export const resetUnauthorizedRedirectState = (): void => {
+  isRedirecting = false;
 };
 
 const normalizeErrorMessage = (error: AxiosError): string => {
@@ -129,7 +144,7 @@ apiClient.interceptors.response.use(
 
       switch (status) {
         case 401:
-          if (!isAuthEndpoint(requestUrl)) {
+          if (shouldHandleUnauthorizedResponse(requestUrl)) {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('blog-auth-user');
             window.location.href = buildHomeRedirectUrl();
