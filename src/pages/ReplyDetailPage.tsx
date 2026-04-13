@@ -118,7 +118,7 @@ export default function ReplyDetailPage() {
 
       {/* 回复列表 */}
       <div className="space-y-6">
-        <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2 mb-6">
+        <h2 className="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-6">
           所有回复
           <span className="text-sm font-normal text-slate-400">{sortedReplies.length}</span>
         </h2>
