@@ -12,11 +12,9 @@ interface CommentListProps {
   onLike?: (postId: number, commentId: number) => Promise<void>;
   onDislike?: (postId: number, commentId: number) => Promise<void>;
   onViewReplies?: (comment: Comment) => void;
+  onSubmitReply?: (commentData: Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'author' | 'email' | 'likes' | 'dislikes' | 'replyCount'>) => Promise<void>;
 }
 
-/**
- * 评论列表组件
- */
 export const CommentList: React.FC<CommentListProps> = ({
   postId,
   comments,
@@ -27,7 +25,9 @@ export const CommentList: React.FC<CommentListProps> = ({
   onLike,
   onDislike,
   onViewReplies,
+  onSubmitReply,
 }) => {
+  const [activeReplyId, setActiveReplyId] = React.useState<number | null>(null);
   const topLevelComments = comments.filter((comment) => !comment.replyTo);
   const totalCount = comments.length;
 
@@ -48,8 +48,24 @@ export const CommentList: React.FC<CommentListProps> = ({
     );
   }
 
-  const getReplyCount = (commentId: number): number => {
-    return comments.filter((comment) => comment.replyTo === commentId).length;
+  const getSubReplies = (commentId: number) => {
+    return comments.filter((comment) => comment.replyTo === commentId);
+  };
+
+  const handleReplyClick = (comment: Comment) => {
+    setActiveReplyId(activeReplyId === comment.id ? null : comment.id);
+    onReply?.(comment);
+  };
+
+  const handleSubmitReply = async (commentData: any) => {
+    if (onReply) {
+       // 这里实际上由上层 ArticleDetailPage 处理添加逻辑
+       // 我们只需确保添加成功后关闭回复框
+       const originalOnReply = onReply;
+       // 注意：这里我们其实是复用了 Page 层的 handleAddComment
+       // 为了简洁，我们假设上层会处理好状态更新
+    }
+    setActiveReplyId(null);
   };
 
   return (
@@ -60,26 +76,36 @@ export const CommentList: React.FC<CommentListProps> = ({
           <span className="text-sm font-normal text-slate-400 dark:text-slate-500">{totalCount}</span>
         </h3>
         <div className="flex items-center gap-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-          <button className="text-slate-900 dark:text-white border-b-2 border-blue-500 pb-4 -mb-4.5">按时间排序</button>
-          <button className="hover:text-blue-500 transition-colors">按热度排序</button>
+          <button className="text-slate-900 dark:text-white border-b-2 border-blue-500 pb-4 -mb-4.5 cursor-pointer">按时间排序</button>
+          <button className="hover:text-blue-500 transition-colors cursor-pointer">按热度排序</button>
         </div>
       </div>
 
       <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
-        {topLevelComments.map((comment) => (
-          <CommentCard
-            key={comment.id}
-            comment={comment}
-            postId={postId}
-            replyCount={getReplyCount(comment.id)}
-            isAdmin={isAdmin}
-            onReply={onReply}
-            onDelete={onDelete}
-            onLike={onLike}
-            onDislike={onDislike}
-            onViewReplies={onViewReplies}
-          />
-        ))}
+        {topLevelComments.map((comment) => {
+          const subReplies = getSubReplies(comment.id);
+          return (
+            <CommentCard
+              key={comment.id}
+              comment={comment}
+              postId={postId}
+              replyCount={subReplies.length}
+              repliesPreview={subReplies.slice(0, 2)}
+              isReplying={activeReplyId === comment.id}
+              isAdmin={isAdmin}
+              onReply={() => handleReplyClick(comment)}
+              onCancelReply={() => setActiveReplyId(null)}
+              onSubmitReply={async (data) => {
+                await onSubmitReply?.(data);
+                setActiveReplyId(null);
+              }}
+              onDelete={onDelete}
+              onLike={onLike}
+              onDislike={onDislike}
+              onViewReplies={onViewReplies}
+            />
+          );
+        })}
       </div>
     </div>
   );

@@ -187,6 +187,7 @@ export default function ArticleDetailPage() {
           comments={comments}
           isLoading={commentsLoading}
           onReply={setReplyingTo}
+          onSubmitReply={handleAddComment}
           onDelete={handleDeleteComment}
           onLike={handleLike}
           onDislike={handleDislike}

@@ -8,6 +8,7 @@ import { CommentCard } from "@/features/comments/components/CommentCard";
 import type { Comment } from "@/types";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * 回复详情页 - 显示某条评论的所有回复
@@ -15,14 +16,11 @@ import { Button } from "@/components/ui/button";
 export default function ReplyDetailPage() {
   const { commentId, postId } = useParams<{ commentId: string; postId: string }>();
   const navigate = useNavigate();
-  const rootCommentRef = useRef<HTMLDivElement | null>(null);
-  const replyFormRef = useRef<HTMLDivElement | null>(null);
+  const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
   
   const { currentPost, fetchPostById, isLoading: postLoading } = usePostStore();
   const threadComments = commentStore((state) => state.comments.get(postId ? Number(postId) : 0) || []);
   const { addComment, deleteComment, likeComment, dislikeComment } = commentStore();
-  const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   
   const postIdNum = postId ? Number(postId) : 0;
   const commentIdNum = commentId ? Number(commentId) : 0;
@@ -37,6 +35,21 @@ export default function ReplyDetailPage() {
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [threadComments, commentIdNum]);
 
+  // 加载页面数据
+  useEffect(() => {
+    if (postIdNum) fetchPostById(postIdNum);
+  }, [postIdNum, fetchPostById]);
+
+  // 处理回复提交
+  const handleAddReply = async (commentData: any) => {
+    try {
+      await addComment(postIdNum, commentData);
+      setActiveReplyId(null);
+    } catch (err) {
+      console.error('Failed to add reply:', err);
+    }
+  };
+
   const buildReplyTree = (parentId: number, depth = 0): ReactElement[] => {
     const directReplies = threadComments
       .filter(item => item.replyTo === parentId)
@@ -44,17 +57,18 @@ export default function ReplyDetailPage() {
 
     return directReplies.flatMap((reply) => {
       const nextDepth = depth + 1;
-
       return [
-        <div key={reply.id} className={nextDepth > 0 ? 'ml-4 pl-4 border-l border-gray-200 dark:border-gray-700' : ''}>
+        <div key={reply.id} className={cn("transition-all", nextDepth > 0 && "ml-8 pl-4 border-l border-slate-100 dark:border-slate-800")}>
           <CommentCard
             comment={reply}
             postId={postIdNum}
-            isAdmin={false}
-            onReply={setReplyTarget}
-            onDelete={handleDeleteReply}
-            onLike={handleLike}
-            onDislike={handleDislike}
+            isReplying={activeReplyId === reply.id}
+            onReply={() => setActiveReplyId(activeReplyId === reply.id ? null : reply.id)}
+            onSubmitReply={handleAddReply}
+            onCancelReply={() => setActiveReplyId(null)}
+            onLike={likeComment}
+            onDislike={dislikeComment}
+            onDelete={async (id) => { await deleteComment(postIdNum, id); }}
           />
         </div>,
         ...buildReplyTree(reply.id, nextDepth),
@@ -62,189 +76,56 @@ export default function ReplyDetailPage() {
     });
   };
 
-  // 加载文章和评论
-  useEffect(() => {
-    if (postIdNum) {
-      fetchPostById(postIdNum);
-    }
-  }, [postIdNum, fetchPostById]);
-
-  // 加载评论和回复
-  useEffect(() => {
-    if (commentIdNum) {
-      if (comment) {
-        setReplyTarget((currentTarget: Comment | null) => currentTarget || comment);
-      }
-    }
-  }, [commentIdNum, comment]);
-
-  // 处理添加回复
-  const handleAddReply = async (commentData: Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'author' | 'email' | 'likes' | 'dislikes' | 'replyCount'>) => {
-    setIsSubmittingComment(true);
-    try {
-      await addComment(postIdNum, commentData);
-      if (comment) {
-        setReplyTarget(comment);
-      }
-    } catch (err) {
-      console.error('Failed to add reply:', err);
-    } finally {
-      setIsSubmittingComment(false);
-    }
-  };
-
-  // 处理删除回复
-  const handleDeleteReply = async (replyId: number) => {
-    try {
-      await deleteComment(postIdNum, replyId);
-    } catch (err) {
-      console.error('Failed to delete reply:', err);
-    }
-  };
-
-  // 处理点赞
-  const handleLike = async (commentPostId: number, replyId: number) => {
-    try {
-      await likeComment(commentPostId, replyId);
-    } catch (err) {
-      console.error('Failed to like reply:', err);
-    }
-  };
-
-  // 处理踩
-  const handleDislike = async (commentPostId: number, replyId: number) => {
-    try {
-      await dislikeComment(commentPostId, replyId);
-    } catch (err) {
-      console.error('Failed to dislike reply:', err);
-    }
-  };
- 
-  const handleBackToOriginalComment = () => {
-    if (comment) {
-      setReplyTarget(comment);
-      replyFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  if (postLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
-        </div>
-      </div>
-    );
-  }
+  if (postLoading) return <div className="py-20 text-center animate-pulse">加载中...</div>;
 
   if (!comment || !currentPost) {
     return (
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">😕</div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">评论不存在</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">无法找到您要查看的评论</p>
-        <Button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
-        >
-          返回
-        </Button>
+      <div className="text-center py-20">
+        <h2 className="text-xl font-bold mb-4">内容不存在</h2>
+        <Button onClick={() => navigate(-1)}>返回</Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* 返回按钮 */}
+    <div className="max-w-4xl mx-auto animate-fade-in">
       <Button
-        type="button"
         onClick={() => navigate(-1)}
         variant="ghost"
-        className="mb-8 gap-2 px-0 text-blue-600 hover:bg-transparent hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+        className="mb-8 gap-2 px-2 text-slate-500 hover:text-blue-500 font-bold cursor-pointer"
       >
-        <ArrowLeftIcon className="w-4 h-4" />
-        回到原评论区
+        <ArrowLeftIcon />
+        返回文章评论区
       </Button>
 
-      {/* 文章标题 */}
-      <header className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          {currentPost.title}
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">评论回复详情</p>
-      </header>
-
-      {/* 主评论 */}
-      <div ref={rootCommentRef} className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-600 rounded p-6">
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">原评论</h2>
-          <Button
-            type="button"
-            onClick={handleBackToOriginalComment}
-            className="h-8 rounded-full bg-blue-600 px-3 text-sm text-white hover:bg-blue-700"
-          >
-            回到原评论区
-          </Button>
+      {/* 主评论详情 */}
+      <div className="p-6 bg-slate-50 dark:bg-slate-900/40 rounded-[2rem] border border-slate-100 dark:border-slate-800/50 mb-10">
+        <div className="text-xs font-bold text-blue-500 mb-4 tracking-widest uppercase">
+          正查看的主评论
         </div>
         <CommentCard
           comment={comment}
           postId={postIdNum}
-          onReply={setReplyTarget}
+          isReplying={activeReplyId === comment.id}
+          onReply={() => setActiveReplyId(activeReplyId === comment.id ? null : comment.id)}
+          onSubmitReply={handleAddReply}
+          onCancelReply={() => setActiveReplyId(null)}
           onLike={likeComment}
           onDislike={dislikeComment}
+          onDelete={async (id) => { await deleteComment(postIdNum, id); }}
         />
       </div>
 
       {/* 回复列表 */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          回复 ({sortedReplies.length})
+      <div className="space-y-6">
+        <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2 mb-6">
+          所有回复
+          <span className="text-sm font-normal text-slate-400">{sortedReplies.length}</span>
         </h2>
-
-        {sortedReplies.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            暂无回复
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {buildReplyTree(comment.id)}
-          </div>
-        )}
-      </div>
-
-      {/* 新增回复表单 */}
-      <div ref={replyFormRef} className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">添加回复</h2>
-          {replyTarget && replyTarget.id !== comment.id && (
-            <Button
-              type="button"
-              onClick={() => setReplyTarget(comment)}
-              variant="ghost"
-              className="px-0 text-sm text-blue-600 hover:bg-transparent hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              回到原评论区
-            </Button>
-          )}
+        
+        <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
+          {buildReplyTree(comment.id)}
         </div>
-
-        {replyTarget && (
-          <div className="mb-4 rounded-lg border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-900/20 px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
-            正在回复：{replyTarget.author || '匿名用户'}
-            <span className="block mt-1 text-gray-500 dark:text-gray-400">
-              点击其他回复也可以切换回复目标。
-            </span>
-          </div>
-        )}
-
-        <CommentForm
-          postId={postIdNum}
-          replyTo={replyTarget || comment}
-          isLoading={isSubmittingComment}
-          onSubmit={handleAddReply}
-        />
       </div>
     </div>
   );
