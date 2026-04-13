@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Comment } from '@/types';
 import { CommentCard } from "@/features/comments/components/CommentCard";
+import { cn } from '@/lib/utils';
 
 interface CommentListProps {
   postId: number;
@@ -28,8 +29,27 @@ export const CommentList: React.FC<CommentListProps> = ({
   onSubmitReply,
 }) => {
   const [activeReplyId, setActiveReplyId] = React.useState<number | null>(null);
-  const topLevelComments = comments.filter((comment) => !comment.replyTo);
+  const [sortBy, setSortBy] = React.useState<'time' | 'heat'>('time');
+  
   const totalCount = comments.length;
+
+  const getSubReplies = (commentId: number) => {
+    return comments.filter((comment) => comment.replyTo === commentId);
+  };
+
+  const sortedTopLevelComments = React.useMemo(() => {
+    const topLevel = comments.filter((comment) => !comment.replyTo);
+    
+    if (sortBy === 'time') {
+      return [...topLevel].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else {
+      return [...topLevel].sort((a, b) => {
+        const heatA = (a.likes || 0) - (a.dislikes || 0) + (getSubReplies(a.id).length * 2);
+        const heatB = (b.likes || 0) - (b.dislikes || 0) + (getSubReplies(b.id).length * 2);
+        return heatB - heatA;
+      });
+    }
+  }, [comments, sortBy]);
 
   if (isLoading) {
     return (
@@ -48,24 +68,9 @@ export const CommentList: React.FC<CommentListProps> = ({
     );
   }
 
-  const getSubReplies = (commentId: number) => {
-    return comments.filter((comment) => comment.replyTo === commentId);
-  };
-
   const handleReplyClick = (comment: Comment) => {
     setActiveReplyId(activeReplyId === comment.id ? null : comment.id);
     onReply?.(comment);
-  };
-
-  const handleSubmitReply = async (commentData: any) => {
-    if (onReply) {
-       // 这里实际上由上层 ArticleDetailPage 处理添加逻辑
-       // 我们只需确保添加成功后关闭回复框
-       const originalOnReply = onReply;
-       // 注意：这里我们其实是复用了 Page 层的 handleAddComment
-       // 为了简洁，我们假设上层会处理好状态更新
-    }
-    setActiveReplyId(null);
   };
 
   return (
@@ -75,14 +80,30 @@ export const CommentList: React.FC<CommentListProps> = ({
           评论
           <span className="text-sm font-normal text-slate-400 dark:text-slate-500">{totalCount}</span>
         </h3>
-        <div className="flex items-center gap-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-          <button className="text-slate-900 dark:text-white border-b-2 border-blue-500 pb-4 -mb-4.5 cursor-pointer">按时间排序</button>
-          <button className="hover:text-blue-500 transition-colors cursor-pointer">按热度排序</button>
+        <div className="flex items-center gap-6 text-[13px] font-bold text-slate-400 dark:text-slate-500 relative">
+          <button 
+            onClick={() => setSortBy('time')}
+            className={cn(
+              "transition-colors hover:text-blue-500 cursor-pointer pb-4 -mb-4.5",
+              sortBy === 'time' && "text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white"
+            )}
+          >
+            按时间排序
+          </button>
+          <button 
+            onClick={() => setSortBy('heat')}
+            className={cn(
+              "transition-colors hover:text-blue-500 cursor-pointer pb-4 -mb-4.5",
+              sortBy === 'heat' && "text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white"
+            )}
+          >
+            按热度排序
+          </button>
         </div>
       </div>
 
       <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
-        {topLevelComments.map((comment) => {
+        {sortedTopLevelComments.map((comment) => {
           const subReplies = getSubReplies(comment.id);
           return (
             <CommentCard
