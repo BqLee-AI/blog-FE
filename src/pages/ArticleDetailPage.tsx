@@ -12,6 +12,18 @@ import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+const CATEGORY_NAME_PATTERN = /^[\p{Script=Han}\p{L}\p{N}]+$/u;
+
+const getSafeCategoryName = (categoryName: string | null | undefined): string => {
+  const trimmedName = categoryName?.trim() || "";
+
+  if (!trimmedName || !CATEGORY_NAME_PATTERN.test(trimmedName)) {
+    return "未分类";
+  }
+
+  return trimmedName;
+};
+
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -257,6 +269,11 @@ export default function ArticleDetailPage() {
             ))}
           </div>
         )}
+
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 shadow-sm">
+          <span className="font-semibold text-gray-900 dark:text-white">分类:</span>
+          <span>{getSafeCategoryName(article.category?.name)}</span>
+        </div>
 
         {/* 文章内容 */}
         <section className="mb-12 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm md:p-8">
