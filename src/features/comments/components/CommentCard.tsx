@@ -134,25 +134,27 @@ export const CommentCard: React.FC<CommentCardProps> = ({
           </div>
         )}
 
-        {/* 子评论预览区域 - B站样式 */}
+        {/* 子评论预览区域 - 深度复刻 B 站样式 */}
         {!isReplying && repliesPreview.length > 0 && (
-          <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl space-y-2.5 border border-slate-100/50 dark:border-slate-800/30">
+          <div className="mt-3.5 p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl space-y-2.5 border border-slate-100/50 dark:border-slate-800/30">
             {repliesPreview.map((reply) => (
-              <div key={reply.id} className="text-[13px] leading-relaxed">
-                <span className="font-bold text-blue-500 dark:text-blue-400 cursor-pointer hover:text-blue-600">
+              <div key={reply.id} className="text-[13px] leading-relaxed group/reply cursor-pointer" onClick={() => onViewReplies?.(comment)}>
+                <span className="font-bold text-blue-500 dark:text-blue-400 hover:text-blue-600 transition-colors">
                   {reply.author}
                 </span>
                 <span className="text-slate-700 dark:text-slate-300 mx-1.5">:</span>
-                <span className="text-slate-600 dark:text-slate-400 break-words">{reply.content}</span>
+                <span className="text-slate-600 dark:text-slate-400 group-hover/reply:text-slate-900 dark:group-hover/reply:text-slate-200 transition-colors break-words">
+                  {reply.content}
+                </span>
               </div>
             ))}
             
-            {replyCount > repliesPreview.length && (
+            {replyCount > 0 && (
               <div 
                 onClick={() => onViewReplies?.(comment)}
-                className="text-[12px] text-slate-400 hover:text-blue-500 transition-colors flex items-center gap-1 pt-1 cursor-pointer"
+                className="text-[12px] text-slate-400 hover:text-blue-500 transition-all flex items-center gap-1.5 pt-1 cursor-pointer font-bold group/more"
               >
-                共{replyCount}条回复，<span className="text-blue-400">查看更多</span>
+                <span className="group-hover/more:translate-x-0.5 transition-transform">共 {replyCount} 条回复 &gt;</span>
               </div>
             )}
           </div>
