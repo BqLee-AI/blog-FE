@@ -73,7 +73,7 @@ export const resetUnauthorizedRedirectState = (): void => {
   isRedirecting = false;
 };
 
-const normalizeErrorMessage = (error: AxiosError): string => {
+export const normalizeErrorMessage = (error: AxiosError): string => {
   const responseData = error.response?.data as
     | { message?: string; msg?: string }
     | string
