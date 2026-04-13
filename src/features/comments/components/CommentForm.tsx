@@ -90,5 +90,6 @@ export const CommentForm: React.FC<CommentFormProps> = ({
           </div>
         </div>
       </div>
+    </form>
   );
 };
