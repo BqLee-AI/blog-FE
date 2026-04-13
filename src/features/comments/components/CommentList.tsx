@@ -29,23 +29,21 @@ export const CommentList: React.FC<CommentListProps> = ({
   onViewReplies,
 }) => {
   const topLevelComments = comments.filter((comment) => !comment.replyTo);
-  const replyCount = comments.length - topLevelComments.length;
+  const totalCount = comments.length;
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-400">
+      <div className="flex items-center justify-center p-12 text-sm text-slate-400 dark:text-slate-500 animate-pulse">
         加载评论中...
       </div>
     );
   }
 
-  if (comments.length === 0) {
+  if (totalCount === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-12 text-center text-gray-500 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-400">
-        <p className="text-sm font-medium">暂无评论</p>
-        <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-          来发表第一条评论吧，让内容区更有讨论感。
-        </p>
+      <div className="py-20 text-center text-slate-400 dark:text-slate-500 border-y border-slate-100 dark:border-slate-800/50 my-8">
+        <p className="text-sm font-bold">暂无评论</p>
+        <p className="mt-2 text-xs opacity-70">来发表第一条评论吧，让讨论活起来。</p>
       </div>
     );
   }
@@ -55,20 +53,19 @@ export const CommentList: React.FC<CommentListProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-800/90">
-        <div>
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white">评论列表</h3>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {topLevelComments.length} 条主评论 · {replyCount} 条回复
-          </p>
-        </div>
-        <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-          共 {comments.length} 条
+    <div className="animate-fade-in">
+      <div className="flex items-center gap-6 mb-8 pb-4 border-b border-slate-100 dark:border-slate-800/50">
+        <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+          评论
+          <span className="text-sm font-normal text-slate-400 dark:text-slate-500">{totalCount}</span>
+        </h3>
+        <div className="flex items-center gap-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+          <button className="text-slate-900 dark:text-white border-b-2 border-blue-500 pb-4 -mb-4.5">按时间排序</button>
+          <button className="hover:text-blue-500 transition-colors">按热度排序</button>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
         {topLevelComments.map((comment) => (
           <CommentCard
             key={comment.id}
