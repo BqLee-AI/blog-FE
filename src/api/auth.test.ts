@@ -197,6 +197,19 @@ describe('auth api adapter', () => {
     });
   });
 
+  it('rejects invalid verification code responses without a string message', async () => {
+    mockedPost.mockResolvedValueOnce({
+      data: {
+        message: 'Verification code sent successfully',
+        data: {
+          message: null,
+        },
+      },
+    });
+
+    await expect(sendVerificationCode('alice@example.com')).rejects.toThrow('发送验证码响应格式无效');
+  });
+
   it('extracts refreshed access token from nested tokens', async () => {
     mockedPost.mockResolvedValueOnce({
       data: {

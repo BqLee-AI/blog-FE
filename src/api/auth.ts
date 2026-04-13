@@ -143,7 +143,12 @@ export const sendVerificationCode = async (email: string): Promise<{ message: st
   try {
     const response = await apiClient.post<ApiEnvelope<{ message: string }> | { message: string }>("/auth/sendcode", { email });
     const codeData = unwrapResponse(response.data);
-    return codeData as { message: string };
+
+    if (!codeData || typeof codeData !== 'object' || typeof codeData.message !== 'string') {
+      throw new Error('发送验证码响应格式无效');
+    }
+
+    return { message: codeData.message };
   } catch (error) {
     console.error("发送验证码失败:", error);
     throw error;
