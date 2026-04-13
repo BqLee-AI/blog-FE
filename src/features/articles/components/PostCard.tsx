@@ -17,29 +17,29 @@ export default function PostCard({ post }: PostCardProps) {
         {/* 指示条 */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
-        <div className="flex-1 flex flex-col p-8 md:p-10">
-          <div className="flex items-center gap-4 mb-6">
-            <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100/50 dark:border-blue-800/50">
+        <div className="flex-1 flex flex-col p-6 md:p-8">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+            <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100/50 dark:border-blue-800/50 whitespace-nowrap">
               {post.tags[0] || "精彩内容"}
             </span>
-            <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 text-[11px] font-bold">
-              <span className="flex items-center gap-1">
-                <FiCalendar className="text-sm" />
+            <div className="flex flex-wrap items-center gap-3 text-slate-400 dark:text-slate-500 text-[10px] font-bold">
+              <span className="flex items-center gap-1.5 whitespace-nowrap">
+                <FiCalendar className="text-xs" />
                 {publishedAt}
               </span>
-              <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-              <span className="flex items-center gap-1">
-                <FiClock className="text-sm" />
+              <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700 hidden sm:block" />
+              <span className="flex items-center gap-1.5 whitespace-nowrap">
+                <FiClock className="text-xs" />
                 {readingTime} 分钟阅读
               </span>
             </div>
           </div>
 
-          <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-4 line-clamp-2 leading-tight tracking-tight group-hover:text-blue-500 transition-colors">
+          <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-blue-500 transition-colors">
             {post.title}
           </h3>
 
-          <p className="text-slate-600 dark:text-slate-400 text-sm md:text-base leading-relaxed mb-8 line-clamp-3 flex-1 font-medium opacity-80 group-hover:opacity-100 transition-opacity">
+          <p className="text-slate-600 dark:text-slate-400 text-xs md:text-sm leading-relaxed mb-6 line-clamp-3 flex-1 font-medium opacity-80 group-hover:opacity-100 transition-opacity">
             {post.summary}
           </p>
 
