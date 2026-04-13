@@ -6,10 +6,23 @@ const sanitizeOptions = {
   FORBID_ATTR: ["onclick", "onerror", "onload", "style"],
 };
 
+const escapeHtml = (value: string): string => {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
 export const sanitizeHtml = (html: string): string => {
-  if (!html) {
+  if (typeof html !== "string" || !html) {
     return "";
   }
 
-  return DOMPurify.sanitize(html, sanitizeOptions);
+  try {
+    return DOMPurify.sanitize(html, sanitizeOptions);
+  } catch {
+    return escapeHtml(html);
+  }
 };

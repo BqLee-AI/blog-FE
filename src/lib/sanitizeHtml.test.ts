@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
+import DOMPurify from "dompurify";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { sanitizeHtml } from "@/lib/sanitizeHtml";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("sanitizeHtml", () => {
   it("removes dangerous tags and event handlers", () => {
@@ -20,5 +25,17 @@ describe("sanitizeHtml", () => {
     expect(sanitized).toContain('<a href="/article/1">Read more</a>');
     expect(sanitized).not.toContain("onclick");
     expect(sanitized).not.toContain("style");
+  });
+
+  it("falls back to escaped text when DOMPurify throws", () => {
+    vi.spyOn(DOMPurify, "sanitize").mockImplementation(() => {
+      throw new Error("sanitize failed");
+    });
+
+    const html = '<p>Hello & welcome <script>alert(1)</script></p>';
+
+    const sanitized = sanitizeHtml(html);
+
+    expect(sanitized).toBe("&lt;p&gt;Hello &amp; welcome &lt;script&gt;alert(1)&lt;/script&gt;&lt;/p&gt;");
   });
 });
