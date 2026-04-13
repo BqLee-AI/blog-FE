@@ -13,25 +13,35 @@ const mockedPost = apiClient.post as unknown as {
   mockResolvedValueOnce: (value: unknown) => void;
 };
 
+let localStorageMock: {
+  clear: () => void;
+  getItem: (key: string) => string | null;
+  removeItem: (key: string) => void;
+  setItem: ReturnType<typeof vi.fn>;
+};
+
 function installLocalStorageMock() {
   const storage = new Map<string, string>();
 
+  localStorageMock = {
+    clear() {
+      storage.clear();
+      localStorageMock.setItem.mockClear();
+    },
+    getItem(key: string) {
+      return storage.has(key) ? storage.get(key)! : null;
+    },
+    removeItem(key: string) {
+      storage.delete(key);
+    },
+    setItem: vi.fn((key: string, value: string) => {
+      storage.set(key, value);
+    }),
+  };
+
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
-    value: {
-      clear() {
-        storage.clear();
-      },
-      getItem(key: string) {
-        return storage.has(key) ? storage.get(key)! : null;
-      },
-      removeItem(key: string) {
-        storage.delete(key);
-      },
-      setItem(key: string, value: string) {
-        storage.set(key, value);
-      },
-    },
+    value: localStorageMock,
   });
 }
 
@@ -78,6 +88,32 @@ describe('auth api adapter', () => {
     expect(localStorage.getItem('accessToken')).toBe('access-token-1');
   });
 
+  it('rejects login responses without an access token and does not persist storage', async () => {
+    mockedPost.mockResolvedValueOnce({
+      data: {
+        message: 'Login successful',
+        data: {
+          user: {
+            user_id: 7,
+            username: 'Alice',
+            email: 'alice@example.com',
+            role_id: 1,
+          },
+          tokens: {
+            refresh_token: 'refresh-token-1',
+          },
+        },
+      },
+    });
+
+    await expect(
+      login({ email: 'alice@example.com', password: 'secret123' })
+    ).rejects.toThrow('登录响应缺少访问令牌');
+
+    expect(localStorage.getItem('accessToken')).toBeNull();
+    expect(localStorageMock.setItem).not.toHaveBeenCalled();
+  });
+
   it('builds register user from minimal response payload', async () => {
     mockedPost.mockResolvedValueOnce({
       data: {
@@ -105,6 +141,45 @@ describe('auth api adapter', () => {
     });
 
     expect(localStorage.getItem('accessToken')).toBeNull();
+  });
+
+  it('persists the access token when register response includes nested tokens', async () => {
+    mockedPost.mockResolvedValueOnce({
+      data: {
+        message: 'Registration successful',
+        data: {
+          user: {
+            user_id: 9,
+            username: 'Bob',
+            email: 'bob@example.com',
+            role_id: 0,
+          },
+          tokens: {
+            access_token: 'register-access-token',
+            refresh_token: 'register-refresh-token',
+          },
+        },
+      },
+    });
+
+    await expect(
+      register({
+        username: 'Bob',
+        email: 'bob@example.com',
+        password: 'secret123',
+        confirmPassword: 'secret123',
+        code: '123456',
+      })
+    ).resolves.toEqual({
+      id: 9,
+      username: 'Bob',
+      email: 'bob@example.com',
+      avatar: undefined,
+      role: 'user',
+    });
+
+    expect(localStorageMock.setItem).toHaveBeenCalledWith('accessToken', 'register-access-token');
+    expect(localStorage.getItem('accessToken')).toBe('register-access-token');
   });
 
   it('unwraps verification code response messages', async () => {
@@ -137,5 +212,23 @@ describe('auth api adapter', () => {
 
     await expect(refreshToken()).resolves.toBe('new-access-token');
     expect(localStorage.getItem('accessToken')).toBe('new-access-token');
+  });
+
+  it('rejects refresh responses without an access token and leaves storage unchanged', async () => {
+    localStorage.setItem('accessToken', 'existing-token');
+    mockedPost.mockResolvedValueOnce({
+      data: {
+        message: 'Token refreshed successfully',
+        data: {
+          tokens: {
+            refresh_token: 'new-refresh-token',
+          },
+        },
+      },
+    });
+
+    await expect(refreshToken()).rejects.toThrow('刷新令牌响应缺少访问令牌');
+    expect(localStorage.getItem('accessToken')).toBe('existing-token');
+    expect(localStorageMock.setItem).not.toHaveBeenCalledWith('accessToken', 'new-access-token');
   });
 });
