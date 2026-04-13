@@ -24,13 +24,29 @@ const buildHomeRedirectUrl = (): string => {
   return `/?redirect=${encodeURIComponent(getCurrentRedirectTarget())}`;
 };
 
-const isTokenExemptAuthEndpoint = (url?: string): boolean => {
+const TOKEN_EXEMPT_AUTH_PATHS = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/sendcode'] as const;
+
+const isSafeAuthPath = (pathname: string): boolean => {
+  return TOKEN_EXEMPT_AUTH_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+};
+
+export const isTokenExemptAuthEndpoint = (url?: string): boolean => {
   if (!url) {
     return false;
   }
 
-  const normalizedUrl = url.replace(/[?#].*$/, '');
-  return /\/auth\/(login|register|refresh|sendcode)(?:\/|$)/.test(normalizedUrl);
+  try {
+    const baseOrigin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin;
+    const parsedUrl = new URL(url, baseOrigin);
+
+    if (parsedUrl.origin !== baseOrigin) {
+      return false;
+    }
+
+    return isSafeAuthPath(parsedUrl.pathname);
+  } catch {
+    return false;
+  }
 };
 
 const isAuthEndpoint = (url?: string): boolean => {
