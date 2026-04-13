@@ -23,8 +23,8 @@ body {
 }
 
 :is(.dark) body {
-  background: radial-gradient(circle at top right, #0f172a, #020617 60%, #000000);
-  color: #f1f5f9;
+  background: radial-gradient(circle at top right, #020617, #0f172a 60%, #000000);
+  color: #e2e8f0;
 }
 
 .container {
