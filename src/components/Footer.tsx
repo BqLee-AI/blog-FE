@@ -20,11 +20,11 @@ export default function Footer() {
 
           {/* 快速链接 */}
           <div>
-            <h3 className="text-white font-semibold mb-6 text-sm uppercase tracking-widest">快速导航</h3>
+            <h3 className="text-white font-semibold mb-6 text-sm uppercase tracking-widest">快速链接</h3>
             <ul className="space-y-4 text-sm">
               <li>
                 <a href="/" className="text-slate-400 hover:text-blue-400 transition-colors duration-200">
-                  网站首页
+                  首页
                 </a>
               </li>
               <li>
@@ -34,7 +34,7 @@ export default function Footer() {
               </li>
               <li>
                 <a href="#" className="text-slate-400 hover:text-blue-400 transition-colors duration-200">
-                  标签分类
+                  分类
                 </a>
               </li>
             </ul>
@@ -42,7 +42,7 @@ export default function Footer() {
 
           {/* 社交媒体 */}
           <div>
-            <h3 className="text-white font-semibold mb-6 text-sm uppercase tracking-widest">关注我</h3>
+            <h3 className="text-white font-semibold mb-6 text-sm uppercase tracking-widest">社交媒体</h3>
             <ul className="space-y-4 text-sm">
               <li>
                 <a href="https://github.com" className="group flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
