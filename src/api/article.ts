@@ -38,6 +38,10 @@ export interface ArticleListParams {
   keyword?: string;
 }
 
+export interface ArticleListRequestOptions {
+  signal?: AbortSignal;
+}
+
 export interface ArticlePagination {
   page: number;
   page_size: number;
@@ -140,7 +144,10 @@ const unwrapResponse = <T>(payload: T | { data: T }): T => {
 };
 
 export const articleApi = {
-  list: async (params: ArticleListParams = {}): Promise<ArticleListResponse> => {
+  list: async (
+    params: ArticleListParams = {},
+    options: ArticleListRequestOptions = {}
+  ): Promise<ArticleListResponse> => {
     const response = await apiClient.get<
       ArticleListResponse | {
         data: ArticleListResponse;
@@ -154,6 +161,7 @@ export const articleApi = {
       }
     >('/articles', {
       params,
+      signal: options.signal,
     });
 
     const payload = unwrapResponse(response.data);
@@ -198,8 +206,10 @@ export const articleApi = {
     };
   },
 
-  getById: async (id: number): Promise<ArticleDetail> => {
-    const response = await apiClient.get<ArticleDetail | { data: ArticleDetail }>(`/articles/${id}`);
+  getById: async (id: number, options: ArticleListRequestOptions = {}): Promise<ArticleDetail> => {
+    const response = await apiClient.get<ArticleDetail | { data: ArticleDetail }>(`/articles/${id}`, {
+      signal: options.signal,
+    });
 
     return normalizeArticleDetail(unwrapResponse(response.data));
   },

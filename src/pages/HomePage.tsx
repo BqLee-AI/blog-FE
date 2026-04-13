@@ -24,7 +24,7 @@ export default function HomePage() {
   const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
-    let isActive = true;
+    const controller = new AbortController();
 
     const loadArticles = async () => {
       setIsLoading(true);
@@ -36,9 +36,11 @@ export default function HomePage() {
           page_size: PAGE_SIZE,
           sort_by: sortBy,
           keyword: keyword || undefined,
+        }, {
+          signal: controller.signal,
         });
 
-        if (!isActive) return;
+        if (controller.signal.aborted) return;
 
         setArticles(Array.isArray(response.items) ? response.items : []);
         const nextPagination = {
@@ -54,13 +56,15 @@ export default function HomePage() {
           setPage(nextPagination.page);
         }
       } catch (requestError) {
-        if (!isActive) return;
+        if (controller.signal.aborted) {
+          return;
+        }
 
         const message = requestError instanceof Error ? requestError.message : "获取文章列表失败";
         setError(message);
         setArticles([]);
       } finally {
-        if (isActive) {
+        if (!controller.signal.aborted) {
           setIsLoading(false);
         }
       }
@@ -69,7 +73,7 @@ export default function HomePage() {
     loadArticles();
 
     return () => {
-      isActive = false;
+      controller.abort();
     };
   }, [keyword, page, sortBy, refreshToken]);
 
