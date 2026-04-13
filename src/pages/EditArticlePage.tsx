@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ArticleForm from "@/features/articles/components/ArticleForm";
-import { usePostStore } from "@/store/postStore";
+import { articleApi } from "@/api/article";
+import { toArticleFormPost } from "@/features/articles/utils/articleFormAdapter";
 import type { Post } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,27 +10,75 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function EditArticlePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { currentPost, fetchPostById, updatePost, isLoading, error } =
-    usePostStore();
+  const [currentPost, setCurrentPost] = useState<Post | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (id) {
-      fetchPostById(Number(id));
-    }
-  }, [id, fetchPostById]);
+    const articleId = Number(id);
 
-  const handleSubmit = (data: Post) => {
+    if (!id || Number.isNaN(articleId)) {
+      setCurrentPost(null);
+      setError("文章不存在");
+      setIsLoading(false);
+      return;
+    }
+
+    let isActive = true;
+
+    setIsLoading(true);
+    setError(null);
+
+    articleApi
+      .getById(articleId)
+      .then((article) => {
+        if (!isActive) {
+          return;
+        }
+
+        setCurrentPost(toArticleFormPost(article));
+      })
+      .catch((requestError) => {
+        if (!isActive) {
+          return;
+        }
+
+        const message = requestError instanceof Error ? requestError.message : "获取文章失败";
+        setCurrentPost(null);
+        setError(message);
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [id]);
+
+  const handleSubmit = async (data: Post) => {
     if (!id) return;
 
-    // 模拟保存（实际开发中这里应该调用后端 API）
-    console.log("更新文章:", data);
-    updatePost(Number(id), data);
+    setIsSubmitting(true);
 
-    // 显示成功提示
-    alert("文章更新成功！");
+    try {
+      await articleApi.update(Number(id), {
+        title: data.title,
+        content: data.content ?? "",
+        summary: data.summary,
+      });
 
-    // 返回管理后台
-    navigate("/admin");
+      alert("文章更新成功！");
+      navigate("/admin");
+    } catch (requestError) {
+      const message = requestError instanceof Error ? requestError.message : "文章更新失败";
+      alert(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -67,7 +116,7 @@ export default function EditArticlePage() {
         <p className="text-gray-600 mt-2">修改文章内容并保存更改</p>
       </div>
 
-      <ArticleForm initialData={currentPost} onSubmit={handleSubmit} />
+      <ArticleForm initialData={currentPost} onSubmit={handleSubmit} isLoading={isSubmitting} />
     </div>
   );
 }
