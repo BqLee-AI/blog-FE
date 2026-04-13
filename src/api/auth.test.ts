@@ -8,9 +8,35 @@ vi.mock('./apiClient', () => ({
   },
 }));
 
-const mockedPost = vi.mocked(apiClient.post);
+const mockedPost = apiClient.post as unknown as {
+  mockReset: () => void;
+  mockResolvedValueOnce: (value: unknown) => void;
+};
+
+function installLocalStorageMock() {
+  const storage = new Map<string, string>();
+
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: {
+      clear() {
+        storage.clear();
+      },
+      getItem(key: string) {
+        return storage.has(key) ? storage.get(key)! : null;
+      },
+      removeItem(key: string) {
+        storage.delete(key);
+      },
+      setItem(key: string, value: string) {
+        storage.set(key, value);
+      },
+    },
+  });
+}
 
 beforeEach(() => {
+  installLocalStorageMock();
   localStorage.clear();
   mockedPost.mockReset();
 });
