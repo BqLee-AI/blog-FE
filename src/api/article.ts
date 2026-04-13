@@ -42,6 +42,30 @@ export interface ArticleListRequestOptions {
   signal?: AbortSignal;
 }
 
+export type ArticlePublishStatus = 'draft' | 'published';
+
+export type ArticleEditableStatus = ArticlePublishStatus | 'archived';
+
+export interface ArticleCreateRequest {
+  title: string;
+  content: string;
+  summary?: string;
+  cover_image?: string;
+  status?: ArticlePublishStatus;
+}
+
+export interface ArticleUpdateRequest {
+  title?: string;
+  content?: string;
+  summary?: string;
+  cover_image?: string;
+  status?: ArticleEditableStatus;
+}
+
+export interface ArticleMutationRequestOptions {
+  signal?: AbortSignal;
+}
+
 export interface ArticlePagination {
   page: number;
   page_size: number;
@@ -212,5 +236,32 @@ export const articleApi = {
     });
 
     return normalizeArticleDetail(unwrapResponse(response.data));
+  },
+
+  create: async (
+    payload: ArticleCreateRequest,
+    options: ArticleMutationRequestOptions = {}
+  ): Promise<ArticleDetail> => {
+    const response = await apiClient.post<ArticleDetail | { data: ArticleDetail }>('/articles', payload, {
+      signal: options.signal,
+    });
+
+    return normalizeArticleDetail(unwrapResponse(response.data));
+  },
+
+  update: async (
+    id: number,
+    payload: ArticleUpdateRequest,
+    options: ArticleMutationRequestOptions = {}
+  ): Promise<void> => {
+    await apiClient.put(`/articles/${id}`, payload, {
+      signal: options.signal,
+    });
+  },
+
+  delete: async (id: number, options: ArticleMutationRequestOptions = {}): Promise<void> => {
+    await apiClient.delete(`/articles/${id}`, {
+      signal: options.signal,
+    });
   },
 };
