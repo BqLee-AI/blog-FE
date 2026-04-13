@@ -61,26 +61,53 @@ const defaultPagination: ArticlePagination = {
   total_pages: 0,
 };
 
-const normalizeArticleAuthor = (author: Partial<ArticleAuthor> | null | undefined): ArticleAuthor => ({
-  id: typeof author?.id === "number" ? author.id : 0,
-  username: author?.username?.trim() || "未知作者",
-});
+const normalizeEntityId = (id: number | undefined): number => (typeof id === "number" ? id : 0);
 
-const normalizeArticleTag = (tag: Partial<ArticleTag>): ArticleTag => ({
-  id: typeof tag.id === "number" ? tag.id : 0,
-  name: tag.name?.trim() || "未命名标签",
-});
-
-const normalizeArticleCategory = (
-  category: Partial<ArticleCategory> | null | undefined
-): ArticleCategory | null => {
-  if (!category) {
+const normalizeLabeledEntity = <T extends { id?: number }>(
+  entity: T | null | undefined,
+  getLabel: (entity: T) => string | undefined,
+  fallbackLabel: string
+): { id: number; label: string } | null => {
+  if (!entity) {
     return null;
   }
 
   return {
-    id: typeof category.id === "number" ? category.id : 0,
-    name: category.name?.trim() || "未分类",
+    id: normalizeEntityId(entity.id),
+    label: getLabel(entity)?.trim() || fallbackLabel,
+  };
+};
+
+const normalizeArticleAuthor = (author: Partial<ArticleAuthor> | null | undefined): ArticleAuthor => {
+  const normalizedAuthor = normalizeLabeledEntity(author, (value) => value.username, "未知作者");
+
+  return {
+    id: normalizedAuthor?.id ?? 0,
+    username: normalizedAuthor?.label ?? "未知作者",
+  };
+};
+
+const normalizeArticleTag = (tag: Partial<ArticleTag>): ArticleTag => {
+  const normalizedTag = normalizeLabeledEntity(tag, (value) => value.name, "未命名标签");
+
+  return {
+    id: normalizedTag?.id ?? 0,
+    name: normalizedTag?.label ?? "未命名标签",
+  };
+};
+
+const normalizeArticleCategory = (
+  category: Partial<ArticleCategory> | null | undefined
+): ArticleCategory | null => {
+  const normalizedCategory = normalizeLabeledEntity(category, (value) => value.name, "未分类");
+
+  if (!normalizedCategory) {
+    return null;
+  }
+
+  return {
+    id: normalizedCategory.id,
+    name: normalizedCategory.label,
   };
 };
 
