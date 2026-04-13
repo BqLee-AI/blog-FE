@@ -93,9 +93,9 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     
-    // 计算旋转角度 (最大 ±8 度)
-    const rotateX = ((y - centerY) / centerY) * -8;
-    const rotateY = ((x - centerX) / centerX) * 8;
+    // 计算旋转角度 (最大 ±15 度，让效果更明显)
+    const rotateX = ((y - centerY) / centerY) * -15;
+    const rotateY = ((x - centerX) / centerX) * 15;
     
     setRotate({ x: rotateX, y: rotateY });
   };
@@ -158,11 +158,11 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
-          perspective: "1000px",
+          perspective: "1200px",
           transform: isHovered 
-            ? `perspective(1000px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale3d(1.02, 1.02, 1.02)` 
-            : "perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
-          transition: isHovered ? "transform 0.1s ease-out" : "transform 0.6s cubic-bezier(0.2, 1, 0.3, 1)"
+            ? `perspective(1200px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale3d(1.05, 1.05, 1.05)` 
+            : "perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
+          transition: isHovered ? "transform 0.1s ease-out" : "transform 0.8s cubic-bezier(0.2, 1, 0.3, 1)"
         }}
         className="relative w-full max-w-[420px] bg-white/90 dark:bg-slate-900/90 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/40 dark:border-white/5 backdrop-blur-2xl animate-in zoom-in-95 duration-300"
       >
