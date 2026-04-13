@@ -17,13 +17,13 @@ export default function PostCard({ post }: PostCardProps) {
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transform origin-left transition-transform duration-500 group-hover:scale-x-110" />
         
         <div className="flex-1 flex flex-col p-6 lg:p-7">
-          <div className="flex items-center gap-3 mb-5">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50">
+          <div className="flex flex-wrap items-center gap-3 mb-5">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50 whitespace-nowrap">
               文章推荐
             </span>
-            <div className="flex items-center text-slate-400 dark:text-slate-500 text-xs font-medium">
+            <div className="flex items-center text-slate-400 dark:text-slate-500 text-xs font-medium whitespace-nowrap">
               {publishedAt}
-              <span className="mx-2 opacity-30">•</span>
+              <span className="mx-2 opacity-30 inline-block">•</span>
               <span>{readingTime} 分钟阅读</span>
             </div>
           </div>
