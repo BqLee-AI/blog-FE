@@ -42,18 +42,18 @@ export default function Header() {
   }, [lastScrollPos, isVisible, scrollThreshold]);
 
   return (
-    <header className={`bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 sticky top-0 z-50 transition-all duration-300 ${
+    <header className={`bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 sticky top-0 z-50 transition-all duration-300 ${
       isVisible ? "translate-y-0" : "-translate-y-full"
     }`}>
-      <div className="container mx-auto px-4 max-w-6xl">
+      <div className="container mx-auto px-4 max-w-7xl">
         <nav className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group transition-transform hover:scale-105">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all">
-              <span className="text-white font-bold text-xl">B</span>
+              <span className="text-white font-bold text-xl tracking-tighter">B</span>
             </div>
-            <span className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-800 bg-clip-text text-transparent">
-              MyBlog
+            <span className="text-xl font-black bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-400 bg-clip-text text-transparent tracking-tight">
+              Antigravity
             </span>
           </Link>
 
@@ -61,41 +61,41 @@ export default function Header() {
           <div className="relative hidden md:block">
             <Input
               type="text"
-              placeholder="搜索文章..."
+              placeholder="搜索感兴趣的内容..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-72 pl-10 pr-4 bg-gray-100/50 dark:bg-gray-800/50 border-transparent hover-input transition-all focus:w-80"
+              className="h-10 w-64 pl-10 pr-4 bg-slate-100/50 dark:bg-white/5 border-transparent hover-input transition-all focus:w-72 rounded-xl text-sm font-medium"
             />
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
           </div>
 
           {/* 导航链接 */}
-          <ul className="flex items-center gap-1 md:gap-4 lg:gap-6">
+          <ul className="flex items-center gap-1 md:gap-2">
             <li>
               <Link
                 to="/"
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-lg transition-all font-medium flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2 rounded-xl transition-all text-sm font-bold flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-white/5"
               >
-                <HomeIcon className="w-5 h-5" />
+                <HomeIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">首页</span>
               </Link>
             </li>
             <li>
               <Link
                 to="/articles"
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-lg transition-all font-medium flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2 rounded-xl transition-all text-sm font-bold flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-white/5"
               >
-                <FileTextIcon className="w-5 h-5" />
-                <span className="hidden sm:inline">文章</span>
+                <FileTextIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">文库</span>
               </Link>
             </li>
             <li>
               <Link
                 to="/admin"
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 dark:hover:bg-blue-600 hover:shadow-blue-500/30 hover:-translate-y-0.5"
               >
-                <GearIcon className="w-5 h-5" />
-                <span className="hidden lg:inline">管理后台</span>
+                <GearIcon className="w-4 h-4" />
+                <span className="hidden lg:inline">控制台</span>
               </Link>
             </li>
             
