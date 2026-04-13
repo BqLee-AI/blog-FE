@@ -38,15 +38,15 @@ export default function HomePage() {
   return (
     <div className="animate-fade-in max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       {/* 页面标题 */}
-      <header className="mb-12 grid gap-8 rounded-[2.5rem] border border-slate-200/60 dark:border-slate-800/60 bg-white/40 dark:bg-slate-900/40 p-8 shadow-xl shadow-blue-500/5 backdrop-blur-xl md:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] md:p-10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32" />
+      <header className="mb-12 grid gap-8 rounded-[2.5rem] border border-slate-200/60 dark:border-white/5 bg-white/40 dark:bg-slate-900/60 p-8 shadow-xl shadow-blue-500/5 backdrop-blur-xl md:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] md:p-10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 dark:bg-blue-400/5 rounded-full blur-3xl -mr-32 -mt-32" />
         
         <div className="relative z-10 flex flex-col justify-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100/30 dark:border-blue-800/30 w-fit">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50/50 dark:bg-blue-400/10 border border-blue-100/30 dark:border-blue-400/20 w-fit">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400" />
             <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">Personal Blog</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
             我的个人博客
           </h1>
           <p className="text-base text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed font-medium opacity-80">
@@ -55,23 +55,23 @@ export default function HomePage() {
         </div>
 
         <div className="relative z-10 rounded-3xl bg-neutral-900/5 dark:bg-white/5 p-1 backdrop-blur-sm">
-          <div className="rounded-[1.25rem] bg-white/60 dark:bg-slate-950/60 p-5 shadow-inner border border-white/40 dark:border-slate-800/40">
+          <div className="rounded-[1.25rem] bg-white/60 dark:bg-slate-950/60 p-5 shadow-inner border border-white/40 dark:border-white/5">
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-slate-100 dark:border-slate-800 shadow-sm group hover:border-blue-500/30 transition-all">
+              <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-slate-100 dark:border-white/5 shadow-sm group hover:border-blue-500/30 transition-all">
                 <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 mb-1 uppercase tracking-wider">文章数量</p>
-                <p className="text-2xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{articleOverview.articleCount}</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{articleOverview.articleCount}</p>
               </div>
-              <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-slate-100 dark:border-slate-800 shadow-sm group hover:border-blue-500/30 transition-all">
+              <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-slate-100 dark:border-white/5 shadow-sm group hover:border-blue-500/30 transition-all">
                 <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 mb-1 uppercase tracking-wider">标签数量</p>
-                <p className="text-2xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{articleOverview.tagCount}</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{articleOverview.tagCount}</p>
               </div>
-              <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-slate-100 dark:border-slate-800 shadow-sm group hover:border-blue-500/30 transition-all">
+              <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-slate-100 dark:border-white/5 shadow-sm group hover:border-blue-500/30 transition-all">
                 <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 mb-1 uppercase tracking-wider">平均阅读</p>
-                <p className="text-lg font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">{articleOverview.averageReadingTime} 分钟</p>
+                <p className="text-lg font-black text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{articleOverview.averageReadingTime} 分钟</p>
               </div>
-              <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-slate-100 dark:border-slate-800 shadow-sm group hover:border-blue-500/30 transition-all">
+              <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-slate-100 dark:border-white/5 shadow-sm group hover:border-blue-500/30 transition-all">
                 <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 mb-1 uppercase tracking-wider">最新文章</p>
-                <p className="text-[11px] font-bold text-slate-900 dark:text-white line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">{articleOverview.latestTitle}</p>
+                <p className="text-[11px] font-bold text-slate-900 dark:text-slate-100 line-clamp-2 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{articleOverview.latestTitle}</p>
               </div>
             </div>
           </div>
@@ -82,8 +82,8 @@ export default function HomePage() {
       <section>
         <div className="flex items-end justify-between gap-4 mb-10">
           <div className="relative">
-            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-blue-600 rounded-full" />
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">最新文章</h2>
+            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-blue-600 dark:bg-blue-500 rounded-full" />
+            <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">最新文章</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">
               当前展示 {articleOverview.articleCount} 篇内容，均可直接进入详情阅读。
             </p>
