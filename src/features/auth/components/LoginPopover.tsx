@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -6,8 +6,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import type { LoginForm, RegisterForm } from "@/types/auth";
 import { Button } from "@/components/ui/button";
-import { FiMail, FiLock, FiUser, FiCheckCircle, FiEye, FiEyeOff, FiX, FiShield } from "react-icons/fi";
-import { cn } from "@/lib/utils";
 
 interface LoginPopoverProps {
   isOpen: boolean;
@@ -34,17 +32,23 @@ const registerSchema = z
     path: ["confirmPassword"],
   });
 
+import { 
+  FiMail, 
+  FiLock, 
+  FiUser, 
+  FiCheckCircle, 
+  FiEye, 
+  FiEyeOff, 
+  FiX, 
+  FiShield 
+} from "react-icons/fi";
+
 export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   const { login, register, isLoading, error, clearError, sendCode, isSendingCode, countdown, setCountdown, clearCountdownTimer } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [activeTab, setActiveTab] = useState<TabType>("login");
-  
-  // 3D 倾斜效果状态
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
 
   // 登录表单
   const loginMethods = useForm<LoginForm>({
@@ -103,33 +107,6 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
     };
   }, [clearCountdownTimer]);
 
-  // 处理 3D 倾斜逻辑
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    
-    const card = cardRef.current;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    // 计算旋转角度 (最大 ±15 度，让效果更明显)
-    const rotateX = ((y - centerY) / centerY) * -15;
-    const rotateY = ((x - centerX) / centerX) * 15;
-    
-    setRotate({ x: rotateX, y: rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setRotate({ x: 0, y: 0 });
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
 
   // 处理标签页切换
   const handleTabChange = (tab: TabType) => {
@@ -166,250 +143,281 @@ export default function LoginPopover({ isOpen, onClose }: LoginPopoverProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* 背景遮罩 */}
       <div
-        className="absolute inset-0 bg-slate-900/40 dark:bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+        className="absolute inset-0 bg-black/50 dark:bg-black/70"
         onClick={onClose}
       />
 
-      {/* 弹窗内容 - 关键：3D 容器 */}
-      <div 
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          perspective: "1200px",
-          transform: isHovered 
-            ? `perspective(1200px) rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale3d(1.05, 1.05, 1.05)` 
-            : "perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
-          transition: isHovered ? "transform 0.1s ease-out" : "transform 0.8s cubic-bezier(0.2, 1, 0.3, 1)"
-        }}
-        className="relative w-full max-w-[420px] bg-white/90 dark:bg-slate-900/90 rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/40 dark:border-white/5 backdrop-blur-2xl animate-in zoom-in-95 duration-300"
-      >
-        {/* 顶部 Branding */}
-        <div className="relative pt-8 pb-6 px-8 text-center overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse" />
-          
-          <div className="relative z-10 space-y-2 animate-branding-float">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/20 mb-1 active:rotate-12 transition-transform">
-              <span className="text-white font-black text-xl tracking-tighter">B</span>
-            </div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-              {activeTab === "login" ? "欢迎回来" : "加入我们"}
-            </h2>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              {activeTab === "login" 
-                ? "继续您的创意之旅" 
-                : "开启一段全新的技术探索"}
-            </p>
-          </div>
-        </div>
-
-        {/* 关键优化：滑动 Tab 切换 */}
-        <div className="px-6 mb-4">
-          <div className="relative p-1 bg-slate-100 dark:bg-white/5 rounded-2xl flex gap-1 items-center">
-            {/* 滑动背景 */}
-            <div 
-              className={cn(
-                "absolute h-9 bg-white dark:bg-slate-800 rounded-xl shadow-sm transition-all duration-300 ease-out",
-                activeTab === "login" ? "w-[48%] left-1" : "w-[48%] left-[51%]"
-              )}
-            />
-            
-            <button
-              onClick={() => handleTabChange("login")}
-              className={cn(
-                "relative z-10 flex-1 h-9 text-[12px] font-black transition-colors duration-300",
-                activeTab === "login" ? "text-blue-600 dark:text-white" : "text-slate-500"
-              )}
-            >
-              登录
-            </button>
-            <button
-              onClick={() => handleTabChange("register")}
-              className={cn(
-                "relative z-10 flex-1 h-9 text-[12px] font-black transition-colors duration-300",
-                activeTab === "register" ? "text-blue-600 dark:text-white" : "text-slate-500"
-              )}
-            >
-              注册
-            </button>
-          </div>
-        </div>
-
+      {/* 弹窗内容 */}
+      <div className="hover-card relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden w-full max-w-sm mx-4">
         {/* 关闭按钮 */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-6 top-6 z-20 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 transition-colors"
+          className="absolute right-4 top-4 z-10 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+          aria-label="关闭"
         >
-          <FiX className="w-5 h-5" />
+          <FiX className="w-6 h-6" />
         </button>
 
-        {/* 表单内容区 - 增加 Key 以触发滑入动画 */}
-        <div key={activeTab} className="animate-content-entrance">
-          {/* 登录标签页 */}
-          {activeTab === "login" && (
-            <div className="p-6 pb-8 space-y-4">
-              {error && (
-                <div className="flex items-center gap-3 p-3 text-[11px] font-bold text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl animate-shake">
-                  <FiShield className="w-4 h-4 shrink-0" />
-                  {error}
-                </div>
-              )}
+        {/* 选项卡标签 */}
+        <div className="flex border-b border-gray-200 dark:border-gray-700">
+          <Button
+            type="button"
+            onClick={() => handleTabChange("login")}
+            variant="ghost"
+            className={`flex-1 px-6 py-4 font-semibold transition-all ${
+              activeTab === "login"
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            登录
+          </Button>
+          <Button
+            type="button"
+            onClick={() => handleTabChange("register")}
+            variant="ghost"
+            className={`flex-1 px-6 py-4 font-semibold transition-all ${
+              activeTab === "register"
+                ? "text-green-600 dark:text-green-400 border-b-2 border-green-600 dark:border-green-400"
+                : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            注册
+          </Button>
+        </div>
 
-              <form onSubmit={handleLoginSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <div className="relative group/input">
-                    <FiMail className={cn(
-                      "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-300",
-                      loginErrors.email ? "text-red-400" : "text-slate-400 group-focus-within/input:text-blue-500"
-                    )} />
-                    <input
-                      type="email"
-                      placeholder="邮箱地址"
-                      {...loginMethods.register("email")}
-                      className={cn(
-                        "w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-slate-400",
-                        loginErrors.email 
-                          ? "border-red-500/50 ring-red-500/10" 
-                          : "focus:border-blue-500/50 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-slate-800"
-                      )}
-                    />
-                  </div>
-                </div>
+        {/* 登录标签页 */}
+        {activeTab === "login" && (
+          <div className="p-6 space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                {error}
+              </div>
+            )}
 
-                <div className="space-y-1.5">
-                  <div className="relative group/input">
-                    <FiLock className={cn(
-                      "absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-300",
-                      loginErrors.password ? "text-red-400" : "text-slate-400 group-focus-within/input:text-blue-500"
-                    )} />
-                    <button
-                      type="button"
-                      onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      {isPasswordVisible ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
-                    </button>
-                    <input
-                      type={isPasswordVisible ? "text" : "password"}
-                      placeholder="账号密码"
-                      {...loginMethods.register("password")}
-                      className={cn(
-                        "w-full pl-11 pr-12 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-4 placeholder:text-slate-400",
-                        loginErrors.password 
-                          ? "border-red-500/50 ring-red-500/10" 
-                          : "focus:border-blue-500/50 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-slate-800"
-                      )}
-                    />
-                  </div>
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <div className="space-y-1">
+                <label htmlFor="login-email" className="sr-only">邮箱</label>
+                <div className="relative">
+                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="login-email"
+                    type="email"
+                    placeholder="邮箱地址"
+                    {...loginMethods.register("email")}
+                    aria-invalid={!!loginErrors.email}
+                    aria-describedby={loginErrors.email ? "login-email-error" : undefined}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
+                {loginErrors.email && (
+                  <p id="login-email-error" className="text-xs text-red-500 ml-1">
+                    {loginErrors.email.message}
+                  </p>
+                )}
+              </div>
 
-                <div className="pt-2">
+              <div className="space-y-1">
+                <label htmlFor="login-password" className="sr-only">密码</label>
+                <div className="relative">
+                  <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="login-password"
+                    type={isPasswordVisible ? "text" : "password"}
+                    placeholder="密码"
+                    {...loginMethods.register("password")}
+                    aria-invalid={!!loginErrors.password}
+                    aria-describedby={loginErrors.password ? "login-password-error" : undefined}
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                   <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="relative w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-black text-sm shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all disabled:opacity-50 overflow-hidden"
+                    type="button"
+                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {isLoading && <div className="absolute inset-0 animate-shimmer" />}
-                    <span className="relative z-10">{isLoading ? "认证中..." : "登录平台"}</span>
+                    {isPasswordVisible ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
-              </form>
-            </div>
-          )}
+                {loginErrors.password && (
+                  <p id="login-password-error" className="text-xs text-red-500 ml-1">
+                    {loginErrors.password.message}
+                  </p>
+                )}
+              </div>
 
-          {/* 注册标签页 - 极致压缩高度 */}
-          {activeTab === "register" && (
-            <div className="p-6 pb-8 space-y-3.5 max-h-[60vh] overflow-y-auto no-scrollbar">
-              {error && (
-                <div className="flex items-center gap-3 p-3 text-[11px] font-bold text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl animate-shake">
-                  <FiShield className="w-3.5 h-3.5 shrink-0" />
-                  {error}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded dark:bg-blue-700 font-medium disabled:opacity-50 transition-all hover:bg-blue-700 dark:hover:bg-blue-600 active:scale-95"
+              >
+                {isLoading ? "登录中..." : "登录"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* 注册标签页 */}
+        {activeTab === "register" && (
+          <div className="p-6 space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleRegisterSubmit} className="space-y-3">
+              <div className="space-y-1">
+                <label htmlFor="register-username" className="sr-only">用户名</label>
+                <div className="relative">
+                  <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="register-username"
+                    type="text"
+                    placeholder="用户名"
+                    {...registerMethods.register("username")}
+                    aria-invalid={!!registerErrors.username}
+                    aria-describedby={registerErrors.username ? "register-username-error" : undefined}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                  />
                 </div>
-              )}
+                {registerErrors.username && (
+                  <p id="register-username-error" className="text-xs text-red-500 ml-1">
+                    {registerErrors.username.message}
+                  </p>
+                )}
+              </div>
 
-              <form onSubmit={handleRegisterSubmit} className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative group/input">
-                    <FiUser className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within/input:text-blue-500" />
-                    <input
-                      type="text"
-                      placeholder="用户名"
-                      {...registerMethods.register("username")}
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-[13px] font-medium transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
-                    />
-                  </div>
-                  <div className="relative group/input">
-                    <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within/input:text-blue-500" />
-                    <input
-                      type="email"
-                      placeholder="邮箱"
-                      {...registerMethods.register("email")}
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-[13px] font-medium transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
-                    />
-                  </div>
+              <div className="space-y-1">
+                <label htmlFor="register-email" className="sr-only">邮箱</label>
+                <div className="relative">
+                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="register-email"
+                    type="email"
+                    placeholder="邮箱"
+                    {...registerMethods.register("email")}
+                    aria-invalid={!!registerErrors.email}
+                    aria-describedby={registerErrors.email ? "register-email-error" : undefined}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                  />
                 </div>
+                {registerErrors.email && (
+                  <p id="register-email-error" className="text-xs text-red-500 ml-1">
+                    {registerErrors.email.message}
+                  </p>
+                )}
+              </div>
 
+              <div className="space-y-1">
                 <div className="flex gap-2">
-                  <div className="flex-1 relative group/input">
-                    <FiShield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within/input:text-blue-500" />
+                  <div className="flex-1 relative">
+                    <label htmlFor="register-code" className="sr-only">验证码</label>
+                    <FiShield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
+                      id="register-code"
                       type="text"
                       placeholder="验证码"
                       {...registerMethods.register("code")}
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-[13px] font-medium transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
+                      aria-invalid={!!registerErrors.code}
+                      aria-describedby={registerErrors.code ? "register-code-error" : undefined}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => sendCode(registerMethods.watch("email"))}
                     disabled={countdown > 0 || isSendingCode || !registerMethods.watch("email")}
-                    className="relative px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-[11px] font-black transition-all disabled:opacity-50 overflow-hidden"
+                    className="px-4 py-2 bg-green-600 text-white rounded dark:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm flex items-center gap-1.5 transition-all hover:bg-green-700"
                   >
-                    {isSendingCode && <div className="absolute inset-0 animate-shimmer" />}
-                    <span className="relative z-10">{countdown > 0 ? `${countdown}s` : "获取代码"}</span>
+                    {countdown > 0 ? (
+                      `${countdown}s`
+                    ) : isSendingCode ? (
+                      "发送中..."
+                    ) : (
+                      <>
+                        <FiCheckCircle />
+                        发送
+                      </>
+                    )}
                   </button>
                 </div>
+                {registerErrors.code && (
+                  <p id="register-code-error" className="text-xs text-red-500 ml-1">
+                    {registerErrors.code.message}
+                  </p>
+                )}
+              </div>
 
-                <div className="relative group/input">
-                  <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within/input:text-blue-500" />
+              <div className="space-y-1">
+                <label htmlFor="register-password" className="sr-only">密码</label>
+                <div className="relative">
+                  <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
+                    id="register-password"
                     type={isPasswordVisible ? "text" : "password"}
-                    placeholder="设置密码"
+                    placeholder="密码 (至少6位)"
                     {...registerMethods.register("password")}
-                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-[13px] font-medium transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
+                    aria-invalid={!!registerErrors.password}
+                    aria-describedby={registerErrors.password ? "register-password-error" : undefined}
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                   />
-                </div>
-
-                <div className="relative group/input">
-                  <FiCheckCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 group-focus-within/input:text-blue-500" />
-                  <input
-                    type={isConfirmPasswordVisible ? "text" : "password"}
-                    placeholder="再次确认"
-                    {...registerMethods.register("confirmPassword")}
-                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-[13px] font-medium transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
-                  />
-                </div>
-
-                <div className="pt-2">
                   <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="relative w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-black text-sm shadow-md shadow-green-500/10 active:scale-[0.98] transition-all disabled:opacity-50 overflow-hidden"
+                    type="button"
+                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {isLoading && <div className="absolute inset-0 animate-shimmer" />}
-                    <span className="relative z-10">{isLoading ? "加入中..." : "立即注册"}</span>
+                    {isPasswordVisible ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
-              </form>
-            </div>
-          )}
-        </div>
+                {registerErrors.password && (
+                  <p id="register-password-error" className="text-xs text-red-500 ml-1">
+                    {registerErrors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label htmlFor="register-confirm-password" className="sr-only">确认密码</label>
+                <div className="relative">
+                  <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="register-confirm-password"
+                    type={isConfirmPasswordVisible ? "text" : "password"}
+                    placeholder="确认密码"
+                    {...registerMethods.register("confirmPassword")}
+                    aria-invalid={!!registerErrors.confirmPassword}
+                    aria-describedby={registerErrors.confirmPassword ? "register-confirm-password-error" : undefined}
+                    className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {isConfirmPasswordVisible ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+                {registerErrors.confirmPassword && (
+                  <p id="register-confirm-password-error" className="text-xs text-red-500 ml-1">
+                    {registerErrors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full mt-2 px-4 py-2 bg-green-600 text-white rounded dark:bg-green-700 font-medium disabled:opacity-50 transition-all hover:bg-green-700 dark:hover:bg-green-600 active:scale-95"
+              >
+                {isLoading ? "注册中..." : "立即加入"}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
