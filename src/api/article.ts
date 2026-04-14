@@ -23,6 +23,7 @@ export interface Article {
   author: ArticleAuthor;
   view_count: number;
   created_at: string;
+  updated_at: string;
 }
 
 export interface ArticleDetail extends Article {
@@ -148,6 +149,7 @@ const normalizeArticle = (article: Partial<Article> & { author?: Partial<Article
   author: normalizeArticleAuthor(article.author),
   view_count: typeof article.view_count === "number" ? article.view_count : 0,
   created_at: article.created_at?.trim() || "",
+  updated_at: article.updated_at?.trim() || "",
 });
 
 const normalizeArticleDetail = (
