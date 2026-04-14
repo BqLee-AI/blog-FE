@@ -1,22 +1,31 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ArticleForm from "@/features/articles/components/ArticleForm";
-import { usePostStore } from "@/store/postStore";
+import { articleApi } from "@/api/article";
 import type { Post } from "@/types";
 
 export default function CreateArticlePage() {
   const navigate = useNavigate();
-  const { addPost } = usePostStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (data: Post) => {
-    // 模拟保存（实际开发中这里应该调用后端 API）
-    console.log("新建文章:", data);
-    addPost(data);
+  const handleSubmit = async (data: Post) => {
+    setIsSubmitting(true);
 
-    // 显示成功提示
-    alert("文章发布成功！");
+    try {
+      await articleApi.create({
+        title: data.title,
+        content: data.content ?? "",
+        summary: data.summary,
+      });
 
-    // 返回管理后台
-    navigate("/admin");
+      alert("文章发布成功！");
+      navigate("/admin");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "文章发布失败";
+      alert(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -26,7 +35,7 @@ export default function CreateArticlePage() {
         <p className="text-gray-600 mt-2">填写下面的表单发布一篇新文章</p>
       </div>
 
-      <ArticleForm onSubmit={handleSubmit} />
+      <ArticleForm onSubmit={handleSubmit} isLoading={isSubmitting} />
     </div>
   );
 }

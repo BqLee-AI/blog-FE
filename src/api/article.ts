@@ -23,6 +23,7 @@ export interface Article {
   author: ArticleAuthor;
   view_count: number;
   created_at: string;
+  updated_at: string;
 }
 
 export interface ArticleDetail extends Article {
@@ -39,6 +40,30 @@ export interface ArticleListParams {
 }
 
 export interface ArticleListRequestOptions {
+  signal?: AbortSignal;
+}
+
+export type ArticlePublishStatus = 'draft' | 'published';
+
+export type ArticleEditableStatus = ArticlePublishStatus | 'archived';
+
+export interface ArticleCreateRequest {
+  title: string;
+  content: string;
+  summary?: string;
+  cover_image?: string;
+  status?: ArticlePublishStatus;
+}
+
+export interface ArticleUpdateRequest {
+  title?: string;
+  content?: string;
+  summary?: string;
+  cover_image?: string;
+  status?: ArticleEditableStatus;
+}
+
+export interface ArticleMutationRequestOptions {
   signal?: AbortSignal;
 }
 
@@ -124,6 +149,7 @@ const normalizeArticle = (article: Partial<Article> & { author?: Partial<Article
   author: normalizeArticleAuthor(article.author),
   view_count: typeof article.view_count === "number" ? article.view_count : 0,
   created_at: article.created_at?.trim() || "",
+  updated_at: article.updated_at?.trim() || "",
 });
 
 const normalizeArticleDetail = (
@@ -212,5 +238,32 @@ export const articleApi = {
     });
 
     return normalizeArticleDetail(unwrapResponse(response.data));
+  },
+
+  create: async (
+    payload: ArticleCreateRequest,
+    options: ArticleMutationRequestOptions = {}
+  ): Promise<ArticleDetail> => {
+    const response = await apiClient.post<ArticleDetail | { data: ArticleDetail }>('/articles', payload, {
+      signal: options.signal,
+    });
+
+    return normalizeArticleDetail(unwrapResponse(response.data));
+  },
+
+  update: async (
+    id: number,
+    payload: ArticleUpdateRequest,
+    options: ArticleMutationRequestOptions = {}
+  ): Promise<void> => {
+    await apiClient.put(`/articles/${id}`, payload, {
+      signal: options.signal,
+    });
+  },
+
+  delete: async (id: number, options: ArticleMutationRequestOptions = {}): Promise<void> => {
+    await apiClient.delete(`/articles/${id}`, {
+      signal: options.signal,
+    });
   },
 };
