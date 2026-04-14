@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { commentStore } from '@/store/commentStore';
 import type { Comment } from '@/types';
-import { TrashIcon, ChatBubbleIcon } from '@radix-ui/react-icons';
+import { TrashIcon, ChatBubbleIcon, CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 /**
  * 评论管理组件 - 在管理后台中显示
  */
 export const CommentManagement: React.FC = () => {
-  const { comments: allComments, isLoading, deleteComment } = commentStore();
+  const { comments: allComments, isLoading, deleteComment, updateComment } = commentStore();
   const [selectedPostId, setSelectedPostId] = useState<number | 'all'>('all');
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'approved' | 'pending'>('all');
   const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
+  const [updatingCommentId, setUpdatingCommentId] = useState<number | null>(null);
 
   // 获取所有评论
   const allCommentsList = Array.from(allComments.values()).flat();
@@ -21,8 +24,17 @@ export const CommentManagement: React.FC = () => {
       ? allCommentsList
       : allCommentsList.filter(c => c.postId === selectedPostId);
 
+  const reviewFilteredComments =
+    reviewFilter === 'all'
+      ? filteredComments
+      : filteredComments.filter((comment) =>
+          reviewFilter === 'approved' ? comment.isApproved : !comment.isApproved
+        );
+
   // 获取所有文章的 ID
   const postIds = Array.from(allComments.keys()).sort((a, b) => a - b);
+  const approvedCount = allCommentsList.filter((comment) => comment.isApproved).length;
+  const pendingCount = allCommentsList.filter((comment) => !comment.isApproved).length;
 
   // 处理删除评论
   const handleDeleteComment = async (postId: number, commentId: number) => {
@@ -38,6 +50,18 @@ export const CommentManagement: React.FC = () => {
       alert('删除失败，请稍后重试');
     } finally {
       setDeletingCommentId(null);
+    }
+  };
+
+  const handleReviewAction = async (postId: number, commentId: number, isApproved: boolean) => {
+    setUpdatingCommentId(commentId);
+    try {
+      await updateComment(postId, commentId, { isApproved });
+    } catch (err) {
+      console.error('Failed to update comment review state:', err);
+      alert(isApproved ? '通过失败，请稍后重试' : '驳回失败，请稍后重试');
+    } finally {
+      setUpdatingCommentId(null);
     }
   };
 
@@ -72,6 +96,22 @@ export const CommentManagement: React.FC = () => {
             {postIds.length}
           </div>
         </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+          <div className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-2">
+            已通过
+          </div>
+          <div className="text-3xl font-bold text-gray-900 dark:text-white">
+            {approvedCount}
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+          <div className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-2">
+            待审核
+          </div>
+          <div className="text-3xl font-bold text-gray-900 dark:text-white">
+            {pendingCount}
+          </div>
+        </div>
       </div>
 
       {/* 筛选 */}
@@ -91,6 +131,17 @@ export const CommentManagement: React.FC = () => {
             </option>
           ))}
         </select>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button type="button" variant={reviewFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setReviewFilter('all')}>
+              全部
+            </Button>
+            <Button type="button" variant={reviewFilter === 'approved' ? 'default' : 'outline'} size="sm" onClick={() => setReviewFilter('approved')}>
+              已通过
+            </Button>
+            <Button type="button" variant={reviewFilter === 'pending' ? 'default' : 'outline'} size="sm" onClick={() => setReviewFilter('pending')}>
+              待审核
+            </Button>
+          </div>
       </div>
 
       {/* 评论列表 */}
@@ -99,24 +150,32 @@ export const CommentManagement: React.FC = () => {
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
             加载中...
           </div>
-        ) : filteredComments.length === 0 ? (
+        ) : reviewFilteredComments.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-            {allCommentsList.length === 0 ? '暂无评论' : '该文章暂无评论'}
+            {allCommentsList.length === 0
+              ? '暂无评论'
+              : reviewFilter === 'pending'
+                ? '当前没有待审核评论'
+                : selectedPostId === 'all'
+                  ? '当前筛选下暂无评论'
+                  : '该文章暂无评论'}
           </div>
         ) : (
           <div className="divide-y dark:divide-gray-700">
-            {filteredComments.map(comment => (
+            {reviewFilteredComments.map(comment => (
               <div
                 key={`${comment.postId}-${comment.id}`}
                 className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
               >
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">
-                    {/* 评论者和时间 */}
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
                       <span className="font-semibold text-gray-900 dark:text-white">
                         {comment.author}
                       </span>
+                      <Badge variant={comment.isApproved ? 'secondary' : 'destructive'}>
+                        {comment.isApproved ? '已通过' : '待审核'}
+                      </Badge>
                       {comment.email && (
                         <span className="text-sm text-gray-500 dark:text-gray-400">
                           {comment.email}
@@ -124,34 +183,55 @@ export const CommentManagement: React.FC = () => {
                       )}
                     </div>
 
-                    {/* 文章关联 */}
                     <div className="text-sm text-blue-600 dark:text-blue-400 mb-2">
                       文章 #{comment.postId}
                       {comment.replyTo && ` • 回复评论 #{comment.replyTo}`}
                     </div>
 
-                    {/* 发布时间 */}
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                       {new Date(comment.createdAt).toLocaleString('zh-CN')}
                     </p>
 
-                    {/* 评论内容 */}
                     <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap wrap-break-word">
                       {comment.content}
                     </p>
                   </div>
 
-                  {/* 删除按钮 */}
-                  <Button
-                    type="button"
-                    onClick={() => handleDeleteComment(comment.postId, comment.id)}
-                    disabled={deletingCommentId === comment.id}
-                    variant="ghost"
-                    className="shrink-0 rounded p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    title="删除评论"
-                  >
-                    <TrashIcon className="w-5 h-5" />
-                  </Button>
+                  <div className="shrink-0 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Button
+                      type="button"
+                      onClick={() => handleReviewAction(comment.postId, comment.id, true)}
+                      disabled={updatingCommentId === comment.id || comment.isApproved}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <CheckIcon className="w-4 h-4" />
+                      通过
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => handleReviewAction(comment.postId, comment.id, false)}
+                      disabled={updatingCommentId === comment.id || !comment.isApproved}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <Cross2Icon className="w-4 h-4" />
+                      驳回
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => handleDeleteComment(comment.postId, comment.id)}
+                      disabled={deletingCommentId === comment.id}
+                      variant="ghost"
+                      size="sm"
+                      className="shrink-0 rounded p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      title="删除评论"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
