@@ -7,7 +7,10 @@ export type Post = {
   createdAt?: string;
   updatedAt?: string;
   author?: string;
+  status?: PostStatus;
 };
+
+export type PostStatus = "published" | "draft";
 
 export type PaginationInfo = {
   page: number;

@@ -1,6 +1,49 @@
 import { create } from "zustand";
-import type { Post } from "@/types/post";
+import type { Post, PostStatus } from "@/types/post";
 import { mockPosts } from "@/assets/mockPosts";
+
+const STORAGE_KEY = "blog_posts";
+const DEFAULT_STATUS: PostStatus = "published";
+
+const isPostStatus = (value: unknown): value is PostStatus => {
+  return value === "published" || value === "draft";
+};
+
+const normalizePost = (post: Post): Post => ({
+  ...post,
+  status: isPostStatus(post.status) ? post.status : DEFAULT_STATUS,
+});
+
+const seedPosts = (): Post[] =>
+  mockPosts.map((post, index) =>
+    normalizePost({
+      ...post,
+      status: index === 1 ? "draft" : DEFAULT_STATUS,
+    })
+  );
+
+const loadPostsFromStorage = (): Post[] | null => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      return null;
+    }
+
+    const parsed = JSON.parse(stored) as Post[];
+    return Array.isArray(parsed) ? parsed.map(normalizePost) : null;
+  } catch (error) {
+    console.error("Failed to load posts from localStorage:", error);
+    return null;
+  }
+};
+
+const savePostsToStorage = (posts: Post[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+  } catch (error) {
+    console.error("Failed to save posts to localStorage:", error);
+  }
+};
 
 /**
  * 文章 Store 状态接口
@@ -38,9 +81,11 @@ export const usePostStore = create<PostStoreState>((set) => ({
   fetchPosts: () => {
     set({ isLoading: true, error: null });
     try {
+      const posts = loadPostsFromStorage() ?? seedPosts();
+
       // 模拟网络延迟
       setTimeout(() => {
-        set({ posts: mockPosts, isLoading: false });
+        set({ posts, isLoading: false });
       }, 300);
     } catch (err) {
       set({ error: "获取文章列表失败", isLoading: false });
@@ -51,7 +96,8 @@ export const usePostStore = create<PostStoreState>((set) => ({
   fetchPostById: (id: number) => {
     set({ isLoading: true, error: null });
     try {
-      const post = mockPosts.find((p) => p.id === id);
+      const posts = loadPostsFromStorage() ?? seedPosts();
+      const post = posts.find((p) => p.id === id);
       setTimeout(() => {
         if (post) {
           set({ currentPost: post, isLoading: false });
@@ -67,26 +113,44 @@ export const usePostStore = create<PostStoreState>((set) => ({
   // 添加新文章（模拟）
   addPost: (post: Post) => {
     set((state) => ({
-      posts: [...state.posts, post],
+      posts: [...state.posts, normalizePost(post)],
     }));
+
+    savePostsToStorage([...usePostStore.getState().posts]);
   },
 
   // 更新文章（模拟）
   updatePost: (id: number, updates: Partial<Post>) => {
-    set((state) => ({
-      posts: state.posts.map((p) => (p.id === id ? { ...p, ...updates } : p)),
-      currentPost:
+    set((state) => {
+      const nextPosts = state.posts.map((p) =>
+        p.id === id ? normalizePost({ ...p, ...updates, id: p.id }) : p
+      );
+
+      const nextCurrentPost =
         state.currentPost?.id === id
-          ? { ...state.currentPost, ...updates }
-          : state.currentPost,
-    }));
+          ? normalizePost({ ...state.currentPost, ...updates, id: state.currentPost.id })
+          : state.currentPost;
+
+      savePostsToStorage(nextPosts);
+
+      return {
+        posts: nextPosts,
+        currentPost: nextCurrentPost,
+      };
+    });
   },
 
   // 删除文章（模拟）
   deletePost: (id: number) => {
-    set((state) => ({
-      posts: state.posts.filter((p) => p.id !== id),
-    }));
+    set((state) => {
+      const nextPosts = state.posts.filter((p) => p.id !== id);
+      savePostsToStorage(nextPosts);
+
+      return {
+        posts: nextPosts,
+        currentPost: state.currentPost?.id === id ? null : state.currentPost,
+      };
+    });
   },
 
   // 清除错误信息
