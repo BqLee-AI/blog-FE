@@ -267,3 +267,18 @@ h1, h2, h3, h4 {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+/* ========== 响应式与可访问性逻辑 ========== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .hover-card:hover,
+  .hover-button:hover,
+  .hover-avatar:hover {
+    transform: none !important;
+  }
+}
