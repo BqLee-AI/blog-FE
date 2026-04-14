@@ -1,172 +1,229 @@
 import React, { useState } from 'react';
 import type { Comment } from '@/types';
-import { FiMessageSquare, FiTrash2, FiThumbsUp, FiThumbsDown, FiMoreHorizontal } from 'react-icons/fi';
+import { ChatBubbleIcon, TrashIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
-import { CommentForm } from './CommentForm';
+import { Button } from '@/components/ui/button';
 
 interface CommentCardProps {
   comment: Comment;
   postId: number;
   replyCount?: number;
   isAdmin?: boolean;
-  repliesPreview?: Comment[];
-  isReplying?: boolean;
   onReply?: (comment: Comment) => void;
   onLike?: (postId: number, commentId: number) => Promise<void>;
   onDislike?: (postId: number, commentId: number) => Promise<void>;
   onDelete?: (commentId: number) => Promise<void>;
   onViewReplies?: (comment: Comment) => void;
-  onCancelReply?: () => void;
-  onSubmitReply?: (commentData: any) => Promise<void>;
 }
 
 /**
- * 评论卡片组件 - 深度定制 B 站交互体验
+ * 评论卡片组件 - 参考B站评论设计
+ * 显示单条评论及操作按钮
  */
 export const CommentCard: React.FC<CommentCardProps> = ({
   comment,
   postId,
   replyCount = 0,
   isAdmin = false,
-  repliesPreview = [],
-  isReplying = false,
   onReply,
   onLike,
   onDislike,
   onDelete,
   onViewReplies,
-  onCancelReply,
-  onSubmitReply,
 }) => {
+  const [isLiking, setIsLiking] = useState(false);
+  const [isDisliking, setIsDisliking] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const currentReaction = comment.currentReaction ?? null;
   const displayName = comment.author || '匿名用户';
   const avatarLabel = displayName.trim().charAt(0).toUpperCase() || 'U';
 
-  const createdAt = new Date(comment.createdAt).toLocaleDateString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
   });
 
+  // 基于作者名称生成确定性等级 (LV1-LV6)
+  const getLevel = (name: string) => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash % 6) + 1;
+  };
+
+  const level = getLevel(displayName);
+
+  const handleLike = async () => {
+    if (isLiking || !onLike) return;
+    setIsLiking(true);
+    try {
+      await onLike(postId, comment.id);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleDislike = async () => {
+    if (isDisliking || !onDislike) return;
+    setIsDisliking(true);
+    try {
+      await onDislike(postId, comment.id);
+    } finally {
+      setIsDisliking(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (isDeleting || !onDelete) return;
+    setIsDeleting(true);
+    try {
+      await onDelete(comment.id);
+    } catch (err) {
+      console.error('Failed to delete comment:', err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <div className="group relative flex gap-4 py-5 first:pt-2 transition-all">
-      {/* 左侧头像 */}
-      <div className="shrink-0 pt-1 cursor-pointer">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-base font-black text-slate-400 dark:text-slate-500 border border-slate-200/50 dark:border-slate-700/50 overflow-hidden shadow-sm transition-transform hover:scale-105">
+    <div className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-800/90 dark:hover:border-blue-800/60">
+      {/* 评论头部 */}
+      <div className="mb-4 flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 via-sky-500 to-cyan-500 text-sm font-bold text-white shadow-sm">
           {avatarLabel}
         </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate font-semibold text-gray-900 dark:text-white text-sm">
+              {displayName}
+            </p>
+            <span className="inline-flex items-center rounded-sm bg-orange-50 px-1 py-0.5 text-[10px] font-bold text-orange-600 ring-1 ring-inset ring-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-800/50">
+              LV{level}
+            </span>
+            {comment.replyTo ? (
+              <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                回复 #{comment.replyTo}
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                主评论
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {createdAt}
+          </p>
+        </div>
+
+        {/* 删除按钮 */}
+        {isAdmin && (
+          <div className="shrink-0">
+            {showDeleteConfirm ? (
+              <div className="flex gap-2 rounded-full bg-gray-50 p-1 dark:bg-gray-700/70">
+                <Button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="h-8 rounded-full bg-red-500 px-3 text-xs font-medium text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-gray-400"
+                >
+                  确定
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                  variant="outline"
+                  className="h-8 rounded-full px-3 text-xs font-medium"
+                >
+                  取消
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                variant="ghost"
+                className="rounded-full p-2 text-gray-500 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                title="删除评论"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* 右侧内容区域 */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-3 mb-1.5">
-          <span className="font-bold text-[13px] text-slate-700 dark:text-slate-300 hover:text-blue-500 transition-colors cursor-pointer">
-            {displayName}
-          </span>
-          <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-[9px] font-black text-orange-600 dark:text-orange-400 rounded uppercase tracking-tighter">LV{Math.floor(Math.random() * 5) + 1}</span>
-        </div>
+      {/* 评论内容 */}
+      <div className="mb-4 rounded-2xl bg-gray-50 px-4 py-3 text-sm leading-7 text-gray-800 shadow-inner dark:bg-gray-900/70 dark:text-gray-200">
+        <p className="whitespace-pre-wrap break-words">{comment.content}</p>
+      </div>
 
-        <div className="text-[14px] leading-relaxed text-slate-800 dark:text-slate-200 mb-3 whitespace-pre-wrap break-words">
-          {comment.content}
-        </div>
+      {/* 操作按钮 - 参考B站设计 */}
+      <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4 dark:border-gray-700/80">
+        {/* 点赞 */}
+        <Button
+          type="button"
+          onClick={handleLike}
+          disabled={isLiking}
+          aria-pressed={currentReaction === 'like'}
+          variant="ghost"
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50',
+            currentReaction === 'like'
+              ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-800'
+              : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-300'
+          )}
+          title="点赞"
+        >
+          <span className={cn('text-base transition-transform', currentReaction === 'like' && 'scale-110')}>👍</span>
+          <span>{comment.likes}</span>
+        </Button>
 
-        {/* 底部操作行 */}
-        <div className="flex items-center gap-6 text-[12px] text-slate-400 dark:text-slate-500 font-medium">
-          <span className="text-slate-400/70">{createdAt}</span>
+        {/* 踩 */}
+        <Button
+          type="button"
+          onClick={handleDislike}
+          disabled={isDisliking}
+          aria-pressed={currentReaction === 'dislike'}
+          variant="ghost"
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-50',
+            currentReaction === 'dislike'
+              ? 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200 dark:bg-red-900/30 dark:text-red-300 dark:ring-red-800'
+              : 'text-gray-600 hover:bg-red-50 hover:text-red-700 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-300'
+          )}
+          title="踩"
+        >
+          <span className={cn('text-base transition-transform', currentReaction === 'dislike' && 'scale-110')}>👎</span>
+          <span>{comment.dislikes}</span>
+        </Button>
 
-          <div className="flex items-center gap-5">
-            <button
-              onClick={() => onLike?.(postId, comment.id)}
-              className={cn(
-                "flex items-center gap-1 transition-all cursor-pointer hover:text-blue-500",
-                currentReaction === 'like' && "text-blue-500 scale-110"
-              )}
-            >
-              <FiThumbsUp className={cn("text-base", currentReaction === 'like' && "fill-current")} />
-              <span className={comment.likes > 0 ? "font-bold" : "hidden"}>{comment.likes}</span>
-            </button>
-
-            <button
-              onClick={() => onDislike?.(postId, comment.id)}
-              className={cn(
-                "flex items-center gap-1 transition-all cursor-pointer hover:text-red-400",
-                currentReaction === 'dislike' && "text-red-400 scale-110"
-              )}
-            >
-              <FiThumbsDown className={cn("text-base", currentReaction === 'dislike' && "fill-current")} />
-            </button>
-
-            <button
-              onClick={() => onReply?.(comment)}
-              className="hover:text-blue-500 transition-colors cursor-pointer flex items-center gap-1"
-            >
-              <FiMessageSquare className="text-sm" />
-              回复
-            </button>
-
-            {isAdmin && !showDeleteConfirm && (
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 ml-2 cursor-pointer"
-              >
-                <FiTrash2 />
-              </button>
-            )}
-            
-            <button className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-blue-500 cursor-pointer">
-              <FiMoreHorizontal />
-            </button>
-          </div>
-        </div>
-
-        {/* 就地回复框 */}
-        {isReplying && onSubmitReply && (
-          <div className="mt-4 pt-4 border-t border-slate-50 dark:border-slate-800/50 animate-in slide-in-from-top-2">
-            <CommentForm
-              postId={postId}
-              replyTo={comment}
-              onSubmit={onSubmitReply}
-              onCancel={onCancelReply}
-              isNested={true}
-            />
-          </div>
+        {/* 回复 */}
+        {onReply && (
+          <Button
+            type="button"
+            onClick={() => onReply(comment)}
+            variant="ghost"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-blue-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-blue-300"
+            title="回复"
+          >
+            <ChatBubbleIcon className="w-4 h-4" />
+            <span>回复</span>
+          </Button>
         )}
 
-        {/* 子评论预览区域 - 深度复刻 B 站样式 */}
-        {!isReplying && repliesPreview.length > 0 && (
-          <div className="mt-3.5 p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl space-y-2.5 border border-slate-100/50 dark:border-slate-800/30">
-            {repliesPreview.map((reply) => (
-              <div key={reply.id} className="text-[13px] leading-relaxed group/reply cursor-pointer" onClick={() => onViewReplies?.(comment)}>
-                <span className="font-bold text-blue-500 dark:text-blue-400 hover:text-blue-600 transition-colors">
-                  {reply.author}
-                </span>
-                <span className="text-slate-700 dark:text-slate-300 mx-1.5">:</span>
-                <span className="text-slate-600 dark:text-slate-400 group-hover/reply:text-slate-900 dark:group-hover/reply:text-slate-200 transition-colors break-words">
-                  {reply.content}
-                </span>
-              </div>
-            ))}
-            
-            {replyCount > 0 && (
-              <div 
-                onClick={() => onViewReplies?.(comment)}
-                className="text-[12px] text-slate-400 hover:text-blue-500 transition-all flex items-center gap-1.5 pt-1 cursor-pointer font-bold group/more"
-              >
-                <span className="group-hover/more:translate-x-0.5 transition-transform">共 {replyCount} 条回复 &gt;</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 删除确认提示 */}
-        {showDeleteConfirm && (
-          <div className="mt-3 flex items-center gap-3 animate-in fade-in slide-in-from-top-1">
-            <span className="text-xs text-red-500 font-bold">确定删除吗？</span>
-            <button onClick={() => { onDelete?.(comment.id); setShowDeleteConfirm(false); }} className="text-xs bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 cursor-pointer shadow-lg shadow-red-500/20">确定</button>
-            <button onClick={() => setShowDeleteConfirm(false)} className="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg cursor-pointer">取消</button>
-          </div>
+        {/* 查看回复 */}
+        {!comment.replyTo && replyCount > 0 && onViewReplies && (
+          <Button
+            type="button"
+            onClick={() => onViewReplies(comment)}
+            variant="ghost"
+            className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/35"
+            title="查看回复"
+          >
+            <ChatBubbleIcon className="w-4 h-4" />
+            <span>{replyCount} 条回复</span>
+          </Button>
         )}
       </div>
     </div>
