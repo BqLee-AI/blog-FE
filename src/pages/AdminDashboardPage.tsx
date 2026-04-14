@@ -6,6 +6,8 @@ import { PlusIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+const ADMIN_ARTICLES_PAGE_SIZE = 100;
+
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
@@ -20,7 +22,7 @@ export default function AdminDashboardPage() {
     setError(null);
 
     articleApi
-      .list({ page_size: 100 })
+      .list({ page_size: ADMIN_ARTICLES_PAGE_SIZE })
       .then((response) => {
         if (isActive) {
           setArticles(response.items);
