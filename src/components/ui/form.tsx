@@ -71,7 +71,7 @@ function FormLabel({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelE
     <label
       className={cn(
         "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-        error && "text-destructive",
+        error && "text-red-600 dark:text-red-400",
         className
       )}
       htmlFor={formItemId}
@@ -103,7 +103,7 @@ function FormControl({ children, ...props }: React.HTMLAttributes<HTMLDivElement
 function FormDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   const { formDescriptionId } = useFormField();
 
-  return <p id={formDescriptionId} className={cn("text-sm text-muted-foreground", className)} {...props} />;
+  return <p id={formDescriptionId} className={cn("text-sm text-gray-500 dark:text-gray-400", className)} {...props} />;
 }
 
 function FormMessage({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
@@ -115,7 +115,7 @@ function FormMessage({ className, children, ...props }: React.HTMLAttributes<HTM
   }
 
   return (
-    <p id={formMessageId} className={cn("text-sm font-medium text-red-500", className)} {...props}>
+    <p id={formMessageId} className={cn("text-sm font-medium text-red-600 dark:text-red-400", className)} {...props}>
       {body}
     </p>
   );

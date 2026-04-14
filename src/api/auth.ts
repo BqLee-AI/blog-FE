@@ -1,7 +1,48 @@
-import { api } from './index';
-import type { LoginForm, RegisterForm, AuthUser } from '../types/auth';
+import apiClient from './apiClient';
+import type { AuthUser, LoginForm, RegisterForm } from '../types/auth';
 
-// 定义登录响应类型
+interface ApiEnvelope<T> {
+  message: string;
+  data: T;
+  code?: string;
+  requestId?: string;
+}
+
+interface BackendAuthTokens {
+  token_type?: string;
+  access_token?: string;
+  refresh_token?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  access_expires_at?: string;
+  refresh_expires_at?: string;
+}
+
+interface BackendAuthUser {
+  id?: number;
+  user_id?: number;
+  username?: string;
+  email?: string;
+  avatar?: string;
+  role_id?: number;
+  role?: AuthUser['role'];
+}
+
+interface BackendAuthPayload {
+  user?: BackendAuthUser;
+  tokens?: BackendAuthTokens;
+  access_token?: string;
+  refresh_token?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  user_id?: number;
+  username?: string;
+  email?: string;
+  avatar?: string;
+  role_id?: number;
+  role?: AuthUser['role'];
+}
+
 interface LoginResponse {
   user: AuthUser;
   accessToken: string;
@@ -14,6 +55,56 @@ interface RegisterResponse {
   refreshToken?: string;
 }
 
+function unwrapResponse<T>(payload: ApiEnvelope<T> | T): T {
+  if (typeof payload === 'object' && payload !== null && 'data' in payload) {
+    return (payload as ApiEnvelope<T>).data;
+  }
+
+  return payload as T;
+}
+
+function resolveRole(roleId?: number, role?: AuthUser['role']): AuthUser['role'] {
+  if (role) {
+    return role;
+  }
+
+  switch (roleId) {
+    case 1:
+      return 'admin';
+    case 2:
+      return 'superadmin';
+    default:
+      return 'user';
+  }
+}
+
+function mapAuthUser(payload: BackendAuthUser, fallback?: Partial<AuthUser>): AuthUser {
+  const id = payload.id ?? payload.user_id ?? fallback?.id;
+  const username = payload.username ?? fallback?.username;
+  const email = payload.email ?? fallback?.email;
+
+  if (id === undefined || !username || !email) {
+    throw new Error('认证响应缺少用户信息');
+  }
+
+  return {
+    id,
+    username,
+    email,
+    avatar: payload.avatar ?? fallback?.avatar,
+    role: resolveRole(payload.role_id, payload.role ?? fallback?.role),
+  };
+}
+
+function resolveAuthTokens(payload: BackendAuthPayload): { accessToken?: string; refreshToken?: string } {
+  const tokens = payload.tokens ?? payload;
+
+  return {
+    accessToken: tokens.access_token ?? tokens.accessToken,
+    refreshToken: tokens.refresh_token ?? tokens.refreshToken,
+  };
+}
+
 /**
  * 用户登录
  * @param credentials 登录凭证（邮箱和密码）
@@ -21,14 +112,22 @@ interface RegisterResponse {
  */
 export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
   try {
-    const response = await api.post<{ data: LoginResponse; code?: number; message?: string } | LoginResponse>('/auth/login', credentials);
-    // 后端返回的数据结构可能是 { data: { user, accessToken, refreshToken } } 或者直接是 { user, accessToken, refreshToken }
-    const loginData = (response.data as any)?.data || response.data;
-    // 登录成功后保存token到localStorage
-    if (loginData.accessToken) {
-      localStorage.setItem('accessToken', loginData.accessToken);
+    const response = await apiClient.post<ApiEnvelope<BackendAuthPayload> | BackendAuthPayload>('/auth/login', credentials);
+    const loginData = unwrapResponse(response.data);
+    const user = mapAuthUser(loginData.user ?? loginData);
+    const { accessToken, refreshToken } = resolveAuthTokens(loginData);
+
+    if (!accessToken) {
+      throw new Error('登录响应缺少访问令牌');
     }
-    return loginData as LoginResponse;
+
+    localStorage.setItem('accessToken', accessToken);
+
+    return {
+      user,
+      accessToken,
+      refreshToken: refreshToken ?? '',
+    };
   } catch (error) {
     console.error('登录失败:', error);
     throw error;
@@ -42,9 +141,14 @@ export const login = async (credentials: LoginForm): Promise<LoginResponse> => {
  */
 export const sendVerificationCode = async (email: string): Promise<{ message: string }> => {
   try {
-    const response = await api.post<{ message: string }>("/auth/sendcode", { email });
-    const codeData = (response.data as any)?.data || response.data;
-    return codeData as { message: string };
+    const response = await apiClient.post<ApiEnvelope<{ message: string }> | { message: string }>("/auth/sendcode", { email });
+    const codeData = unwrapResponse(response.data);
+
+    if (!codeData || typeof codeData !== 'object' || typeof codeData.message !== 'string') {
+      throw new Error('发送验证码响应格式无效');
+    }
+
+    return { message: codeData.message };
   } catch (error) {
     console.error("发送验证码失败:", error);
     throw error;
@@ -58,15 +162,21 @@ export const sendVerificationCode = async (email: string): Promise<{ message: st
  */
 export const register = async (userData: RegisterForm): Promise<AuthUser> => {
   try {
-    const response = await api.post<{ data: RegisterResponse; code?: number; message?: string } | RegisterResponse>('/auth/register', userData);
-    // 后端可能返回 { data: { user, accessToken } } 或直接返回 { user, accessToken }
-    const registerData = 'data' in response.data ? response.data.data : response.data;
-    const user = registerData.user;
-    // 如果注册返回 token，保存到 localStorage
-    if (registerData.accessToken) {
-      localStorage.setItem('accessToken', registerData.accessToken);
+    const response = await apiClient.post<ApiEnvelope<BackendAuthPayload> | BackendAuthPayload>('/auth/register', userData);
+    const registerData = unwrapResponse(response.data);
+    const user = mapAuthUser(registerData.user ?? registerData, {
+      id: registerData.user?.id ?? registerData.user?.user_id ?? registerData.user_id,
+      username: userData.username,
+      email: userData.email,
+      role: 'user',
+    });
+    const { accessToken } = resolveAuthTokens(registerData);
+
+    if (accessToken) {
+      localStorage.setItem('accessToken', accessToken);
     }
-    return user as AuthUser;
+
+    return user;
   } catch (error) {
     console.error('注册失败:', error);
     throw error;
@@ -79,7 +189,7 @@ export const register = async (userData: RegisterForm): Promise<AuthUser> => {
  */
 export const logout = async (): Promise<void> => {
   try {
-    await api.post('/auth/logout');
+    await apiClient.post('/auth/logout');
     // 清除本地存储的令牌
     localStorage.removeItem('accessToken');
   } catch (error) {
@@ -95,12 +205,16 @@ export const logout = async (): Promise<void> => {
  */
 export const refreshToken = async (): Promise<string> => {
   try {
-    const response = await api.post('/auth/refresh');
-    const newToken = response.data.accessToken;
-    if (newToken) {
-      localStorage.setItem('accessToken', newToken);
+    const response = await apiClient.post<ApiEnvelope<BackendAuthPayload> | BackendAuthPayload>('/auth/refresh');
+    const refreshData = unwrapResponse(response.data);
+    const { accessToken } = resolveAuthTokens(refreshData);
+
+    if (!accessToken) {
+      throw new Error('刷新令牌响应缺少访问令牌');
     }
-    return newToken;
+
+    localStorage.setItem('accessToken', accessToken);
+    return accessToken;
   } catch (error) {
     console.error('刷新令牌失败:', error);
     throw error;
