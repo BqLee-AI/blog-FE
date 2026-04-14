@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
-const DEFAULT_API_BASE_URL = 'http://localhost:8080/api/v1';
+const DEFAULT_API_BASE_URL = '/api/v1';
 
 const resolveApiBaseUrl = (value?: string): string => {
   return value?.trim() || DEFAULT_API_BASE_URL;
