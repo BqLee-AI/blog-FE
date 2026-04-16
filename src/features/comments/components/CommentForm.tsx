@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import type { Comment } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 interface CommentFormProps {
   postId: number;
   replyTo?: Comment; // 要回复的评论
   isLoading?: boolean;
+  isNested?: boolean; // 是否处于嵌套模式（就地回复）
   onSubmit: (comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'author' | 'email' | 'likes' | 'dislikes' | 'replyCount'>) => Promise<void>;
   onCancel?: () => void;
 }
@@ -19,39 +21,16 @@ export const CommentForm: React.FC<CommentFormProps> = ({
   postId,
   replyTo,
   isLoading = false,
+  isNested = false,
   onSubmit,
   onCancel,
 }) => {
   const [content, setContent] = useState('');
-  const [errors, setErrors] = useState<FormError>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  /**
-   * 表单验证
-   */
-  const validateForm = (): boolean => {
-    const newErrors: FormError = {};
-
-    if (!content.trim()) {
-      newErrors.content = '请输入评论内容';
-    } else if (content.trim().length < 2) {
-      newErrors.content = '评论内容至少需要2个字符';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  /**
-   * 处理表单提交
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(null);
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!content.trim() || content.trim().length < 2) return;
 
     try {
       const commentData: Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'author' | 'email' | 'likes' | 'dislikes' | 'replyCount'> = {
@@ -60,107 +39,68 @@ export const CommentForm: React.FC<CommentFormProps> = ({
         isApproved: true,
         replyTo: replyTo?.id,
       };
-
       await onSubmit(commentData);
-
-      // 清空表单
       setContent('');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '发表评论失败，请稍后重试';
-      setSubmitError(errorMessage);
+      setSubmitError(err instanceof Error ? err.message : '发表失败');
     }
   };
 
   const placeholder = replyTo 
-    ? `回复 ${replyTo.author || '用户'} 的评论`
-    : '请在评论区留下见解或问题...';
-
-  const characterCount = content.trim().length;
+    ? `回复 @${replyTo.author || '用户'}:`
+    : '发一条友善的评论吧...';
 
   return (
-    <form onSubmit={handleSubmit} className="w-full rounded-2xl bg-white dark:bg-gray-800/90">
-      <div className="mb-4 flex items-start justify-between gap-4 border-b border-gray-100 pb-4 dark:border-gray-700">
-        <div>
-          <p className="text-xs font-bold tracking-[0.3em] uppercase text-blue-700 dark:text-blue-300 mb-2">
-            评论输入
-          </p>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            {replyTo ? '回复这条评论' : '写下你的看法'}
-          </h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            评论会直接显示在文章下方，保持简洁更容易被阅读。
-          </p>
-        </div>
-
-        {replyTo && (
-          <div className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
-            回复 {replyTo.author || '用户'}
-          </div>
-        )}
-      </div>
-
-      {/* 错误提示 */}
+    <form onSubmit={handleSubmit} className={cn("relative group transition-all", isNested && "ml-0")}>
       {submitError && (
-        <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300">
+        <div className="mb-3 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-500 text-xs rounded-lg animate-in fade-in slide-in-from-top-1">
           {submitError}
         </div>
       )}
 
-      {/* 评论内容字段 */}
-      <div className="mb-4">
-        <label className="mb-2 flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300">
-          <span>评论内容</span>
-          <span className={characterCount < 2 ? 'text-gray-400 dark:text-gray-500' : 'text-blue-600 dark:text-blue-400'}>
-            {characterCount} 字
-          </span>
-        </label>
-        <div
-          className={`rounded-2xl border bg-white p-2 shadow-sm transition-colors dark:bg-gray-900/60 ${
-            errors.content
-              ? 'border-red-300 ring-1 ring-red-200 dark:border-red-700 dark:ring-red-900/40'
-              : 'border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 dark:border-gray-700 dark:focus-within:border-blue-500 dark:focus-within:ring-blue-900/30'
-          }`}
-        >
-          <Textarea
+      <div className={cn("relative flex gap-4")}>
+        {/* 占位头像 - 嵌套模式下隐藏以减少空间占用 */}
+        {!isNested && (
+          <div className="hidden sm:flex shrink-0 w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center text-slate-400 font-bold border border-slate-200/50 dark:border-slate-700/50">
+            ?
+          </div>
+        )}
+
+        <div className="flex-1 relative">
+          <textarea
             value={content}
-            onChange={e => {
-              setContent(e.target.value);
-              if (errors.content) setErrors({});
-            }}
+            onChange={(e) => setContent(e.target.value)}
             placeholder={placeholder}
             disabled={isLoading}
-            rows={3}
-            className="min-h-[120px] resize-none border-0 bg-transparent px-3 py-2 text-sm leading-6 shadow-none focus-visible:ring-0"
+            autoFocus={isNested}
+            className={cn(
+              "w-full p-3 text-sm bg-slate-50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:border-blue-400/50 focus:bg-white dark:focus:bg-slate-900 transition-all resize-none leading-relaxed placeholder:text-slate-400 shadow-sm",
+              isNested ? "min-h-[60px]" : "min-h-[85px]"
+            )}
           />
+          
+          <div className="flex items-center justify-end gap-3 mt-2">
+            {(replyTo || isNested) && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="text-xs text-slate-400 hover:text-slate-600 transition-colors cursor-pointer font-bold"
+              >
+                取消
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={isLoading || !content.trim() || content.trim().length < 2}
+              className={cn(
+                "px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white text-xs font-bold rounded-lg transition-all shadow-lg active:scale-95 cursor-pointer",
+                isNested ? "shadow-blue-500/10" : "shadow-blue-500/20"
+              )}
+            >
+              {isLoading ? '发送中...' : '发表评论'}
+            </button>
+          </div>
         </div>
-        {errors.content && (
-          <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">{errors.content}</p>
-        )}
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          支持换行，尽量把观点说完整一些。
-        </p>
-      </div>
-
-      {/* 按钮 */}
-      <div className="flex flex-wrap gap-3 pt-1">
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="bg-gradient-to-r from-blue-600 to-cyan-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:from-blue-700 hover:to-cyan-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isLoading ? '发送中...' : '发表评论'}
-        </Button>
-        {replyTo && onCancel && (
-          <Button
-            type="button"
-            onClick={onCancel}
-            disabled={isLoading}
-            variant="outline"
-            className="rounded-full px-5 py-2.5 text-sm font-medium"
-          >
-            取消
-          </Button>
-        )}
       </div>
     </form>
   );

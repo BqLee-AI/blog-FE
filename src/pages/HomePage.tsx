@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import PostCard from "@/features/articles/components/PostCard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { articleApi, type Article, type ArticleListParams } from "@/api/article";
-import { formatArticleDate } from "@/lib/utils";
+import { useSearchStore } from "@/store/searchStore";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 9;
 
@@ -17,11 +18,17 @@ export default function HomePage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [keyword, setKeyword] = useState("");
   const [sortBy, setSortBy] = useState<ArticleListParams["sort_by"]>("created_at");
   const [page, setPage] = useState(1);
   const [refreshToken, setRefreshToken] = useState(0);
+
+  // 获取全局搜索关键字
+  const { keyword } = useSearchStore();
+
+  // 当搜索关键词变化时，重置页码为 1
+  useEffect(() => {
+    setPage(1);
+  }, [keyword]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -77,185 +84,113 @@ export default function HomePage() {
     };
   }, [keyword, page, sortBy, refreshToken]);
 
-  const totalViews = useMemo(
-    () => (Array.isArray(articles) ? articles : []).reduce((total, article) => total + (article.view_count ?? 0), 0),
-    [articles]
-  );
-
-  const latestArticle = useMemo(() => {
-    if (!Array.isArray(articles) || articles.length === 0) return null;
-
-    return [...articles].sort(
-      (left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
-    )[0];
-  }, [articles]);
-
   const totalPages = pagination.total_pages || 1;
 
-  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setPage(1);
-    setKeyword(searchInput.trim());
-  };
-
   const handleResetFilters = () => {
-    setSearchInput("");
-    setKeyword("");
     setSortBy("created_at");
     setPage(1);
     setRefreshToken((value) => value + 1);
   };
 
   return (
-    <div>
-      <header className="mb-12 grid gap-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 p-6 shadow-sm backdrop-blur md:grid-cols-[minmax(0,1.6fr)_minmax(320px,0.9fr)] md:p-8">
-        <div>
-          <p className="text-blue-600 dark:text-blue-400 font-bold text-sm tracking-[0.35em] uppercase mb-3">
-            欢迎来到
-          </p>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            我的个人博客
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl leading-8">
-            现在首页文章列表已经切换为后端数据，支持分页、搜索和排序筛选，浏览体验更接近真实场景。
-          </p>
-        </div>
-
-        <div className="rounded-2xl bg-linear-to-br from-blue-50 via-sky-50 to-cyan-50 dark:from-blue-900/20 dark:via-sky-900/10 dark:to-cyan-900/10 p-5 border border-blue-100 dark:border-blue-900/30">
-          <p className="text-xs font-bold tracking-[0.3em] uppercase text-blue-700 dark:text-blue-300 mb-4">
-            内容概览
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white/80 dark:bg-gray-950/40 p-4 border border-white/70 dark:border-gray-800/60">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">文章总数</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{pagination.total}</p>
-            </div>
-            <div className="rounded-2xl bg-white/80 dark:bg-gray-950/40 p-4 border border-white/70 dark:border-gray-800/60">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">当前页</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {page} / {totalPages}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/80 dark:bg-gray-950/40 p-4 border border-white/70 dark:border-gray-800/60">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">当前页阅读量</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalViews}</p>
-            </div>
-            <div className="rounded-2xl bg-white/80 dark:bg-gray-950/40 p-4 border border-white/70 dark:border-gray-800/60">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">最新文章</p>
-              <p className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
-                {latestArticle?.title ?? "暂无文章"}
-              </p>
-              {latestArticle && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {formatArticleDate(latestArticle.created_at)}
-                </p>
-              )}
-            </div>
+    <div className="animate-fade-in">
+      {/* 内容区 */}
+      <section className="space-y-12">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-4">
+            <span className="w-12 h-1.5 bg-blue-600 rounded-full" />
+            {(keyword && keyword.trim() !== "") ? "搜索结果" : "全部文章"}
+          </h2>
+          
+          <div className="flex items-center gap-4">
+            <select
+              aria-label="排序方式"
+              value={sortBy}
+              onChange={(event) => {
+                setPage(1);
+                setSortBy(event.target.value as ArticleListParams["sort_by"]);
+              }}
+              className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 text-xs font-black text-slate-500 dark:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+            >
+              <option value="created_at">按最新发布</option>
+              <option value="view_count">按阅读热度</option>
+            </select>
           </div>
-        </div>
-      </header>
-
-      <section>
-        <div className="mb-8 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 p-5 shadow-sm backdrop-blur">
-          <form
-            onSubmit={handleSearchSubmit}
-            className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
-          >
-            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-              <Input
-                aria-label="搜索标题、摘要或作者"
-                value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="搜索标题、摘要或作者"
-                className="h-11 min-w-0 flex-1"
-              />
-              <Button type="submit" className="h-11 px-5">
-                搜索
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11 px-5"
-                onClick={handleResetFilters}
-              >
-                重置
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <label htmlFor="sort-by" className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                排序
-              </label>
-              <select
-                id="sort-by"
-                value={sortBy}
-                onChange={(event) => {
-                  setPage(1);
-                  setSortBy(event.target.value as ArticleListParams["sort_by"]);
-                }}
-                className="h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 text-sm text-gray-900 dark:text-white shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-              >
-                <option value="created_at">最新发布</option>
-                <option value="view_count">最热阅读</option>
-              </select>
-            </div>
-          </form>
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center min-h-80 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70">
-            <div className="text-center">
-              <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600 dark:border-blue-800 dark:border-t-blue-400" />
-              <p className="text-gray-600 dark:text-gray-400">加载文章中...</p>
-            </div>
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <div className="w-12 h-12 border-2 border-blue-100 dark:border-blue-900/30 border-t-blue-500 rounded-full animate-spin mb-6"></div>
+            <p className="text-slate-400 dark:text-slate-500 font-bold tracking-widest uppercase text-[10px]">Filtering Knowledge...</p>
           </div>
         ) : error ? (
-          <div className="rounded-3xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 p-8 text-center">
-            <p className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">加载失败</p>
-            <p className="text-sm text-red-600 dark:text-red-400 mb-6">{error}</p>
+          <div className="p-12 text-center bg-red-50/50 dark:bg-red-900/10 rounded-[3rem] border border-red-100 dark:border-red-900/20">
+            <p className="text-sm font-black text-red-600 dark:text-red-400 mb-6">{error}</p>
             <Button
               type="button"
               onClick={() => setRefreshToken((value) => value + 1)}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl font-black px-8"
             >
-              重新加载
+              重试
             </Button>
           </div>
         ) : articles.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-16 text-center">
-            <p className="text-lg text-gray-500 dark:text-gray-400">暂无文章</p>
-            <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">尝试清空搜索条件或切换排序方式后再查看。</p>
-            <Button type="button" variant="outline" className="mt-6" onClick={handleResetFilters}>
-              清空筛选
+          <div className="py-32 text-center bg-slate-50/50 dark:bg-slate-900/30 rounded-[3.5rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
+            <p className="text-lg font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">No Results</p>
+            <p className="mt-2 text-xs text-slate-400 dark:text-slate-600 font-bold">未找到与 &quot;{keyword}&quot; 匹配的内容。</p>
+            <Button variant="outline" className="mt-10 rounded-xl font-black border-slate-200 dark:border-slate-800 px-8" onClick={handleResetFilters}>
+              返回全部文章
             </Button>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
               {articles.map((article) => (
                 <PostCard key={article.id} post={article} />
               ))}
             </div>
 
-            <div className="mt-10 flex flex-col gap-4 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                第 {page} 页，共 {totalPages} 页 · 当前显示 {articles.length} 篇文章
+            {/* 分页器 */}
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between py-10 border-t border-slate-100 dark:border-slate-800/50">
+              <div className="text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest opacity-60">
+                Page {page} of {totalPages} — Total {pagination.total} articles
               </div>
               <div className="flex items-center gap-3">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   disabled={page <= 1}
                   onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  className="h-11 px-5 text-slate-400 hover:text-blue-500 font-black text-xs uppercase transition-all disabled:opacity-10 cursor-pointer"
                 >
-                  上一页
+                  <FiChevronLeft className="mr-2" /> Pre
                 </Button>
+                
+                <div className="flex gap-2">
+                  {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPage(i + 1)}
+                      className={cn(
+                        "w-9 h-9 rounded-xl text-[11px] font-black transition-all cursor-pointer",
+                        page === i + 1 
+                          ? "bg-blue-600 text-white shadow-xl shadow-blue-500/30 scale-110" 
+                          : "text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5"
+                      )}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   disabled={page >= totalPages}
                   onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  className="h-11 px-5 text-slate-400 hover:text-blue-500 font-black text-xs uppercase transition-all disabled:opacity-10 cursor-pointer"
                 >
-                  下一页
+                  Next <FiChevronRight className="ml-2" />
                 </Button>
               </div>
             </div>

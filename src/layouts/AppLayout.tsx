@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "@/components/Header";
+import { HeroBanner } from "@/components/HeroBanner";
 import Footer from "@/components/Footer";
 import LoginPopover from "@/features/auth/components/LoginPopover";
 
@@ -22,6 +23,9 @@ export default function AppLayout() {
       {/* 顶部导航栏 */}
       <Header />
 
+      {/* 沉浸式 Banner */}
+      <HeroBanner />
+
       {/* 登录弹窗 - 放在 Header 外部 */}
       <LoginPopover
         isOpen={isLoginPopoverOpen}
@@ -29,7 +33,7 @@ export default function AppLayout() {
       />
 
       {/* 主内容区域 */}
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+      <main className="relative z-10 flex-1 container mx-auto px-4 pb-20 max-w-6xl -mt-10 md:-mt-16">
         <Outlet />
       </main>
 

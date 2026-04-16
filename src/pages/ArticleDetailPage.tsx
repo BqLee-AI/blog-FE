@@ -11,6 +11,7 @@ import { estimateReadingTime, formatArticleDate } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { FiClock, FiCalendar, FiMessageSquare, FiEye } from "react-icons/fi";
 
 const CATEGORY_NAME_PATTERN = /^[\p{Script=Han}\p{L}\p{N}]+$/u;
 
@@ -143,10 +144,10 @@ export default function ArticleDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-100">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
+          <div className="w-14 h-14 border-4 border-blue-100 dark:border-blue-900/30 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">文章加载中...</p>
         </div>
       </div>
     );
@@ -154,210 +155,170 @@ export default function ArticleDetailPage() {
 
   if (error || isNotFound || !article) {
     return (
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">😕</div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+      <div className="text-center py-20 animate-fade-in">
+        <div className="text-8xl mb-8">😕</div>
+        <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4">
           {error?.message || "文章不存在"}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          {isNotFound ? "无法找到您要查看的文章" : "文章加载失败，请稍后重试"}
+        <p className="text-slate-500 dark:text-slate-400 mb-10 max-w-md mx-auto">
+          {isNotFound ? "无法找到您要查看的文章，可能已被移动或删除" : "服务器响应异常，请稍后再次尝试"}
         </p>
-        <Button
-          type="button"
-          onClick={() => navigate("/")}
-          className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
-        >
-          返回首页
-        </Button>
-        {error?.retryable && (
+        <div className="flex items-center justify-center gap-4">
           <Button
             type="button"
-            onClick={() => setRetryToken((value) => value + 1)}
-            variant="outline"
-            className="ml-2"
+            onClick={() => navigate("/")}
+            className="h-12 px-8 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-2xl font-black shadow-lg shadow-blue-500/20"
           >
-            重试
+            返回首页
           </Button>
-        )}
+          {error?.retryable && (
+            <Button
+              type="button"
+              onClick={() => setRetryToken((value) => value + 1)}
+              variant="outline"
+              className="h-12 px-8 rounded-2xl border-slate-200 dark:border-slate-800 font-black"
+            >
+              重试加载
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* 左侧：文章内容 */}
-      <article className="lg:col-span-2">
-        {/* 返回按钮 */}
-        <Button
-          type="button"
-          onClick={() => navigate("/")}
-          variant="ghost"
-          className="mb-8 gap-2 px-0 text-blue-600 hover:bg-transparent hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          <ArrowLeftIcon className="w-4 h-4" />
-          返回首页
-        </Button>
+    <div className="animate-fade-in max-w-6xl mx-auto px-4 sm:px-6">
+      {/* 返回按钮 */}
+      <Button
+        type="button"
+        onClick={() => navigate("/")}
+        variant="ghost"
+        className="mb-8 gap-2 px-4 py-6 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-2xl transition-all font-black text-sm uppercase tracking-widest"
+      >
+        <ArrowLeftIcon className="w-4 h-4" />
+        返回文章列表
+      </Button>
 
-        {/* 文章标题和元信息 */}
-        <header className="mb-8 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm md:p-8">
-          {article.cover_image && (
-            <div className="mb-6 overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800">
-              <img
-                src={article.cover_image}
-                alt={article.title}
-                className="h-64 w-full object-cover"
-              />
+      {/* 文章头部 - 高保真重写 */}
+      <header className="mb-12">
+        <div className="mb-8 flex flex-wrap items-center gap-3">
+          <span className="px-3 py-1 bg-blue-50 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 text-[11px] font-black uppercase tracking-widest rounded-lg border border-blue-100 dark:border-blue-400/20">
+            {article.category?.name || "精选内容"}
+          </span>
+          <div className="flex flex-wrap items-center gap-4 text-slate-400 dark:text-slate-500 text-xs font-bold">
+            <span className="flex items-center gap-1.5"><FiCalendar /> {publishedAt}</span>
+            <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-800" />
+            <span className="flex items-center gap-1.5"><FiClock /> {readingTime} 分钟阅读</span>
+            <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-800" />
+            <span className="flex items-center gap-1.5"><FiEye /> {article.view_count} 次浏览</span>
+          </div>
+        </div>
+        
+        <h1 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white mb-10 tracking-tighter leading-[1.1]">
+          {article.title}
+        </h1>
+
+        {article.cover_image && (
+          <div className="mb-12 overflow-hidden rounded-[3rem] shadow-2xl shadow-blue-500/10 border border-white/40 dark:border-white/5">
+            <img
+              src={article.cover_image}
+              alt={article.title}
+              className="w-full h-auto max-h-[500px] object-cover"
+            />
+          </div>
+        )}
+
+        {/* 文章概览卡片 */}
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-8 mb-12">
+          <div className="relative p-8 md:p-10 rounded-[2.5rem] bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/50 shadow-inner">
+            <div className="absolute -left-3 top-10 w-2 h-16 bg-blue-500 rounded-full shadow-lg shadow-blue-500/40" />
+            <div className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] mb-4">Article Summary</div>
+            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed font-medium italic">
+              “ {article.summary} ”
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <div className="flex-1 p-6 rounded-[2rem] bg-white/40 dark:bg-slate-900/60 border border-white/40 dark:border-white/5 backdrop-blur-xl flex flex-col justify-center">
+              <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">评论互动</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black text-slate-900 dark:text-white">{comments.length}</span>
+                <span className="text-xs text-slate-500 font-bold">条见解</span>
+              </div>
             </div>
+            <div className="flex-1 p-6 rounded-[2rem] bg-white/40 dark:bg-slate-900/60 border border-white/40 dark:border-white/5 backdrop-blur-xl flex flex-col justify-center">
+              <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">内容分类</span>
+              <span className="text-lg font-black text-blue-600 dark:text-blue-400">{getSafeCategoryName(article.category?.name)}</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 文章正文 */}
+      <main className="mb-24">
+        <div className="prose prose-lg dark:prose-invert max-w-none prose-slate prose-headings:font-black prose-headings:tracking-tight prose-a:text-blue-500 prose-img:rounded-[2rem] prose-img:shadow-2xl prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50/50 dark:prose-blockquote:bg-blue-900/10 dark:prose-blockquote:border-blue-400">
+          {safeContent ? (
+            <article dangerouslySetInnerHTML={{ __html: safeContent }} />
+          ) : (
+            <div className="py-24 text-center text-slate-400 italic font-medium">暂无正文内容</div>
           )}
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-5">
-            {article.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">作者: {article.author.username}</span>
-            {article.category ? (
-              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">分类: {article.category.name}</span>
-            ) : (
-              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">分类: 未分类</span>
-            )}
-            {publishedAt && (
-              <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">发布: {publishedAt}</span>
-            )}
-            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">阅读量: {article.view_count}</span>
-            <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1">{readingTime} 分钟阅读</span>
-          </div>
-        </header>
+        </div>
 
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
-            <p className="text-xs font-bold tracking-[0.25em] uppercase text-gray-500 dark:text-gray-400 mb-2">
-              阅读
-            </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{readingTime} 分钟</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">预计完整阅读时长</p>
-          </div>
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
-            <p className="text-xs font-bold tracking-[0.25em] uppercase text-gray-500 dark:text-gray-400 mb-2">
-              评论
-            </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{comments.length}</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {topLevelCommentCount} 条主评论
-            </p>
-          </div>
-        </section>
-
-        {/* 摘要 */}
-        <section className="mb-8 rounded-2xl border border-blue-100 dark:border-blue-900/30 bg-linear-to-r from-blue-50 via-sky-50 to-cyan-50 dark:from-blue-900/20 dark:via-sky-900/10 dark:to-cyan-900/10 p-5 shadow-sm">
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-[0.3em] uppercase text-blue-700 dark:text-blue-300">
-            <span className="h-2 w-2 rounded-full bg-blue-500" />
-            文章摘要
-          </div>
-          <p className="text-lg leading-8 text-gray-700 dark:text-gray-300">{article.summary}</p>
-        </section>
-
-        {/* 标签 */}
         {article.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-8">
+          <div className="flex flex-wrap gap-2.5 mt-16 pt-8 border-t border-slate-100 dark:border-slate-800">
             {article.tags.map((tag) => (
               <Badge
                 key={tag.id}
-                variant="secondary"
-                className="text-sm font-medium"
+                className="bg-slate-100 dark:bg-white/5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-1.5 rounded-xl border border-slate-200 dark:border-white/5 transition-all text-xs font-bold"
               >
                 #{tag.name}
               </Badge>
             ))}
           </div>
         )}
+      </main>
 
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 shadow-sm">
-          <span className="font-semibold text-gray-900 dark:text-white">分类:</span>
-          <span>{getSafeCategoryName(article.category?.name)}</span>
+      {/* 分解线 */}
+      <div className="h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent mb-20" />
+
+      {/* 评论区 - B站风格交互 */}
+      <section id="comments" className="mb-32">
+        <div className="flex items-center gap-4 mb-12">
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">评论区</h2>
+          <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-xs font-black rounded-full border border-slate-200 dark:border-white/5">
+            {comments.length}
+          </span>
         </div>
 
-        {/* 文章内容 */}
-        <section className="mb-12 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm md:p-8">
-          <div className="mb-6 flex items-end justify-between gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
-            <div>
-              <p className="text-xs font-bold tracking-[0.35em] uppercase text-gray-500 dark:text-gray-400 mb-2">
-                正文
-              </p>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">文章内容</h2>
-            </div>
-            <p className="hidden text-sm text-gray-500 dark:text-gray-400 md:block">
-              建议先看摘要，再顺着正文往下读
-            </p>
-          </div>
-
-          {safeContent ? (
-            <article
-              className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300 prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:leading-8 prose-p:mb-5 prose-strong:text-gray-900 dark:prose-strong:text-white prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-img:rounded-2xl prose-img:shadow-sm prose-img:my-6 prose-blockquote:border-blue-400 prose-blockquote:text-gray-600 dark:prose-blockquote:text-gray-300"
-              dangerouslySetInnerHTML={{ __html: safeContent }}
-            />
-          ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center text-gray-500 dark:text-gray-400">
-              <p>暂无详细内容</p>
-            </div>
-          )}
-        </section>
-
-        {/* 底部导航 */}
-        <div className="border-t dark:border-gray-700 pt-8">
-          <Button
-            type="button"
-            onClick={() => navigate("/")}
-            className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
-          >
-            ← 返回文章列表
-          </Button>
+        <div className="mb-16">
+          <CommentForm
+            postId={articleId ?? 0}
+            replyTo={replyingTo || undefined}
+            isLoading={isSubmittingComment}
+            onSubmit={handleAddComment}
+            onCancel={replyingTo ? () => setReplyingTo(null) : undefined}
+          />
         </div>
-      </article>
 
-      {/* 右侧：评论区 */}
-      <aside className="lg:col-span-1">
-        <div className="sticky top-24 space-y-6">
-          {/* 评论区标题 */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-              评论 ({comments.length})
-            </h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {topLevelCommentCount} 条主评论 · {comments.length - topLevelCommentCount} 条回复
-            </p>
+        {comments.length === 0 ? (
+          <div className="text-center py-20 bg-slate-50/50 dark:bg-slate-900/30 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
+            <FiMessageSquare className="w-12 h-12 text-slate-200 dark:text-slate-800 mx-auto mb-4" />
+            <p className="text-slate-400 dark:text-slate-500 font-bold">暂无评论</p>
+            <p className="text-xs text-slate-400 dark:text-slate-600 mt-2 font-medium">写下你的第一个见解吧！</p>
           </div>
-
-          {/* 评论表单 */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <CommentForm
-              postId={articleId ?? 0}
-              replyTo={replyingTo || undefined}
-              isLoading={isSubmittingComment}
-              onSubmit={handleAddComment}
-              onCancel={replyingTo ? () => setReplyingTo(null) : undefined}
-            />
-          </div>
-
-          {/* 评论列表 - 可滚动 */}
-          <div className="max-h-[60vh] overflow-y-auto space-y-4 bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-            {comments.length === 0 ? (
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
-                暂无评论，来发表第一条吧！
-              </div>
-            ) : (
-              <CommentList
-                postId={articleId ?? 0}
-                comments={comments}
-                isLoading={commentsLoading}
-                onReply={setReplyingTo}
-                onDelete={handleDeleteComment}
-                onLike={handleLike}
-                onDislike={handleDislike}
-                onViewReplies={handleViewReplies}
-              />
-            )}
-          </div>
-        </div>
-      </aside>
+        ) : (
+          <CommentList
+            postId={articleId ?? 0}
+            comments={comments}
+            isLoading={commentsLoading}
+            onReply={setReplyingTo}
+            onDelete={handleDeleteComment}
+            onLike={handleLike}
+            onDislike={handleDislike}
+            onViewReplies={handleViewReplies}
+          />
+        )}
+      </section>
     </div>
   );
 }
