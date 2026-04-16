@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import PostCard from "@/features/articles/components/PostCard";
 import { usePostStore } from "@/store/postStore";
 import { cn } from "@/lib/utils";
+import { ProfileCard } from "@/components/ProfileCard";
 
 export default function ArticlesPage() {
   const { posts, isLoading, fetchPosts } = usePostStore();
@@ -36,43 +37,8 @@ export default function ArticlesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
         {/* 左侧侧边栏 */}
         <aside className="lg:col-span-1 space-y-8">
-          {/* 分类卡片 */}
-          <div className="bg-white/40 dark:bg-slate-900/40 rounded-[2rem] border border-white/40 dark:border-white/5 backdrop-blur-xl p-6 shadow-xl shadow-blue-500/5">
-            <h3 className="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">
-              <span className="w-1.5 h-6 bg-blue-600 rounded-full" />
-              Categories
-            </h3>
-            
-            <nav className="space-y-1">
-              {["全部", ...tagData.tags].map((category) => {
-                const isActive = category === activeCategory;
-                const count = category === "全部" ? posts.length : tagData.counts.get(category);
-                
-                return (
-                  <button
-                    key={category}
-                    onClick={() => setActiveCategory(category)}
-                    className={cn(
-                      "w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 group",
-                      isActive 
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20 translate-x-1" 
-                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-blue-500"
-                    )}
-                  >
-                    <span>{category}</span>
-                    <span className={cn(
-                      "text-[10px] px-2 py-0.5 rounded-lg border",
-                      isActive 
-                        ? "border-blue-400 bg-blue-500/50 text-white" 
-                        : "border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5"
-                    )}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+          {/* 装饰性 Profile Card */}
+          <ProfileCard />
 
           {/* 标签云卡片 */}
           <div className="bg-white/40 dark:bg-slate-900/40 rounded-[2rem] border border-white/40 dark:border-white/5 backdrop-blur-xl p-6 shadow-xl shadow-blue-500/5">
