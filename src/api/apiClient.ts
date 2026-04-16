@@ -1,7 +1,13 @@
 import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
+const DEFAULT_API_BASE_URL = '/api/v1';
+
+const resolveApiBaseUrl = (value?: string): string => {
+  return value?.trim() || DEFAULT_API_BASE_URL;
+};
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+  baseURL: resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
