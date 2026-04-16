@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+import { FiClock, FiCalendar, FiArrowRight } from "react-icons/fi";
 import { createPostCardViewModel, type ArticleSourcePost } from "../utils/postCardViewModel";
 
 type PostCardProps = {
@@ -8,52 +10,61 @@ export default function PostCard({ post }: PostCardProps) {
   const viewModel = createPostCardViewModel(post);
 
   return (
-    <Link to={`/article/${post.id}`} className="block">
-      <article className="hover-card group bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-        {viewModel.coverImage ? (
+    <Link to={`/article/${viewModel.id}`} className="block group">
+      <article className="relative h-full flex flex-col rounded-[2.5rem] bg-white/40 dark:bg-slate-900/60 border border-white/40 dark:border-white/5 backdrop-blur-2xl shadow-2xl shadow-blue-500/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-blue-500/10 hover:border-blue-500/30 overflow-hidden">
+        {/* 指示条 */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        
+        {/* 封面图支持 (如果有) */}
+        {viewModel.coverImage && (
           <div className="relative h-48 overflow-hidden">
             <img
               src={viewModel.coverImage}
               alt={viewModel.title}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-black/40 via-black/10 to-transparent" />
-            {viewModel.publishedAt && (
-              <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm">
-                {viewModel.publishedAt}
-              </span>
-            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
           </div>
-        ) : (
-          <div className="h-1 bg-linear-to-r from-blue-500 via-cyan-500 to-emerald-500" />
         )}
-        <div className="p-6">
-          <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 mb-4">
-            <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-2.5 py-1 text-blue-600 dark:text-blue-300">
+
+        <div className="flex-1 flex flex-col p-6 md:p-8">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+            <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-400/10 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100/50 dark:border-blue-400/20 whitespace-nowrap">
               {viewModel.sourceLabel}
             </span>
-            {viewModel.metaItems.map((item, index) => (
-              <span key={`${item}-${index}`}>
-                {index > 0 && <span className="mx-1">·</span>}
-                <span>{item}</span>
-              </span>
-            ))}
+            <div className="flex flex-wrap items-center gap-3 text-slate-400 dark:text-slate-500 text-[10px] font-bold">
+              {viewModel.publishedAt && (
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
+                  <FiCalendar className="text-xs" />
+                  {viewModel.publishedAt}
+                </span>
+              )}
+              {viewModel.publishedAt && viewModel.isBackendArticle && (
+                <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+              )}
+              {viewModel.isBackendArticle && (
+                <span className="flex items-center gap-1.5 whitespace-nowrap">
+                  <FiClock className="text-xs" />
+                  {viewModel.ctaLabel}
+                </span>
+              )}
+            </div>
           </div>
 
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
+          <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-slate-100 mb-3 line-clamp-2 leading-tight tracking-tight group-hover:text-blue-500 transition-colors">
             {viewModel.title}
           </h3>
 
-          <p className="text-gray-600 dark:text-gray-400 text-sm leading-6 mb-5 line-clamp-3">
+          <p className="text-slate-600 dark:text-slate-400 text-xs md:text-sm leading-relaxed mb-6 line-clamp-3 flex-1 font-medium opacity-80 group-hover:opacity-100 transition-opacity">
             {viewModel.summary}
           </p>
 
           {viewModel.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-5">
-              {viewModel.tags.map((tag) => (
+            <div className="flex flex-wrap gap-2.5 mb-8">
+              {viewModel.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="inline-block px-3 py-1 bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-full transition-colors group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-700 dark:group-hover:text-blue-300"
+                  className="px-3 py-1 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-500 text-[11px] font-bold rounded-lg border border-slate-200/50 dark:border-white/5 transition-all group-hover:border-blue-400/30 group-hover:text-blue-500"
                 >
                   #{tag}
                 </span>
@@ -61,9 +72,17 @@ export default function PostCard({ post }: PostCardProps) {
             </div>
           )}
 
-          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-100 dark:border-gray-700">
-            <span>点击阅读全文</span>
-            <span className="font-medium text-blue-600 dark:text-blue-400">{viewModel.ctaLabel}</span>
+          <div className="pt-6 border-t border-slate-100/50 dark:border-white/5 flex items-center justify-between mt-auto">
+            <span className="text-xs font-black text-blue-500 uppercase tracking-[0.2em] inline-flex items-center gap-2 group-hover:gap-3 transition-all">
+              阅读全文
+              <FiArrowRight className="text-lg" />
+            </span>
+            
+            <div className="flex -space-x-2">
+              <div className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[8px] font-black text-white">
+                {viewModel.authorName?.charAt(0) || "U"}
+              </div>
+            </div>
           </div>
         </div>
       </article>
