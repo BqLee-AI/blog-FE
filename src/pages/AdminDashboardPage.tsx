@@ -1,28 +1,68 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { usePostStore } from "@/store/postStore";
+import { articleApi, type Article } from "@/api/article";
 import { CommentManagement } from "@/features/comments/components/CommentManagement";
 import { PlusIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
+const ADMIN_ARTICLES_PAGE_SIZE = 100;
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
-  const { posts, fetchPosts } = usePostStore();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'articles' | 'comments'>('articles');
 
   useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
+    let isActive = true;
 
-  const handleDelete = (id: number) => {
+    setIsLoading(true);
+    setError(null);
+
+    articleApi
+      .list({ page_size: ADMIN_ARTICLES_PAGE_SIZE })
+      .then((response) => {
+        if (isActive) {
+          setArticles(response.items);
+        }
+      })
+      .catch((requestError) => {
+        if (!isActive) {
+          return;
+        }
+
+        const message = requestError instanceof Error ? requestError.message : "获取文章列表失败";
+        setError(message);
+        setArticles([]);
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const handleDelete = async (id: number) => {
     if (window.confirm("确定要删除这篇文章吗？")) {
-      // 调用 store 的 deletePost，但我们需要更新 store
-      // 这里先提示用户
-      alert("删除功能需要后端 API 支持");
+      try {
+        await articleApi.delete(id);
+        setArticles((currentArticles) => currentArticles.filter((article) => article.id !== id));
+        alert("文章删除成功！");
+      } catch (requestError) {
+        const message = requestError instanceof Error ? requestError.message : "删除文章失败";
+        alert(message);
+      }
     }
   };
+
+  const totalViews = articles.reduce((sum, article) => sum + article.view_count, 0);
+  const recentArticleDate = articles[0]?.created_at ? new Date(articles[0].created_at).toLocaleDateString() : "-";
 
   return (
     <div>
@@ -80,25 +120,21 @@ export default function AdminDashboardPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">总文章数</div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">{posts.length}</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{articles.length}</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-6">
                 <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">最近更新</div>
                 <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                {posts[0]?.createdAt 
-                  ? new Date(posts[0].createdAt).toLocaleDateString() 
-                  : "-"}
+                {recentArticleDate}
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-6">
-                <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">总标签数</div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                {new Set(posts.flatMap((p) => p.tags)).size}
-                </div>
+                <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-2">总阅读量</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{totalViews}</div>
               </CardContent>
             </Card>
           </div>
@@ -112,10 +148,13 @@ export default function AdminDashboardPage() {
                     标题
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                    标签
+                    作者
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
                     发布日期
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white">
+                    阅读量
                   </th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-white">
                     操作
@@ -123,9 +162,21 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {posts.length === 0 ? (
+                {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                      正在加载文章列表...
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-red-600 dark:text-red-400">
+                      {error}
+                    </td>
+                  </tr>
+                ) : articles.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                       暂无文章，
                       <Button
                         type="button"
@@ -138,45 +189,33 @@ export default function AdminDashboardPage() {
                     </td>
                   </tr>
                 ) : (
-                  posts.map((post) => (
+                  articles.map((article) => (
                     <tr
-                      key={post.id}
+                      key={article.id}
                       className="border-b border-gray-200 transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50"
                     >
                       <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900 dark:text-white">{post.title}</div>
+                        <div className="font-medium text-gray-900 dark:text-white">{article.title}</div>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-1">
-                          {post.summary}
+                          {article.summary}
                         </p>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {post.tags.slice(0, 2).map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                          {post.tags.length > 2 && (
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              +{post.tags.length - 2}
-                            </span>
-                          )}
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {article.author.username}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                        {post.createdAt 
-                          ? new Date(post.createdAt).toLocaleDateString() 
-                          : "-"}
+                        {article.created_at ? new Date(article.created_at).toLocaleDateString() : "-"}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {article.view_count}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button
                             type="button"
-                            onClick={() => navigate(`/admin/edit/${post.id}`)}
+                            onClick={() => navigate(`/admin/edit/${article.id}`)}
                             variant="ghost"
                             className="h-9 w-9 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/40"
                             title="编辑"
@@ -185,7 +224,7 @@ export default function AdminDashboardPage() {
                           </Button>
                           <Button
                             type="button"
-                            onClick={() => handleDelete(post.id)}
+                            onClick={() => handleDelete(article.id)}
                             variant="ghost"
                             className="h-9 w-9 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/40"
                             title="删除"
