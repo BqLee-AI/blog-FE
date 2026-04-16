@@ -1,161 +1,135 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useThemeStore } from "@/store/themeStore";
 import { useAuthStore } from "@/store/authStore";
-import { MoonIcon, SunIcon, MagnifyingGlassIcon, PersonIcon, HomeIcon, FileTextIcon, GearIcon } from "@radix-ui/react-icons";
+import { useSearchStore } from "@/store/searchStore";
+import { MoonIcon, SunIcon, MagnifyingGlassIcon, PersonIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
-// 全局登录弹窗控制函数
 export function setLoginPopoverOpen(open: boolean) {
   const event = new CustomEvent("toggleLoginPopover", { detail: { open } });
   window.dispatchEvent(event);
 }
 
 export default function Header() {
+  const location = useLocation();
   const theme = useThemeStore((state) => state.theme);
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { user, isLoggedIn } = useAuthStore();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { keyword, setKeyword } = useSearchStore();
+  
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollPos, setLastScrollPos] = useState(0);
-  const [scrollThreshold] = useState(80);
 
-  // 监听滚动事件
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
-      const isScrollingDown = currentScrollPos > lastScrollPos;
-      const hasScrolledEnough = Math.abs(currentScrollPos - lastScrollPos) > scrollThreshold;
-
-      if (isScrollingDown && hasScrolledEnough && isVisible) {
+      if (currentScrollPos > lastScrollPos && currentScrollPos > 100) {
         setIsVisible(false);
-      } else if (!isScrollingDown && !isVisible) {
+      } else {
         setIsVisible(true);
       }
-
       setLastScrollPos(currentScrollPos);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollPos, isVisible, scrollThreshold]);
+  }, [lastScrollPos]);
+
+  const navLinks = [
+    { name: "首页", path: "/" },
+    { name: "文章", path: "/articles" },
+    { name: "管理", path: "/admin" },
+  ];
 
   return (
-    <header className={`bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-all duration-300 overflow-visible ${
-      isVisible ? "translate-y-0" : "-translate-y-full"
-    }`}>
-      <div className="container mx-auto px-4 max-w-6xl">
-        <nav className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-xl">B</span>
+    <header className={cn(
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+      isVisible ? "translate-y-0" : "-translate-y-full",
+      lastScrollPos > 50 
+        ? "bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-lg shadow-black/5 py-3" 
+        : "bg-transparent py-5"
+    )}>
+      <div className="container mx-auto px-6 max-w-7xl">
+        <nav className="grid grid-cols-3 items-center">
+          {/* Logo - Left */}
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                <span className="text-white font-black text-lg">B</span>
+              </div>
+              <span className="text-xl font-black text-slate-900 dark:text-white tracking-tighter hidden md:block">
+                MyBlog
+              </span>
+            </Link>
+          </div>
+
+          {/* Navigation - Center */}
+          <div className="flex justify-center">
+            <ul className="flex items-center gap-8">
+              {navLinks.map((link) => (
+                <li key={link.path}>
+                  <Link
+                    to={link.path}
+                    className={cn(
+                      "text-[13px] font-black uppercase tracking-widest transition-all hover:text-blue-500",
+                      location.pathname === link.path 
+                        ? "text-blue-500" 
+                        : "text-slate-500 dark:text-slate-400"
+                    )}
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tools - Right */}
+          <div className="flex items-center justify-end gap-4">
+             {/* 实时搜索框 */}
+            <div className="relative group hidden sm:block">
+              <MagnifyingGlassIcon className={cn(
+                "absolute left-3 top-1/2 -translate-y-1/2 transition-colors",
+                keyword ? "text-blue-500" : "text-slate-400"
+              )} />
+              <Input
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="搜索..."
+                className="h-9 w-40 md:w-56 pl-9 bg-slate-100/50 dark:bg-white/5 border-none rounded-full text-xs font-bold focus-visible:ring-1 focus-visible:ring-blue-500/50 transition-all"
+              />
             </div>
-            <span className="text-2xl font-bold bg-linear-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              MyBlog
-            </span>
-          </Link>
 
-          {/* 搜索栏 */}
-          <div className="relative hidden md:block">
-            <Input
-              type="text"
-              placeholder="搜索文章..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-64 pl-10 pr-4 rounded-full bg-gray-100 dark:bg-gray-800 border-none focus-visible:ring-blue-500"
-            />
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-          </div>
-
-          {/* 移动端搜索入口 */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full text-gray-600 dark:text-gray-400"
-              onClick={() => {
-                // 这里可以触发一个搜索弹窗或展开搜索栏
-                const query = prompt("请输入搜索内容:");
-                if (query) setSearchQuery(query);
-              }}
-            >
-              <MagnifyingGlassIcon className="w-5 h-5" />
-            </Button>
-          </div>
-
-          {/* 导航链接 */}
-          <ul className="flex items-center gap-2 md:gap-6">
-            <li className="hidden sm:block">
-              <Link
-                to="/"
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium flex items-center gap-2 hover-button"
-              >
-                <HomeIcon className="w-5 h-5" />
-                <span className="hidden lg:inline">首页</span>
-              </Link>
-            </li>
-            <li className="hidden sm:block">
-              <Link
-                to="/articles"
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium flex items-center gap-2 hover-button"
-              >
-                <FileTextIcon className="w-5 h-5" />
-                <span className="hidden lg:inline">文章</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/admin"
-                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 md:px-4 py-2 font-medium text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg hover-button text-sm md:text-base"
-              >
-                <GearIcon className="w-5 h-5" />
-                <span className="hidden xs:inline">管理</span>
-              </Link>
-            </li>
+            {/* 用户/登录 */}
             {isLoggedIn && user ? (
-              <li>
-                <Link
-                  to="/account"
-                  className="flex items-center justify-center w-10 h-10 rounded-full hover:ring-2 hover:ring-blue-500 transition-all"
-                  title="账号设置"
-                >
-                  <img
-                    src={user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.email}
-                    alt="用户头像"
-                    className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
-                  />
-                </Link>
-              </li>
+              <Link to="/account" className="shrink-0">
+                <img
+                  src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}
+                  alt="Avatar"
+                  className="w-9 h-9 rounded-full object-cover border-2 border-white dark:border-slate-800 shadow-sm"
+                />
+              </Link>
             ) : (
-              <li>
-                <Button
-                  type="button"
-                  onClick={() => setLoginPopoverOpen(true)}
-                  className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  <PersonIcon className="w-4 h-4" />
-                  <span>登录</span>
-                </Button>
-              </li>
-            )}
-            {/* 主题切换按钮 */}           
-            <li>
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="group p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 hover:shadow-md"
-                title={theme === "light" ? "切换到暗夜模式" : "切换到日间模式"}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setLoginPopoverOpen(true)}
+                className="rounded-full text-slate-500"
               >
-                {theme === "light" ? (
-                  <MoonIcon className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-                ) : (
-                  <SunIcon className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                )}
-              </button>
-            </li>
-          </ul>
+                <PersonIcon className="w-5 h-5" />
+              </Button>
+            )}
+
+            {/* 主题切换 */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-slate-500 dark:text-yellow-400"
+            >
+              {theme === "light" ? <MoonIcon /> : <SunIcon />}
+            </button>
+          </div>
         </nav>
       </div>
     </header>
