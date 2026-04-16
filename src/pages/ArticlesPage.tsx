@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import PostCard from "@/features/articles/components/PostCard";
 import { usePostStore } from "@/store/postStore";
-import { estimateReadingTime } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function ArticlesPage() {
@@ -15,145 +13,131 @@ export default function ArticlesPage() {
     }
   }, [posts.length, fetchPosts]);
 
-  const categories = useMemo(() => {
-    const tagSet = new Set<string>();
-
-    posts.forEach((post) => {
-      post.tags.forEach((tag) => tagSet.add(tag));
-    });
-
-    return ["全部", ...Array.from(tagSet).sort((left, right) => left.localeCompare(right))];
-  }, [posts]);
-
-  const categoryCounts = useMemo(() => {
+  // 计算所有标签及其出现次数
+  const tagData = useMemo(() => {
     const counts = new Map<string, number>();
-
     posts.forEach((post) => {
       post.tags.forEach((tag) => {
         counts.set(tag, (counts.get(tag) ?? 0) + 1);
       });
     });
-
-    return counts;
+    
+    const sortedTags = Array.from(counts.keys()).sort((a, b) => a.localeCompare(b));
+    return { tags: sortedTags, counts };
   }, [posts]);
 
   const visiblePosts = useMemo(() => {
-    if (activeCategory === "全部") {
-      return posts;
-    }
-
+    if (activeCategory === "全部") return posts;
     return posts.filter((post) => post.tags.includes(activeCategory));
   }, [activeCategory, posts]);
 
-  const totalReadingMinutes = useMemo(
-    () => visiblePosts.reduce((total, post) => total + estimateReadingTime(post.content), 0),
-    [visiblePosts]
-  );
-
   return (
-    <div className="animate-fade-in max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-      <header className="mb-12 space-y-10">
-        <div className="relative group">
-          {/* 装饰性背景 */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5 dark:from-blue-400/10 dark:via-indigo-400/5 dark:to-transparent rounded-[3rem] blur-2xl opacity-50 transition duration-1000" />
-          
-          <div className="relative flex flex-col lg:flex-row gap-8 lg:items-center">
-            <div className="flex-1 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50/50 dark:bg-blue-400/10 border border-blue-100/30 dark:border-blue-400/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400" />
-                <span className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">Latest Articles</span>
-              </div>
-              
-              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
-                探索 <span className="text-blue-600 dark:text-blue-400">深度洞察</span><br />
-                发现技术之美
-              </h1>
-              
-              <p className="text-base text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed font-medium opacity-80">
-                记录关于前端架构、AI 驱动开发以及设计工程的思考。
-              </p>
-            </div>
+    <div className="animate-fade-in pb-20">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+        {/* 左侧侧边栏 */}
+        <aside className="lg:col-span-1 space-y-8">
+          {/* 分类卡片 */}
+          <div className="bg-white/40 dark:bg-slate-900/40 rounded-[2rem] border border-white/40 dark:border-white/5 backdrop-blur-xl p-6 shadow-xl shadow-blue-500/5">
+            <h3 className="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">
+              <span className="w-1.5 h-6 bg-blue-600 rounded-full" />
+              Categories
+            </h3>
+            
+            <nav className="space-y-1">
+              {["全部", ...tagData.tags].map((category) => {
+                const isActive = category === activeCategory;
+                const count = category === "全部" ? posts.length : tagData.counts.get(category);
+                
+                return (
+                  <button
+                    key={category}
+                    onClick={() => setActiveCategory(category)}
+                    className={cn(
+                      "w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 group",
+                      isActive 
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20 translate-x-1" 
+                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-blue-500"
+                    )}
+                  >
+                    <span>{category}</span>
+                    <span className={cn(
+                      "text-[10px] px-2 py-0.5 rounded-lg border",
+                      isActive 
+                        ? "border-blue-400 bg-blue-500/50 text-white" 
+                        : "border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5"
+                    )}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:min-w-[400px]">
-              {[
-                { label: "全部", value: posts.length, icon: "📚" },
-                { label: "筛选", value: visiblePosts.length, icon: "🏷️" },
-                { label: "阅时", value: totalReadingMinutes, unit: "Min", icon: "⌛" },
-              ].map((stat, i) => (
-                <div key={i} className="group/stat relative p-4 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-100 dark:border-white/5 shadow-sm hover:border-blue-500/20 transition-all">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-black text-slate-900 dark:text-slate-100">{stat.value}</span>
-                    {stat.unit && <span className="text-[9px] font-bold text-slate-400">{stat.unit}</span>}
-                  </div>
-                </div>
+          {/* 标签云卡片 */}
+          <div className="bg-white/40 dark:bg-slate-900/40 rounded-[2rem] border border-white/40 dark:border-white/5 backdrop-blur-xl p-6 shadow-xl shadow-blue-500/5">
+            <h3 className="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-6">
+              <span className="w-1.5 h-6 bg-indigo-600 rounded-full" />
+              Tags Cloud
+            </h3>
+            
+            <div className="flex flex-wrap gap-2">
+              {tagData.tags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveCategory(tag)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all border",
+                    activeCategory === tag
+                      ? "bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/20"
+                      : "bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-indigo-500/30 hover:text-indigo-500"
+                  )}
+                >
+                  #{tag}
+                </button>
               ))}
             </div>
           </div>
-        </div>
+        </aside>
 
-        <nav className="sticky top-4 z-50 py-2.5 px-3 rounded-2xl bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl border border-white/50 dark:border-white/5 shadow-xl shadow-blue-500/5">
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth">
-            {categories.map((category) => {
-              const isActive = category === activeCategory;
-              return (
-                <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={cn(
-                    "px-5 py-2 rounded-full text-[13px] font-bold transition-all duration-300 whitespace-nowrap",
-                    isActive 
-                      ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-md scale-105" 
-                      : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
-                  )}
-                >
-                  {category}
-                  <span className={cn(
-                    "ml-1.5 text-[9px] opacity-40",
-                    isActive ? "text-blue-300 dark:text-blue-600" : ""
-                  )}>
-                    {category === "全部" ? posts.length : categoryCounts.get(category) ?? 0}
-                  </span>
-                </button>
-              );
-            })}
+        {/* 右侧主内容区 */}
+        <main className="lg:col-span-3 space-y-10">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/50 pb-6 ml-2 lg:ml-0">
+             <div className="flex items-center gap-4">
+                <span className="w-8 h-1 bg-slate-200 dark:bg-slate-800 rounded-full" />
+                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">
+                  {activeCategory === "全部" ? "Latest Articles" : `In ${activeCategory}`}
+                </h2>
+             </div>
+             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+               Show {visiblePosts.length} Results
+             </span>
           </div>
-        </nav>
-      </header>
 
-      <section className="relative">
-        <div className="flex items-center justify-between mb-12">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-3">
-              <span className="w-8 h-1 bg-blue-600 dark:bg-blue-500 rounded-full" />
-              文章精选
-            </h2>
-            <p className="text-sm text-slate-400 font-bold ml-11">
-              {activeCategory} · 展示 {visiblePosts.length} 篇
-            </p>
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="w-14 h-14 border-[3px] border-blue-100 dark:border-blue-900/30 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mx-auto mb-6"></div>
-              <p className="text-slate-500 dark:text-slate-400 font-medium">加载文章中...</p>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center min-h-[400px]">
+              <div className="w-12 h-12 border-2 border-blue-100 dark:border-blue-900/30 border-t-blue-500 rounded-full animate-spin mb-6"></div>
+              <p className="text-slate-400 dark:text-slate-500 font-bold tracking-widest uppercase text-[10px]">Preparing Articles...</p>
             </div>
-          </div>
-        ) : visiblePosts.length === 0 ? (
-          <div className="text-center py-24 bg-slate-50/50 dark:bg-slate-900/50 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-            <p className="text-slate-400 dark:text-slate-500 text-xl font-bold">暂无文章</p>
-            <p className="text-sm text-slate-400 dark:text-slate-500 mt-3">当前分类没有内容，试试切换到其他标签。</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {visiblePosts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
-        )}
-      </section>
+          ) : visiblePosts.length === 0 ? (
+            <div className="text-center py-32 bg-slate-50/50 dark:bg-slate-900/50 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
+              <p className="text-slate-400 dark:text-slate-500 text-lg font-black uppercase tracking-widest">No Content Found</p>
+              <button 
+                onClick={() => setActiveCategory("全部")}
+                className="mt-8 text-xs font-black text-blue-500 hover:text-blue-600 transition-colors uppercase tracking-[0.2em]"
+              >
+                ← Back to all articles
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {visiblePosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
